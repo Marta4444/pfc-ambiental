@@ -1,61 +1,69 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## GitHub
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Para futuros cambios, en la terminal simplemente hacer:
+git add .
+git commit -m "mensaje de commit"
+git push
 
-## About Laravel
+## Migración de User
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Ahora tiene 3 tablas, desde la versión laravel 11.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Tabla Users -> info de los usaurios.
+- Tabla password_reset_tokens -> para recuperar contraseñas olvidadas de los users. Rutas /forgot-password y /reset-password.
+- Tabla Sessions -> para almacenar sessiones activas. Se pueden gestionar las sesiones siendo Admin, y para temas de auditoría. Hay que incluir en .env "SESSIONS_DRIVER=database" para activarlo y que se guarden en la BD.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Para asegurar que estas tablas están creadas, hay que ejecutar "php artisan migrate"
 
-## Learning Laravel
+Para ver las sessiones, se puede usar Tinker
+php artisan tinker
+>>> DB::table('sessions')->get()  --> esto permite ver IPs, user_ids, tiempos de actividad... muy útil si se crea un panel de admin para controlar accesos.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Autenticación
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Laravel 12 ya no trae autenticación por defecto. Se puede usar Laravel Breeze (verisón moderna). Se instala ejecutando:
 
-## Laravel Sponsors
+composer require laravel/breeze --dev
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Y luego ejecutando el instalador:
 
-### Premium Partners
+php artisan breeze:install
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Preguntará el stack usado (Blade, Vue o React) -> elegir el correspondiente --> para mi app, Blade debería servir.
 
-## Contributing
+Despues instalar los assets y compilarlos con:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+npm install
+npm run dev -> inicia el servidor de Vite, y sale la página del mensaje inicial de Vite.
 
-## Code of Conduct
+y luego:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+php artisan migrate
 
-## Security Vulnerabilities
+Biblio de Laravel Breeze: https://www.cursosdesarrolloweb.es/blog/laravel-breeze-la-solucion-moderna-de-autenticacion-para-laravel
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Al hacer "php artisan serve", con las siguientes webs se puede ver la página inicial de autenticación:
+- http://127.0.0.1:8000/login --> para hacer login a la app.
+- http://127.0.0.1:8000/register -> para registrarse.
+- http://127.0.0.1:8000/dashboard --> para ver el dashboard, una vez loggeado.
 
-## License
+Esto además ha creado todos los controladores necesarios, vistas de auth, rutas de auth.php, rutas en web.php y demás (como tests). Se crea tmb vistas para editar el perfil, y borrarlo.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Login a la app
+Se ha eliminado la vista welcome, porque se ha modificado web.php para que cuando el usuario se conecte a la app, le redirija a la vista login, o a dashboard si ya está autenticado.
+
+## Orden de migraciones
+
+1. Category --> php artisan make:model Category -mc --resource
+2. Subcategory  --> php artisan make:model Subcategory -mc --resource
+3. Report --> --> php artisan make:model Report -mc --resource
+...
+
+## Middleware para Admins
+los ususarios se crean con el rol User por defecto.
+Para los administradores, he creado un middleware con "php artisan make:middleware AdminMiddleware, para controlar lo que ve el admin y lo que ve el user.
+En el middleware he añadido la comprobación del valor del atributo Rol del user.
+El middleware se ha registrado en app/Http/Kernel.php, en $routeMiddleware.
+Luego añado en web.php la proección para las rutas de los objetos que solo los admin deben poder ver y editar (categories, subcategories, factors..)
+
