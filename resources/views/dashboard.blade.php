@@ -17,7 +17,7 @@
                 <!-- Botones de Reports, visibles para todos los usuarios autenticados -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <a href="{{ route('reports.index') }}" class="bg-blue-600 text-black px-4 py-2 rounded text-center">
-                        Mis informes
+                        Ver informes
                     </a>
 
                     <a href="{{ route('reports.create') }}" class="bg-red-600 text-black px-4 py-2 rounded text-center">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subcategory;
+use App\Models\Category;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,9 @@ class SubcategoryController extends Controller
      */
     public function index()
     {
-        //
+        $subcategories = Subcategory::with('category')->get();
+
+        return view('subcategories.index', compact('subcategories'));
     }
 
     /**
@@ -21,7 +24,9 @@ class SubcategoryController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+
+        return view('subcategories.create', compact('categories'));
     }
 
     /**
@@ -29,7 +34,16 @@ class SubcategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+        //Ver si aqui incluyo algun coeficiente.
+
+        Subcategory::create($validated);
+
+        return redirect()->route('subcategories.index')->with('success', 'Subcategoría creada con éxito!');
     }
 
     /**
@@ -37,7 +51,7 @@ class SubcategoryController extends Controller
      */
     public function show(Subcategory $subcategory)
     {
-        //
+        return view('subcategories.show', compact('subcategory'));
     }
 
     /**
@@ -45,7 +59,9 @@ class SubcategoryController extends Controller
      */
     public function edit(Subcategory $subcategory)
     {
-        //
+        $categories = Category::all();
+
+        return view('subcategories.edit', compact('subcategory', 'categories'));
     }
 
     /**
@@ -53,7 +69,16 @@ class SubcategoryController extends Controller
      */
     public function update(Request $request, Subcategory $subcategory)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+        //Ver si aqui incluyo algun coeficiente.
+
+        $subcategory->update($validated);
+
+        return redirect()->route('subcategories.index')->with('success', 'Subcategoría editada con éxito!');
     }
 
     /**
@@ -61,6 +86,8 @@ class SubcategoryController extends Controller
      */
     public function destroy(Subcategory $subcategory)
     {
-        //
+        $subcategory->delete();
+
+        return redirect()->route('subcategories.index')->with('success', 'Subcategoría borrada con éxito!');
     }
 }

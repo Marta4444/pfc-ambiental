@@ -64,6 +64,20 @@ Se ha eliminado la vista welcome, porque se ha modificado web.php para que cuand
 los ususarios se crean con el rol User por defecto.
 Para los administradores, he creado un middleware con "php artisan make:middleware AdminMiddleware, para controlar lo que ve el admin y lo que ve el user.
 En el middleware he añadido la comprobación del valor del atributo Rol del user.
-El middleware se ha registrado en app/Http/Kernel.php, en $routeMiddleware.
+En laravel 12 ya no hay arhcivo Kernel.php donde registrar el middleware, se pone directamente en web.php
 Luego añado en web.php la proección para las rutas de los objetos que solo los admin deben poder ver y editar (categories, subcategories, factors..)
 
+## Seeders
+Se crean seeders con el comando php artisan make:seeder LoQueSeaSeeder
+
+Seeders creados:
+- Category
+- Subcategory
+- Report - usa la factory para crear datos
+
+
+## FactoriesSe 
+crean factories con el comando php artisan make:factory ReportFactory
+
+Factories creadas (para pruebas):
+- Report

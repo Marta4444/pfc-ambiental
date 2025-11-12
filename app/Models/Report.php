@@ -24,7 +24,9 @@ class Report extends Model
         'pdf_report'
     ];
 
-    protected $dates = ['date_damage'];
+    protected $casts = [
+        'date_damage' => 'date',
+    ];
 
     public function user()
     {
