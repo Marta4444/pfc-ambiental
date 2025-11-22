@@ -14,18 +14,17 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Aguas', 'description' => 'Daños y contaminación de masas de agua (vertidos, eutrofización).', 'base_coeficient' => 1.10],
-            ['name' => 'Incendios', 'description' => 'Incendios forestales y urbanos que afectan ecosistemas y personas.', 'base_coeficient' => 1.50],
-            ['name' => 'Suelo', 'description' => 'Degradación y contaminación del suelo (erosión, hidrocarburos).', 'base_coeficient' => 1.20],
-            ['name' => 'Aire', 'description' => 'Contaminación atmosférica y emisiones tóxicas.', 'base_coeficient' => 1.15],
-            ['name' => 'Biodiversidad', 'description' => 'Pérdida de hábitat, especies y efectos sobre ecosistemas.', 'base_coeficient' => 1.40],
-            ['name' => 'Residuos', 'description' => 'Gestión inadecuada de residuos y vertederos ilegales.', 'base_coeficient' => 1.25],
+            
+            
+            ['name' => 'Biodiversidad', 'description' => 'Diferentes tipologías de hechos ilícitos, a nivel nacionel e internacional, relacionados con la fauna y la flora, que ongloben especies internacionales, nacionales, endémicas y cinegéticas'],
+            ['name' => 'Infraestructuras', 'description' => 'Hechos ilícitos que engloben la afección a diferentes recursos naturales mediante el uso de diferentes tipos de infraestructuras'],
+            ['name' => 'Vertidos', 'description' => 'Hechos ilícitos relacionados con el vertido de residuos o efluentes en diferentes matrices como aguas o suelos'],
         ];
 
         foreach ($categories as $c) {
             Category::updateOrCreate(
                 ['name' => $c['name']],
-                ['description' => $c['description'], 'base_coeficient' => $c['base_coeficient'], 'active' => true]
+                ['description' => $c['description'], 'active' => true]
             );
         }
     }

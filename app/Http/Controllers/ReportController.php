@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use App\Models\Category;
 use App\Models\Subcategory;
+use App\Models\User;
+use App\Models\Petitioner;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,25 +17,104 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        /*$reports = Report::with(['category', 'subcategory'])
-        ->where('user_id', Auth::id())
-        ->latest()
-        ->get();
+        $query = Report::with(['user', 'category', 'subcategory', 'petitioner', 'assignedTo']);
 
-        return view('reports.index', compact('reports'));*/
-
-        $user = Auth::user();
-
-        // Modificado para que si es admin vea todos los informes, si no, solo los propios, y que muestre 10 por página.
-        if ($user && $user->role === 'admin') {
-            $reports = Report::with(['category', 'subcategory', 'user'])->latest()->paginate(10);
-        } else {
-            $reports = Report::with(['category', 'subcategory'])->where('user_id', Auth::id())->latest()->paginate(10);
+        // Filtro por búsqueda general
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('ip', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%")
+                  ->orWhere('locality', 'like', "%{$search}%")
+                  ->orWhere('background', 'like', "%{$search}%");
+            });
         }
 
-        return view('reports.index', compact('reports'));
+        // Filtro por estado
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filtro por categoría
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Filtro por subcategoría
+        if ($request->filled('subcategory_id')) {
+            $query->where('subcategory_id', $request->subcategory_id);
+        }
+
+        // Filtro por urgencia
+        if ($request->filled('urgency')) {
+            $query->where('urgency', $request->urgency);
+        }
+
+        // Filtro por autor
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Filtro por agente asignado
+        if ($request->filled('assigned_to')) {
+            if ($request->assigned_to === 'unassigned') {
+                $query->whereNull('assigned_to');
+            } else {
+                $query->where('assigned_to', $request->assigned_to);
+            }
+        }
+
+        // Filtro por peticionario
+        if ($request->filled('petitioner_id')) {
+            $query->where('petitioner_id', $request->petitioner_id);
+        }
+
+        // Filtro por comunidad
+        if ($request->filled('community')) {
+            $query->where('community', $request->community);
+        }
+
+        // Filtro por provincia
+        if ($request->filled('province')) {
+            $query->where('province', $request->province);
+        }
+
+        // Filtro por rango de fechas
+        if ($request->filled('date_from')) {
+            $query->where('date_petition', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->where('date_petition', '<=', $request->date_to);
+        }
+
+        // Ordenar por fecha de creación (más reciente primero)
+        $reports = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Datos para filtros
+        $categories = Category::where('active', true)->orderBy('name')->get();
+        $subcategories = Subcategory::where('active', true)->orderBy('name')->get();
+        $users = User::orderBy('name')->get();
+        $petitioners = Petitioner::where('active', true)->orderBy('order')->get();
+        $statuses = ['nuevo', 'en_proceso', 'en_espera', 'completado'];
+        $urgencies = ['normal', 'alta', 'urgente'];
+        
+        $communities = Report::distinct()->pluck('community')->filter()->sort()->values();
+        $provinces = Report::distinct()->pluck('province')->filter()->sort()->values();
+
+        return view('reports.index', compact(
+            'reports', 
+            'categories', 
+            'subcategories',
+            'users',
+            'petitioners',
+            'statuses', 
+            'urgencies',
+            'communities',
+            'provinces'
+        ));
     }
 
     /**
@@ -42,8 +123,11 @@ class ReportController extends Controller
     public function create()
     {
         $categories = Category::where('active', true)->get();
-        $subcategories = Subcategory::where('active', true)->get(); 
-        return view('reports.create', compact('categories', 'subcategories'));
+        $subcategories = Subcategory::where('active', true)->get();
+        $agents = User::where('role', 'user')->get();
+        $petitioners = Petitioner::where('active', true)->orderBy('order')->get();
+        
+        return view('reports.create', compact('categories', 'subcategories', 'agents', 'petitioners'));
     }
 
     /**
@@ -52,25 +136,47 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'ip' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^\d{4}-IP\d+$/',
+                'unique:reports,ip'
+            ],
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'background' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'required|exists:subcategories,id',
-            'location' => 'nullable|string|max:255',
-            'coordinates' => 'nullable|string|max:100',
+            'community' => 'required|string|max:100',
+            'province' => 'required|string|max:100',
+            'locality' => 'required|string|max:255',
+            'petitioner_id' => 'required|exists:petitioners,id',
+            'petitioner_other' => 'nullable|string|max:255',
+            'urgency' => 'required|in:normal,alta,urgente',
+            'date_petition' => 'required|date',
             'date_damage' => 'required|date',
-            'affected_area' => 'nullable|numeric',
-            'criticallity' => 'nullable|integer|min:1|max:5',
-            'status' => 'nullable|string|in:pendiente,en_proceso,cerrado,procesando,resuelto',
+            'assigned_to' => 'nullable|exists:users,id',
             'pdf_report' => 'nullable|file|mimes:pdf|max:20480',
+        ], [
+            'ip.required' => 'El número IP es obligatorio.',
+            'ip.regex' => 'El formato del IP debe ser: AAAA-IPNNN (ejemplo: 2025-IP312)',
+            'ip.unique' => 'Este número IP ya está registrado en otro informe.',
+            'background.required' => 'Los antecedentes son obligatorios.',
+            'petitioner_id.required' => 'Debe seleccionar una unidad peticionaria.',
         ]);
 
-        // comprobar coherencia subcategory -> category
+        $petitioner = Petitioner::find($validated['petitioner_id']);
+        if ($petitioner && $petitioner->name === 'Otro' && empty($validated['petitioner_other'])) {
+            return back()
+                ->withErrors(['petitioner_other' => 'Debe especificar la unidad peticionaria cuando selecciona "Otro".'])
+                ->withInput();
+        }
+
         $belongs = Subcategory::where('id', $validated['subcategory_id'])
             ->where('category_id', $validated['category_id'])
             ->exists();
 
-        if (! $belongs) {
+        if (!$belongs) {
             return back()
                 ->withErrors(['subcategory_id' => 'La subcategoría no pertenece a la categoría seleccionada.'])
                 ->withInput();
@@ -78,25 +184,35 @@ class ReportController extends Controller
 
         $path = null;
         if ($request->hasFile('pdf_report')) {
-            $path = $request->file('pdf_report')->store('reports', 'public');
+            $originalName = $request->file('pdf_report')->getClientOriginalName();
+            $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+            $path = $request->file('pdf_report')->storeAs('reports', time() . '_' . $sanitizedName, 'public');
         }
+
+        $assigned = !empty($validated['assigned_to']);
 
         $report = Report::create([
             'user_id' => Auth::id(),
             'category_id' => $validated['category_id'],
             'subcategory_id' => $validated['subcategory_id'],
+            'ip' => $validated['ip'],
             'title' => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'location' => $validated['location'] ?? null,
-            'coordinates' => $validated['coordinates'] ?? null,
+            'background' => $validated['background'],
+            'community' => $validated['community'],
+            'province' => $validated['province'],
+            'locality' => $validated['locality'],
+            'petitioner_id' => $validated['petitioner_id'],
+            'petitioner_other' => $petitioner->name === 'Otro' ? $validated['petitioner_other'] : null,
+            'urgency' => $validated['urgency'],
+            'date_petition' => $validated['date_petition'],
             'date_damage' => $validated['date_damage'],
-            'affected_area' => $validated['affected_area'] ?? null,
-            'criticallity' => $validated['criticallity'] ?? 1,
-            'status' => $validated['status'] ?? 'pendiente',
+            'status' => 'nuevo',
+            'assigned' => $assigned,
+            'assigned_to' => $validated['assigned_to'] ?? null,
             'pdf_report' => $path,
         ]);
 
-        return redirect()->route('reports.show', $report)->with('success', 'Informe creado correctamente.');
+        return redirect()->route('reports.show', $report)->with('success', 'Caso creado correctamente.');
     }
 
     /**
@@ -104,8 +220,12 @@ class ReportController extends Controller
      */
     public function show(Report $report)
     {
-        $report->load(['category', 'subcategory', 'user']);
-        return view('reports.show', compact('report'));
+        $report->load(['user', 'category', 'subcategory', 'petitioner', 'assignedTo']);
+        
+        // Obtener lista de agentes para asignación
+        $agents = User::where('role', 'user')->orderBy('name')->get();
+        
+        return view('reports.show', compact('report', 'agents'));
     }
 
     /**
@@ -113,15 +233,22 @@ class ReportController extends Controller
      */
     public function edit(Report $report)
     {
-        if (Auth::id() !== $report->user_id && Auth::user()->role !== 'admin') {
-            return redirect()->route('reports.show', $report)->with('error', 'No tienes permiso para editar este informe.');
+        // CAMBIO: Permitir edición a creador, asignado o admin
+        $user = Auth::user();
+        $canEdit = $user->role === 'admin' || 
+                   $report->user_id === $user->id || 
+                   $report->assigned_to === $user->id;
+
+        if (!$canEdit) {
+            abort(403, 'No tienes permiso para editar este caso.');
         }
 
-        // cargar colecciones para los selects
         $categories = Category::where('active', true)->get();
         $subcategories = Subcategory::where('active', true)->get();
-
-        return view('reports.edit', compact('report', 'categories', 'subcategories'));
+        $agents = User::where('role', 'user')->get();
+        $petitioners = Petitioner::where('active', true)->orderBy('order')->get();
+        
+        return view('reports.edit', compact('report', 'categories', 'subcategories', 'agents', 'petitioners'));
     }
 
     /**
@@ -130,57 +257,73 @@ class ReportController extends Controller
     public function update(Request $request, Report $report)
     {
         $user = Auth::user();
-        $isAdmin = $user && $user->role === 'admin';
-        $completed = $report->status === 'resuelto';
+        $isAdmin = $user->role === 'admin';
+        $isOwner = $user->id === $report->user_id;
+        $isAssigned = $user->id === $report->assigned_to;
 
-        if (! $isAdmin && $completed) {
-            return redirect()->route('reports.show', $report)->with('error', 'El informe ya está resuelto y no puede ser modificado.');
+        if (!$isAdmin && !$isOwner && !$isAssigned) {
+            abort(403, 'No tienes permiso para actualizar este caso.');
         }
 
-        if ($isAdmin) {
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'category_id' => 'required|exists:categories,id',
-                'subcategory_id' => 'required|exists:subcategories,id',
-                'location' => 'nullable|string|max:255',
-                'coordinates' => 'nullable|string|max:100',
-                'date_damage' => 'required|date',
-                'affected_area' => 'nullable|numeric',
-                'criticallity' => 'nullable|integer|min:1|max:5',
-                'status' => 'required|in:pendiente,procesando,resuelto',
-                'pdf_report' => 'nullable|file|mimes:pdf|max:20480',
-            ]);
+        // CAMBIO: Ahora admin, creador Y asignado pueden editar TODO
+        $validated = $request->validate([
+            'ip' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^\d{4}-IP\d+$/',
+                'unique:reports,ip,' . $report->id
+            ],
+            'title' => 'required|string|max:255',
+            'background' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'subcategory_id' => 'required|exists:subcategories,id',
+            'community' => 'required|string|max:100',
+            'province' => 'required|string|max:100',
+            'locality' => 'required|string|max:255',
+            'petitioner_id' => 'required|exists:petitioners,id',
+            'petitioner_other' => 'nullable|string|max:255',
+            'urgency' => 'required|in:normal,alta,urgente',
+            'date_petition' => 'required|date',
+            'date_damage' => 'required|date',
+            'status' => 'required|in:nuevo,en_proceso,en_espera,completado',
+            'assigned_to' => 'nullable|exists:users,id',
+            'pdf_report' => 'nullable|file|mimes:pdf|max:20480',
+        ]);
 
-            // comprobar coherencia subcategory -> category
-            $belongs = Subcategory::where('id', $validated['subcategory_id'])
-                ->where('category_id', $validated['category_id'])
-                ->exists();
-
-            if (! $belongs) {
-                return back()->withErrors(['subcategory_id' => 'La subcategoría no pertenece a la categoría seleccionada.'])->withInput();
-            }
-
-            if ($request->hasFile('pdf_report')) {
-                // borrar antiguo si existe
-                if ($report->pdf_report) {
-                    Storage::disk('public')->delete($report->pdf_report);
-                }
-                $validated['pdf_report'] = $request->file('pdf_report')->store('reports', 'public');
-            }
-
-            $report->update($validated);
-        } else {
-            // usuario normal: solo puede cambiar el estado mientras no esté resuelto
-            $validated = $request->validate([
-                'status' => 'required|in:pendiente,procesando,resuelto',
-            ]);
-
-            $report->status = $validated['status'];
-            $report->save();
+        $petitioner = Petitioner::find($validated['petitioner_id']);
+        if ($petitioner && $petitioner->name === 'Otro' && empty($validated['petitioner_other'])) {
+            return back()
+                ->withErrors(['petitioner_other' => 'Debe especificar la unidad peticionaria.'])
+                ->withInput();
         }
 
-        return redirect()->route('reports.show', $report)->with('success', 'Informe actualizado correctamente.');
+        $belongs = Subcategory::where('id', $validated['subcategory_id'])
+            ->where('category_id', $validated['category_id'])
+            ->exists();
+
+        if (!$belongs) {
+            return back()
+                ->withErrors(['subcategory_id' => 'La subcategoría no pertenece a la categoría.'])
+                ->withInput();
+        }
+
+        if ($request->hasFile('pdf_report')) {
+            if ($report->pdf_report) {
+                Storage::disk('public')->delete($report->pdf_report);
+            }
+            
+            $originalName = $request->file('pdf_report')->getClientOriginalName();
+            $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+            $validated['pdf_report'] = $request->file('pdf_report')->storeAs('reports', time() . '_' . $sanitizedName, 'public');
+        }
+
+        $validated['assigned'] = !empty($validated['assigned_to']);
+        $validated['petitioner_other'] = $petitioner->name === 'Otro' ? $validated['petitioner_other'] : null;
+
+        $report->update($validated);
+
+        return redirect()->route('reports.show', $report)->with('success', 'Caso actualizado correctamente.');
     }
 
     /**
@@ -188,21 +331,92 @@ class ReportController extends Controller
      */
     public function destroy(Report $report)
     {
-        $user = Auth::user();
-
-        //Permitir borrar solo al admin o al autor del informe
-        if (! $user || ($user->role !== 'admin' && $user->id !== $report->user_id)) {
-            return redirect()->route('reports.show', $report)
-                ->with('error', 'No tienes permiso para eliminar este informe.');
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'No tienes permiso para eliminar casos.');
         }
 
-        //Borrar archivo adjunto si existe
         if ($report->pdf_report) {
             Storage::disk('public')->delete($report->pdf_report);
         }
 
         $report->delete();
 
-        return redirect()->route('reports.index')->with('success', 'Informe eliminado correctamente.');
+        return redirect()->route('reports.index')->with('success', 'Caso eliminado correctamente.');
+    }
+
+    /**
+     * Assign a report to a user.
+     */
+    public function assign(Request $request, Report $report)
+    {
+        $user = Auth::user();
+        
+        // CAMBIO: Cualquier usuario autenticado puede asignar casos
+        // Admin tiene permiso total
+        // Usuarios pueden asignar casos no asignados o reasignar si son el creador o el asignado actual
+        $canAssign = $user->role === 'admin' || 
+                     !$report->assigned || 
+                     $report->user_id === $user->id || 
+                     $report->assigned_to === $user->id;
+        
+        if (!$canAssign) {
+            return redirect()->back()->with('error', 'No tienes permiso para asignar este caso. El caso ya está asignado a otro usuario.');
+        }
+
+        $request->validate([
+            'assigned_to' => 'required|exists:users,id',
+        ]);
+
+        $report->update([
+            'assigned_to' => $request->assigned_to,
+            'assigned' => true,
+            'status' => $report->status === 'nuevo' ? 'en_proceso' : $report->status,
+        ]);
+
+        return redirect()->back()->with('success', 'Caso asignado correctamente.');
+    }
+
+    /**
+     * Unassign a report from a user.
+     */
+    public function unassign(Report $report)
+    {
+        $user = Auth::user();
+        
+        // Admin puede desasignar cualquier caso
+        // Usuario puede desasignarse solo si está asignado a él mismo
+        $canUnassign = $user->role === 'admin' || $report->assigned_to === $user->id;
+        
+        if (!$canUnassign) {
+            abort(403, 'No tienes permiso para desasignar este caso.');
+        }
+
+        $report->update([
+            'assigned_to' => null,
+            'assigned' => false,
+        ]);
+
+        return redirect()->back()->with('success', 'Caso desasignado correctamente.');
+    }
+
+    /**
+     * Self-assign a report to the authenticated user.
+     */
+    public function selfAssign(Report $report)
+    {
+        $user = Auth::user();
+        
+        // Verificar que el caso no esté ya asignado
+        if ($report->assigned) {
+            return redirect()->back()->with('error', 'Este caso ya está asignado a otro usuario.');
+        }
+
+        $report->update([
+            'assigned_to' => $user->id,
+            'assigned' => true,
+            'status' => $report->status === 'nuevo' ? 'en_proceso' : $report->status,
+        ]);
+
+        return redirect()->back()->with('success', 'Te has asignado el caso correctamente.');
     }
 }

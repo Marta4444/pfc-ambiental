@@ -4,9 +4,17 @@
 
         <!-- Name -->
         <div>
-            <x-input-label for="name" :value="__('Name')" />
+            <x-input-label for="name" :value="__('Nombre')" />
             <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        </div>
+
+        <!-- Agent Number -->
+        <div class="mt-4">
+            <x-input-label for="agent_num" :value="__('Número de Agente')" />
+            <x-text-input id="agent_num" class="block mt-1 w-full" type="text" name="agent_num" :value="old('agent_num')" required maxlength="50" />
+            <p class="text-xs text-gray-500 mt-1">Este campo es obligatorio y único para cada usuario.</p>
+            <x-input-error :messages="$errors->get('agent_num')" class="mt-2" />
         </div>
 
         <!-- Email Address -->
@@ -18,7 +26,7 @@
 
         <!-- Password -->
         <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+            <x-input-label for="password" :value="__('Contraseña')" />
 
             <x-text-input id="password" class="block mt-1 w-full"
                             type="password"
@@ -30,7 +38,7 @@
 
         <!-- Confirm Password -->
         <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <x-input-label for="password_confirmation" :value="__('Confirmar Contraseña')" />
 
             <x-text-input id="password_confirmation" class="block mt-1 w-full"
                             type="password"
@@ -41,7 +49,7 @@
 
         <!-- Role -->
         <div class="mt-4">
-            <x-input-label for="role" :value="__('Role')" />
+            <x-input-label for="role" :value="__('Rol')" />
             <select id="role" name="role" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm">
                 <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
                 <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
@@ -51,11 +59,11 @@
 
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
+                {{ __('Ya estás registrado/a?') }}
             </a>
 
             <x-primary-button class="ms-4">
-                {{ __('Register') }}
+                {{ __('Registrar') }}
             </x-primary-button>
         </div>
     </form>

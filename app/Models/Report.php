@@ -13,19 +13,27 @@ class Report extends Model
         'user_id', 
         'category_id', 
         'subcategory_id', 
+        'ip',
         'title', 
-        'description', 
-        'location',
-        'coordinates',
+        'background', 
+        'community',
+        'province',
+        'locality',
+        'petitioner_id',
+        'petitioner_other',
+        'urgency',
+        'date_petition',
         'date_damage',
-        'affected_area',
-        'criticallity',
         'status',
-        'pdf_report'
+        'assigned',
+        'assigned_to',
+        'pdf_report',
     ];
 
     protected $casts = [
+        'date_petition' => 'date',
         'date_damage' => 'date',
+        'assigned' => 'boolean',
     ];
 
     public function user()
@@ -41,6 +49,16 @@ class Report extends Model
     public function subcategory()
     {
         return $this->belongsTo(Subcategory::class);
+    }
+
+    public function assignedTo()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function petitioner()
+    {
+        return $this->belongsTo(Petitioner::class);
     }
 
     //Aqui faltaran añadir mas

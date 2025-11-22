@@ -1,96 +1,211 @@
-
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold">Crear nuevo informe</h2>
+        <h2 class="text-xl font-semibold">Crear Nuevo Caso</h2>
     </x-slot>
 
-    <form method="POST" action="{{ route('reports.store') }}" class="py-6 px-4" enctype="multipart/form-data">
-        @csrf
+    <div class="py-6 px-4">
+        <form method="POST" action="{{ route('reports.store') }}" enctype="multipart/form-data" class="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
+            @csrf
 
-        <div class="mb-4">
-            <x-input-label for="title" value="Título" />
-            <x-text-input id="title" name="title" class="mt-1 block w-full" required value="{{ old('title') }}"/>
-            @error('title')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-        </div>
+            {{-- Sección: Información Básica --}}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Información Básica</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label for="ip" value="Número IP (Informe Pericial) *" />
+                        <x-text-input 
+                            id="ip" 
+                            name="ip" 
+                            class="mt-1 block w-full" 
+                            placeholder="2025-IP312" 
+                            value="{{ old('ip') }}"
+                            pattern="\d{4}-IP\d+"
+                            title="Formato: AAAA-IPNNN (ejemplo: 2025-IP312)"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">Formato: AAAA-IPNNN</p>
+                        @error('ip')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
 
-        <div class="mb-4">
-            <x-input-label for="description" value="Descripción" />
-            <textarea id="description" name="description" class="mt-1 block w-full border rounded p-2">{{ old('description') }}</textarea>
-        </div>
+                    <div>
+                        <x-input-label for="title" value="Título *" />
+                        <x-text-input id="title" name="title" class="mt-1 block w-full" required value="{{ old('title') }}" />
+                        @error('title')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+                </div>
 
-        <div class="mb-4">
-            <x-input-label for="category_id" value="Categoría" />
-            <select id="category_id" name="category_id" class="mt-1 block w-full border rounded p-2" required>
-                <option value="">Selecciona una categoría</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
-            @error('category_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-        </div>
+                <div class="mt-4">
+                    <x-input-label for="background" value="Antecedentes *" />
+                    <textarea 
+                        id="background" 
+                        name="background" 
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" 
+                        rows="4" 
+                        required
+                    >{{ old('background') }}</textarea>
+                    @error('background')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                </div>
+            </div>
 
-        <div class="mb-4">
-            <x-input-label for="subcategory_id" value="Subcategoría" />
-            <select id="subcategory_id" name="subcategory_id" class="mt-1 block w-full border rounded p-2" required>
-                <option value="">Selecciona primero una categoría</option>
-            </select>
-            @error('subcategory_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-        </div>
+            {{-- Sección: Categorización --}}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Categorización</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label for="category_id" value="Categoría *" />
+                        <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Selecciona una categoría</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('category_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
 
-        <div class="mb-4">
-            <x-input-label for="location" value="Ubicación" />
-            <x-text-input id="location" name="location" class="mt-1 block w-full" value="{{ old('location') }}" />
-        </div>
+                    <div>
+                        <x-input-label for="subcategory_id" value="Subcategoría *" />
+                        <select id="subcategory_id" name="subcategory_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Selecciona primero una categoría</option>
+                        </select>
+                        @error('subcategory_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
 
-        <div class="mb-4">
-            <x-input-label for="coordinates" value="Coordenadas (lat,lon)" />
-            <x-text-input id="coordinates" name="coordinates" placeholder="41.12345,-1.23456" class="mt-1 block w-full" value="{{ old('coordinates') }}" />
-        </div>
+            {{-- Sección: Localización --}}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Localización</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <x-input-label for="community" value="Comunidad Autónoma *" />
+                        <x-text-input id="community" name="community" class="mt-1 block w-full" required value="{{ old('community') }}" />
+                        @error('community')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
 
-        <div class="mb-4">
-            <x-input-label for="date_damage" value="Fecha del daño" />
-            <x-text-input type="date" id="date_damage" name="date_damage" class="mt-1 block w-full" required value="{{ old('date_damage') }}" />
-            @error('date_damage')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-        </div>
+                    <div>
+                        <x-input-label for="province" value="Provincia *" />
+                        <x-text-input id="province" name="province" class="mt-1 block w-full" required value="{{ old('province') }}" />
+                        @error('province')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
 
-        <div class="mb-4">
-            <x-input-label for="affected_area" value="Área afectada (m²)" />
-            <x-text-input type="number" step="0.01" id="affected_area" name="affected_area" class="mt-1 block w-full" value="{{ old('affected_area') }}" />
-        </div>
+                    <div>
+                        <x-input-label for="locality" value="Localidad *" />
+                        <x-text-input id="locality" name="locality" class="mt-1 block w-full" required value="{{ old('locality') }}" />
+                        @error('locality')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
 
-        <div class="mb-4">
-            <x-input-label for="criticallity" value="Nivel de criticidad (1-5)" />
-            <x-text-input type="number" min="1" max="5" id="criticallity" name="criticallity" class="mt-1 block w-full" value="{{ old('criticallity', 1) }}" />
-        </div>
+            {{-- Sección: Peticionario --}}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Unidad Peticionaria</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label for="petitioner_id" value="Peticionario *" />
+                        <select id="petitioner_id" name="petitioner_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Selecciona una opción</option>
+                            @foreach($petitioners as $petitioner)
+                                <option value="{{ $petitioner->id }}" {{ old('petitioner_id') == $petitioner->id ? 'selected' : '' }}>
+                                    {{ $petitioner->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('petitioner_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
 
-        <div class="mb-4">
-            <x-input-label for="status" value="Estado" />
-            <select id="status" name="status" class="mt-1 block w-full border rounded p-2">
-                <option value="pendiente" {{ old('status')=='pendiente' ? 'selected' : '' }}>Pendiente</option>
-                <option value="en_proceso" {{ old('status')=='en_proceso' ? 'selected' : '' }}>En proceso</option>
-                <option value="cerrado" {{ old('status')=='cerrado' ? 'selected' : '' }}>Cerrado</option>
-            </select>
-        </div>
+                    <div id="petitioner_other_wrapper" style="display: none;">
+                        <x-input-label for="petitioner_other" value="Especificar Otro" />
+                        <x-text-input 
+                            id="petitioner_other" 
+                            name="petitioner_other" 
+                            class="mt-1 block w-full" 
+                            value="{{ old('petitioner_other') }}"
+                            placeholder="Especifique la unidad"
+                        />
+                        @error('petitioner_other')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
 
-        <div class="mb-4">
-            <x-input-label for="pdf_report" value="Adjuntar PDF" />
-            <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" />
-            @error('pdf_report')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-        </div>
+            {{-- Sección: Fechas y Urgencia --}}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Fechas y Prioridad</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <x-input-label for="date_petition" value="Fecha de Petición *" />
+                        <x-text-input type="date" id="date_petition" name="date_petition" class="mt-1 block w-full" required value="{{ old('date_petition') }}" />
+                        <p class="text-xs text-gray-500 mt-1">Fecha de llegada al SEPRONA</p>
+                        @error('date_petition')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
 
-        <div>
-            <x-primary-button>Guardar informe</x-primary-button>
-        </div>
-    </form>
+                    <div>
+                        <x-input-label for="date_damage" value="Fecha del Daño *" />
+                        <x-text-input type="date" id="date_damage" name="date_damage" class="mt-1 block w-full" required value="{{ old('date_damage') }}" />
+                        <p class="text-xs text-gray-500 mt-1">Fecha del delito/daño</p>
+                        @error('date_damage')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
 
-    <!-- Script para cargar subcategorías según categoría seleccionada -->
+                    <div>
+                        <x-input-label for="urgency" value="Urgencia *" />
+                        <select id="urgency" name="urgency" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="normal" {{ old('urgency', 'normal') == 'normal' ? 'selected' : '' }}>Normal</option>
+                            <option value="alta" {{ old('urgency') == 'alta' ? 'selected' : '' }}>Alta</option>
+                            <option value="urgente" {{ old('urgency') == 'urgente' ? 'selected' : '' }}>Urgente</option>
+                        </select>
+                        @error('urgency')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
+
+            {{-- Sección: Asignación --}}
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Asignación (Opcional)</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label for="assigned_to" value="Asignar a Agente" />
+                        <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <option value="">Sin asignar</option>
+                            @foreach($agents as $agent)
+                                <option value="{{ $agent->id }}" {{ old('assigned_to') == $agent->id ? 'selected' : '' }}>
+                                    {{ $agent->name }} ({{ $agent->agent_num }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Puede dejarse sin asignar y asignarse posteriormente</p>
+                        @error('assigned_to')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <x-input-label for="pdf_report" value="Adjuntar PDF" />
+                        <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept=".pdf" />
+                        @error('pdf_report')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+            </div>
+
+            {{-- Botones de acción --}}
+            <div class="flex items-center justify-end space-x-3 pt-4 border-t">
+                <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50">
+                    Cancelar
+                </a>
+                <x-primary-button>Crear Caso</x-primary-button>
+            </div>
+        </form>
+    </div>
+
+    {{-- Scripts --}}
     <script>
+        // Manejo de subcategorías dinámicas
         const categorySelect = document.getElementById('category_id');
         const subcategorySelect = document.getElementById('subcategory_id');
-
-        // JSON con campos mínimos para JS (asegura 'name' y 'category_id')
         const subcategories = @json($subcategories->map(fn($s) => [
             'id' => $s->id,
             'name' => $s->name,
@@ -100,7 +215,9 @@
         function populateSubcategories(categoryId, selectedId = null) {
             subcategorySelect.innerHTML = '<option value="">Selecciona una subcategoría</option>';
             if (!categoryId) return;
-            subcategories.filter(s => s.category_id === parseInt(categoryId))
+            
+            subcategories
+                .filter(s => s.category_id === parseInt(categoryId))
                 .forEach(s => {
                     const option = document.createElement('option');
                     option.value = s.id;
@@ -114,13 +231,49 @@
             populateSubcategories(this.value);
         });
 
-        // Si hay valores viejos en el formulario (error de validación), restaurarlos
+        // Restaurar valores en caso de error de validación
         document.addEventListener('DOMContentLoaded', function() {
             const oldCategory = "{{ old('category_id') }}";
             const oldSubcategory = "{{ old('subcategory_id') }}";
             if (oldCategory) {
                 categorySelect.value = oldCategory;
-                populateSubcategories(oldCategory, oldSubcategory ? parseInt(oldSubcategory) : null);
+                populateSubcategories(oldCategory, oldSubcategory);
+            }
+        });
+
+        // Manejo del campo "Otro" en peticionario - CAMBIO
+        const petitionerSelect = document.getElementById('petitioner_id');
+        const petitionerOtherWrapper = document.getElementById('petitioner_other_wrapper');
+        const petitionerOtherInput = document.getElementById('petitioner_other');
+
+        // Obtener los datos de petitioners con sus IDs
+        const petitioners = @json($petitioners->map(fn($p) => [
+            'id' => $p->id,
+            'name' => $p->name
+        ]));
+
+        petitionerSelect.addEventListener('change', function() {
+            const selectedPetitioner = petitioners.find(p => p.id === parseInt(this.value));
+            
+            if (selectedPetitioner && selectedPetitioner.name === 'Otro') {
+                petitionerOtherWrapper.style.display = 'block';
+                petitionerOtherInput.required = true;
+            } else {
+                petitionerOtherWrapper.style.display = 'none';
+                petitionerOtherInput.required = false;
+                petitionerOtherInput.value = '';
+            }
+        });
+
+        // Verificar al cargar la página (por si hay old values)
+        document.addEventListener('DOMContentLoaded', function() {
+            const oldPetitionerId = "{{ old('petitioner_id') }}";
+            if (oldPetitionerId) {
+                const selectedPetitioner = petitioners.find(p => p.id === parseInt(oldPetitionerId));
+                if (selectedPetitioner && selectedPetitioner.name === 'Otro') {
+                    petitionerOtherWrapper.style.display = 'block';
+                    petitionerOtherInput.required = true;
+                }
             }
         });
     </script>

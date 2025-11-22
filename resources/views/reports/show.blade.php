@@ -1,114 +1,346 @@
-
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl">{{ __('Informe') }}</h2>
-    </x-slot>
-
-    <div class="max-w-4xl mx-auto py-6 px-4">
-        <div class="flex items-start justify-between mb-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">{{ $report->title }}</h1>
-                <p class="text-sm text-gray-500 mt-1">Creado por: <span class="text-gray-700">{{ $report->user->name ?? '—' }}</span></p>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <a href="{{ route('reports.index') }}" class="inline-flex items-center px-3 py-1 bg-gray-100 border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50">Volver</a>
-                <a href="{{ route('reports.edit', $report) }}" class="inline-flex items-center px-3 py-1 bg-yellow-100 border border-yellow-200 rounded text-sm text-yellow-800 hover:bg-yellow-50">Editar</a>
-
-                @if($report->pdf_report)
-                    <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="inline-flex items-center px-3 py-1 bg-blue-100 border border-blue-200 rounded text-sm text-blue-700 hover:bg-blue-50">
-                        Ver PDF
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Detalles del Caso') }} - {{ $report->ip }}
+            </h2>
+            <div class="flex gap-2">
+                {{-- Botón Editar: visible para admin, creador o asignado --}}
+                @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id())
+                    <a href="{{ route('reports.edit', $report) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar Caso
                     </a>
                 @endif
-
-                <form action="{{ route('reports.destroy', $report) }}" method="POST" onsubmit="return confirm('¿Eliminar informe?');" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-100 border border-red-200 rounded text-sm text-red-700 hover:bg-red-50">Eliminar</button>
-                </form>
+                
+                {{-- Botón Volver a la lista --}}
+                <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                    </svg>
+                    Ver Lista de Casos
+                </a>
             </div>
         </div>
+    </x-slot>
 
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-                <div class="md:col-span-2">
-                    <h3 class="text-sm font-medium text-gray-600">Descripción</h3>
-                    <p class="mt-2 text-gray-800 whitespace-pre-line">{{ $report->description ?? '—' }}</p>
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if (session('success'))
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
 
-                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            @if (session('error'))
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @if (session('info'))
+                <div class="mb-4 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('info') }}</span>
+                </div>
+            @endif
+
+            {{-- Panel de Asignación --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                        </svg>
+                        Estado de Asignación
+                    </h3>
+
+                    <div class="flex items-center justify-between">
                         <div>
-                            <h4 class="text-xs text-gray-500">Categoría</h4>
-                            <p class="text-sm text-gray-800 mt-1">{{ $report->category->name ?? '—' }}</p>
+                            @if($report->assigned && $report->assignedTo)
+                                <div class="flex items-center">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Asignado a: {{ $report->assignedTo->name }} ({{ $report->assignedTo->agent_num }})
+                                    </span>
+                                </div>
+                            @else
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Sin asignar
+                                </span>
+                            @endif
+                        </div>
+
+                        <div class="flex gap-2">
+                            @if(!$report->assigned || ($report->assigned && $report->assigned_to !== Auth::id()))
+                                {{-- Botón de autoasignación (solo si no está asignado o está asignado a otro) --}}
+                                @if(!$report->assigned)
+                                    <form action="{{ route('reports.selfAssign', $report) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Autoasignar
+                                        </button>
+                                    </form>
+                                @endif
+
+                                {{-- Botón para asignar a otro (siempre visible si tienes permisos) --}}
+                                @if(Auth::user()->role === 'admin' || !$report->assigned || $report->user_id === Auth::id())
+                                    <button type="button" onclick="document.getElementById('assignModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
+                                        Asignar
+                                    </button>
+                                @endif
+                            @else
+                                {{-- Botón de desasignación (solo si está asignado a ti mismo) --}}
+                                <form action="{{ route('reports.unassign', $report) }}" method="POST" onsubmit="return confirm('¿Estás seguro de desasignar este caso?');">
+                                    @csrf
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                        Desasignarme
+                                    </button>
+                                </form>
+
+                                {{-- Admin o creador pueden reasignar --}}
+                                @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id())
+                                    <button type="button" onclick="document.getElementById('assignModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                        </svg>
+                                        Reasignar
+                                    </button>
+                                @endif
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Información General --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Información General</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Número IP</label>
+                            <p class="mt-1 text-sm text-gray-900 font-semibold">{{ $report->ip }}</p>
                         </div>
 
                         <div>
-                            <h4 class="text-xs text-gray-500">Subcategoría</h4>
-                            <p class="text-sm text-gray-800 mt-1">{{ $report->subcategory->name ?? '—' }}</p>
-                        </div>
-
-                        <div>
-                            <h4 class="text-xs text-gray-500">Fecha del daño</h4>
-                            <p class="text-sm text-gray-800 mt-1">
-                                {{ $report->date_damage ? \Illuminate\Support\Carbon::parse($report->date_damage)->format('d/m/Y') : '—' }}
+                            <label class="block text-sm font-medium text-gray-700">Estado</label>
+                            <p class="mt-1">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    @if($report->status === 'nuevo') bg-blue-100 text-blue-800
+                                    @elseif($report->status === 'en_proceso') bg-yellow-100 text-yellow-800
+                                    @elseif($report->status === 'en_espera') bg-orange-100 text-orange-800
+                                    @else bg-green-100 text-green-800
+                                    @endif">
+                                    {{ ucfirst(str_replace('_', ' ', $report->status)) }}
+                                </span>
                             </p>
                         </div>
 
                         <div>
-                            <h4 class="text-xs text-gray-500">Estado</h4>
-                            <p class="text-sm text-gray-800 mt-1 capitalize">{{ $report->status ?? '—' }}</p>
+                            <label class="block text-sm font-medium text-gray-700">Urgencia</label>
+                            <p class="mt-1">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    @if($report->urgency === 'urgente') bg-red-100 text-red-800
+                                    @elseif($report->urgency === 'alta') bg-orange-100 text-orange-800
+                                    @else bg-gray-100 text-gray-800
+                                    @endif">
+                                    {{ ucfirst($report->urgency) }}
+                                </span>
+                            </p>
                         </div>
 
                         <div>
-                            <h4 class="text-xs text-gray-500">Área afectada (m²)</h4>
-                            <p class="text-sm text-gray-800 mt-1">{{ $report->affected_area !== null ? number_format($report->affected_area, 2) : '—' }}</p>
+                            <label class="block text-sm font-medium text-gray-700">Creado por</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->user->name }} ({{ $report->user->agent_num }})</p>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Título</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->title }}</p>
                         </div>
 
                         <div>
-                            <h4 class="text-xs text-gray-500">Criticidad</h4>
-                            <p class="text-sm text-gray-800 mt-1">{{ $report->criticallity ?? '—' }}</p>
+                            <label class="block text-sm font-medium text-gray-700">Categoría</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->category->name }}</p>
                         </div>
-                    </div>
 
-                    <div class="mt-6">
-                        <h4 class="text-xs text-gray-500">Ubicación</h4>
-                        <p class="text-sm text-gray-800 mt-1">{{ $report->location ?? '—' }}</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Subcategoría</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->subcategory->name }}</p>
+                        </div>
 
-                        <h4 class="text-xs text-gray-500 mt-3">Coordenadas</h4>
-                        <p class="text-sm text-gray-800 mt-1">
-                            @if($report->coordinates)
-                                {{ $report->coordinates }}
-                                @php
-                                    [$lat, $lon] = array_pad(explode(',', $report->coordinates), 2, null);
-                                @endphp
-                                @if($lat && $lon)
-                                    <a href="https://www.google.com/maps/search/?api=1&query={{ trim($lat) }},{{ trim($lon) }}" target="_blank" class="text-blue-600 hover:underline ml-2 text-sm">Ver en mapa</a>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Unidad Peticionaria</label>
+                            <p class="mt-1 text-sm text-gray-900">
+                                {{ $report->petitioner->name }}
+                                @if($report->petitioner->name === 'Otro' && $report->petitioner_other)
+                                    - {{ $report->petitioner_other }}
                                 @endif
-                            @else
-                                —
-                            @endif
-                        </p>
+                            </p>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <aside class="space-y-4">
-                    <div class="bg-gray-50 border border-gray-100 rounded p-4">
-                        <h4 class="text-xs text-gray-500">Metadatos</h4>
-                        <div class="mt-2 text-sm text-gray-700">
-                            <div><strong>Autor:</strong> {{ $report->user->name ?? '—' }}</div>
-                            <div class="mt-1"><strong>Creado:</strong> {{ optional($report->created_at)->format('d/m/Y H:i') ?? '—' }}</div>
-                            <div class="mt-1"><strong>Última modificación:</strong> {{ optional($report->updated_at)->format('d/m/Y H:i') ?? '—' }}</div>
+            {{-- Ubicación --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Ubicación
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Comunidad Autónoma</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->community }}</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Provincia</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->province }}</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Localidad</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->locality }}</p>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    @if($report->pdf_report)
-                        <div class="bg-white border border-gray-100 rounded p-4">
-                            <h4 class="text-xs text-gray-500">Archivo adjunto</h4>
-                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="mt-2 inline-block text-sm text-blue-700 hover:underline">
-                                Descargar / Ver PDF
-                            </a>
+            {{-- Fechas --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Fechas
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Fecha de Petición</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::parse($report->date_petition)->format('d/m/Y') }}</p>
                         </div>
-                    @endif
-                </aside>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Fecha del Daño</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::parse($report->date_damage)->format('d/m/Y') }}</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Fecha de Creación</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->created_at->format('d/m/Y H:i') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Antecedentes --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Antecedentes
+                    </h3>
+                    
+                    <div class="prose max-w-none">
+                        <p class="text-sm text-gray-900 whitespace-pre-line">{{ $report->background }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Documento PDF --}}
+            @if($report->pdf_report)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            Documento Adjunto
+                        </h3>
+                        
+                        <a href="{{ Storage::url($report->pdf_report) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Descargar PDF
+                        </a>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Modal de Asignación --}}
+    <div id="assignModal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('assignModal').classList.add('hidden')"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form action="{{ route('reports.assign', $report) }}" method="POST">
+                    @csrf
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                    Asignar caso
+                                </h3>
+                                <div class="mt-4">
+                                    <label for="assigned_to" class="block text-sm font-medium text-gray-700">Seleccionar agente</label>
+                                    <select name="assigned_to" id="assigned_to" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="">-- Seleccionar --</option>
+                                        @foreach($agents as $agent)
+                                            <option value="{{ $agent->id }}" {{ $report->assigned_to == $agent->id ? 'selected' : '' }}>
+                                                {{ $agent->name }} ({{ $agent->agent_num }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Asignar
+                        </button>
+                        <button type="button" onclick="document.getElementById('assignModal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -26,7 +26,13 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        // Prevenir que el usuario intente modificar agent_num
+        $validated = $request->validated();
+        
+        // Asegurarse de que agent_num no se actualice desde el perfil
+        unset($validated['agent_num']);
+        
+        $request->user()->fill($validated);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;

@@ -15,17 +15,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Crear usuario admin principal
+        User::factory()->admin()->create([
+            'name' => 'Administrador',
+            'email' => 'admin@seprona.es',
+            'agent_num' => now()->year . '-00001',
+        ]);
 
-        /*User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);*/
+        // Crear algunos usuarios de prueba
+        User::factory(10)->create();
 
+        // Llamar a otros seeders
         $this->call([
-            \Database\Seeders\CategorySeeder::class,
-            \Database\Seeders\SubcategorySeeder::class,
-            \Database\Seeders\ReportSeeder::class,
+            CategorySeeder::class,
+            SubcategorySeeder::class,
+            PetitionerSeeder::class,
+            ReportSeeder::class,
         ]);
     }
 }

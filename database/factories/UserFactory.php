@@ -29,8 +29,19 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role' => fake()->randomElement(['user', 'admin']),
+            'role' => 'user',
+            'agent_num' => $this->generateAgentNum(), // Generar número de agente único
         ];
+    }
+
+    /**
+     * Generate a unique agent number in format: AAAA-NNNNN
+     */
+    protected function generateAgentNum(): string
+    {
+        $year = now()->year;
+        $number = fake()->unique()->numberBetween(1, 99999);
+        return sprintf('%d-%05d', $year, $number);
     }
 
     /**
@@ -40,6 +51,26 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a regular user.
+     */
+    public function user(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'user',
         ]);
     }
 }

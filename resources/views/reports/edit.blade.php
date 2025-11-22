@@ -47,17 +47,27 @@
                     </div>
 
                     <div>
-                        <x-input-label for="date_damage" value="Fecha del daño" />
-                        <x-text-input type="date" id="date_damage" name="date_damage" class="mt-1 block w-full" required value="{{ old('date_damage', optional($report->date_damage)->format('Y-m-d')) }}" />
-                        @error('date_damage') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        <x-input-label for="ip" value="Número IP (Informe Pericial) *" />
+                        <x-text-input 
+                            id="ip" 
+                            name="ip" 
+                            class="mt-1 block w-full" 
+                            placeholder="2025-IP312" 
+                            value="{{ old('ip', $report->ip) }}"
+                            pattern="\d{4}-IP\d+"
+                            title="Formato: AAAA-IPNNN (ejemplo: 2025-IP312)"
+                            required
+                        />
+                        <p class="text-sm text-gray-500 mt-1">Formato obligatorio: AAAA-IPNNN (ejemplo: 2025-IP312)</p>
+                        @error('ip') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <x-input-label for="description" value="Descripción" />
-                    <textarea id="description" name="description" class="mt-1 block w-full border rounded p-2" rows="4">{{ old('description', $report->description) }}</textarea>
-                    @error('description') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                </div>
+                    <x-input-label for="date_damage" value="Fecha del daño" />
+                    <x-text-input type="date" id="date_damage" name="date_damage" class="mt-1 block w-full" required value="{{ old('date_damage', optional($report->date_damage)->format('Y-m-d')) }}" />
+                    @error('date_damage') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                </div>                    
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>

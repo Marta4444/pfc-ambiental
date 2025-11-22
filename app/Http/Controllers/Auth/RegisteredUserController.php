@@ -31,15 +31,20 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'agent_num' => ['required', 'string', 'max:50', 'unique:'.User::class],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
+        ], [
+            'agent_num.required' => 'El número de agente es obligatorio.',
+            'agent_num.unique' => 'Este número de agente ya está registrado.',
         ]);
 
         $role = $request->role ?? 'user';  //si por lo que fuera no tuviera rol, le asigna User por defecto
 
         $user = User::create([
             'name' => $request->name,
+            'agent_num' => $request->agent_num,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $role,

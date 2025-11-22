@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subcategories', function (Blueprint $table) {
+        Schema::create('petitioners', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained()->onDelete('cascade'); // FK a category
-            $table->string('name')->unique();
-            $table->text('description')->nullable();
-            $table->boolean('active')->default(true); //por defecto se crean activadas
+            $table->string('name', 100)->unique();
+            $table->boolean('active')->default(true);
+            $table->integer('order')->default(0); // Para ordenar en desplegables
             $table->timestamps();
         });
+
     }
 
     /**
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subcategories');
+        Schema::dropIfExists('petitioners');
     }
 };

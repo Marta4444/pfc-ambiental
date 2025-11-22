@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
-            $table->decimal('base_coeficient', 5, 2)->default(1.0); // coeficiente para cálculo de daño
             $table->boolean('active')->default(true); //por defecto se crean activas
             $table->timestamps();
         });
