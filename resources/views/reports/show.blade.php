@@ -143,12 +143,8 @@
                             <label class="block text-sm font-medium text-gray-700">Estado</label>
                             <p class="mt-1">
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                    @if($report->status === 'nuevo') bg-blue-100 text-blue-800
-                                    @elseif($report->status === 'en_proceso') bg-yellow-100 text-yellow-800
-                                    @elseif($report->status === 'en_espera') bg-orange-100 text-orange-800
-                                    @else bg-green-100 text-green-800
-                                    @endif">
-                                    {{ ucfirst(str_replace('_', ' ', $report->status)) }}
+                                    bg-{{ $report->getStatusColor() }}-100 text-{{ $report->getStatusColor() }}-800">
+                                    {{ $report->getStatusLabel() }}
                                 </span>
                             </p>
                         </div>
@@ -157,11 +153,8 @@
                             <label class="block text-sm font-medium text-gray-700">Urgencia</label>
                             <p class="mt-1">
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                    @if($report->urgency === 'urgente') bg-red-100 text-red-800
-                                    @elseif($report->urgency === 'alta') bg-orange-100 text-orange-800
-                                    @else bg-gray-100 text-gray-800
-                                    @endif">
-                                    {{ ucfirst($report->urgency) }}
+                                    bg-{{ $report->getUrgencyColor() }}-100 text-{{ $report->getUrgencyColor() }}-800">
+                                    {{ $report->getUrgencyLabel() }}
                                 </span>
                             </p>
                         </div>

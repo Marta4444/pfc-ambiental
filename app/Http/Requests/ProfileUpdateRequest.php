@@ -15,8 +15,14 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
+            'agent_num' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique(User::class)->ignore($this->user()->id),
+            ],
             'email' => [
                 'required',
                 'string',
@@ -25,6 +31,28 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+        ];
+
+        // Solo los administradores pueden actualizar el rol
+        if ($this->user()->role === 'admin') {
+            $rules['role'] = ['required', Rule::in(['admin', 'user'])];
+        }
+
+        return $rules;
+    }
+
+     /**
+     * Get custom validation messages.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'agent_num.required' => 'El número de agente es obligatorio.',
+            'agent_num.unique' => 'Este número de agente ya está registrado.',
+            'role.required' => 'El rol es obligatorio.',
+            'role.in' => 'El rol seleccionado no es válido.',
         ];
     }
 }

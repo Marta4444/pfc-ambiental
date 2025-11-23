@@ -76,8 +76,15 @@ Seeders creados:
 - Report - usa la factory para crear datos
 
 
-## FactoriesSe 
-crean factories con el comando php artisan make:factory ReportFactory
+## Factories 
+Se crean factories con el comando php artisan make:factory ReportFactory
 
 Factories creadas (para pruebas):
 - Report
+
+## Estructura de la tabla: Notas
+Se crean tablas "de registro" para :Category, Subcategory, Petitioners (unidades que piden los informes), Fields (contiene los distintos campos que pueden existinr para las distintas subcategorías, para crear formularios dinámicos), formula_items (para meter toda la lista de parámetros de fórmulas, para luego así poder ligar cada parámetro a las distintas categorías y tenerlo todo en una misma tabla, y tener fórmulas dinámicas).
+
+Tablas PIVOTE: Subcategory_fields (une subcategorías con los campos que se necesitan rellenar con info, para aplicar luego cálculos), subcategory_formula_items (une subcategorías con los distintos parámetros de las fórmulas a usar para los cálculos necesarios).
+
+Tabla Audit_log: Para auditorías. Los Admin pueden acceder a esta tabla y ver todos los cambios y acciones realizadas en la app por los usuarios. Se aplica usando un Observer y un helper para facilitar la implementación.

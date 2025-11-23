@@ -82,10 +82,10 @@
                                 <div>
                                     <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
                                     <select name="status" id="status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">Todos</option>
-                                        @foreach($statuses as $status)
-                                            <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>
-                                                {{ ucfirst(str_replace('_', ' ', $status)) }}
+                                        <option value="">Todos los estados</option>
+                                        @foreach($statuses as $value => $label)
+                                            <option value="{{ $value }}" {{ request('status') == $value ? 'selected' : '' }}>
+                                                {{ $label }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -95,10 +95,10 @@
                                 <div>
                                     <label for="urgency" class="block text-sm font-medium text-gray-700 mb-1">Urgencia</label>
                                     <select name="urgency" id="urgency" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">Todas</option>
-                                        @foreach($urgencies as $urgency)
-                                            <option value="{{ $urgency }}" {{ request('urgency') === $urgency ? 'selected' : '' }}>
-                                                {{ ucfirst($urgency) }}
+                                        <option value="">Todas las urgencias</option>
+                                        @foreach($urgencies as $value => $label)
+                                            <option value="{{ $value }}" {{ request('urgency') == $value ? 'selected' : '' }}>
+                                                {{ $label }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -282,22 +282,15 @@
                                                 <div class="text-xs text-gray-500">{{ $report->subcategory->name }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                    @if($report->status === 'nuevo') bg-blue-100 text-blue-800
-                                                    @elseif($report->status === 'en_proceso') bg-yellow-100 text-yellow-800
-                                                    @elseif($report->status === 'en_espera') bg-orange-100 text-orange-800
-                                                    @else bg-green-100 text-green-800
-                                                    @endif">
-                                                    {{ ucfirst(str_replace('_', ' ', $report->status)) }}
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    bg-{{ $report->getStatusColor() }}-100 text-{{ $report->getStatusColor() }}-800">
+                                                    {{ $report->getStatusLabel() }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                    @if($report->urgency === 'urgente') bg-red-100 text-red-800
-                                                    @elseif($report->urgency === 'alta') bg-orange-100 text-orange-800
-                                                    @else bg-gray-100 text-gray-800
-                                                    @endif">
-                                                    {{ ucfirst($report->urgency) }}
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    bg-{{ $report->getUrgencyColor() }}-100 text-{{ $report->getUrgencyColor() }}-800">
+                                                    {{ $report->getUrgencyLabel() }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">

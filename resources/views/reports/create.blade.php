@@ -155,9 +155,12 @@
                     <div>
                         <x-input-label for="urgency" value="Urgencia *" />
                         <select id="urgency" name="urgency" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
-                            <option value="normal" {{ old('urgency', 'normal') == 'normal' ? 'selected' : '' }}>Normal</option>
-                            <option value="alta" {{ old('urgency') == 'alta' ? 'selected' : '' }}>Alta</option>
-                            <option value="urgente" {{ old('urgency') == 'urgente' ? 'selected' : '' }}>Urgente</option>
+                            <option value="">-- Seleccionar --</option>
+                            @foreach(\App\Models\Report::URGENCY_LABELS as $value => $label)
+                                <option value="{{ $value }}" {{ old('urgency', 'normal') == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
                         </select>
                         @error('urgency')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>

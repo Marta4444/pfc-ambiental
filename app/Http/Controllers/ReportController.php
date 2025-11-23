@@ -98,8 +98,8 @@ class ReportController extends Controller
         $subcategories = Subcategory::where('active', true)->orderBy('name')->get();
         $users = User::orderBy('name')->get();
         $petitioners = Petitioner::where('active', true)->orderBy('order')->get();
-        $statuses = ['nuevo', 'en_proceso', 'en_espera', 'completado'];
-        $urgencies = ['normal', 'alta', 'urgente'];
+        $statuses = Report::STATUS_LABELS;
+        $urgencies = Report::URGENCY_LABELS;
         
         $communities = Report::distinct()->pluck('community')->filter()->sort()->values();
         $provinces = Report::distinct()->pluck('province')->filter()->sort()->values();
@@ -152,7 +152,7 @@ class ReportController extends Controller
             'locality' => 'required|string|max:255',
             'petitioner_id' => 'required|exists:petitioners,id',
             'petitioner_other' => 'nullable|string|max:255',
-            'urgency' => 'required|in:normal,alta,urgente',
+            'urgency' => ['required', \Illuminate\Validation\Rule::in(Report::VALID_URGENCIES)],
             'date_petition' => 'required|date',
             'date_damage' => 'required|date',
             'assigned_to' => 'nullable|exists:users,id',
@@ -206,7 +206,7 @@ class ReportController extends Controller
             'urgency' => $validated['urgency'],
             'date_petition' => $validated['date_petition'],
             'date_damage' => $validated['date_damage'],
-            'status' => 'nuevo',
+            'status' => Report::STATUS_NUEVO,
             'assigned' => $assigned,
             'assigned_to' => $validated['assigned_to'] ?? null,
             'pdf_report' => $path,
@@ -255,17 +255,19 @@ class ReportController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Report $report)
-    {
-        $user = Auth::user();
-        $isAdmin = $user->role === 'admin';
-        $isOwner = $user->id === $report->user_id;
-        $isAssigned = $user->id === $report->assigned_to;
+{
+    $user = Auth::user();
+    $isAdmin = $user->role === 'admin';
+    $isOwner = $user->id === $report->user_id;
+    $isAssigned = $user->id === $report->assigned_to;
 
-        if (!$isAdmin && !$isOwner && !$isAssigned) {
-            abort(403, 'No tienes permiso para actualizar este caso.');
-        }
+    if (!$isAdmin && !$isOwner && !$isAssigned) {
+        abort(403, 'No tienes permiso para actualizar este caso.');
+    }
 
-        // CAMBIO: Ahora admin, creador Y asignado pueden editar TODO
+    // CAMBIO: Validación diferencial según rol
+    if ($isAdmin) {
+        // Admin puede editar TODO
         $validated = $request->validate([
             'ip' => [
                 'required',
@@ -283,12 +285,15 @@ class ReportController extends Controller
             'locality' => 'required|string|max:255',
             'petitioner_id' => 'required|exists:petitioners,id',
             'petitioner_other' => 'nullable|string|max:255',
-            'urgency' => 'required|in:normal,alta,urgente',
+            'urgency' => ['required', \Illuminate\Validation\Rule::in(Report::VALID_URGENCIES)],
             'date_petition' => 'required|date',
             'date_damage' => 'required|date',
-            'status' => 'required|in:nuevo,en_proceso,en_espera,completado',
+            'status' => ['required', \Illuminate\Validation\Rule::in(Report::VALID_STATUSES)],
             'assigned_to' => 'nullable|exists:users,id',
             'pdf_report' => 'nullable|file|mimes:pdf|max:20480',
+            'location' => 'nullable|string|max:255',
+            'coordinates' => 'nullable|string|max:100',
+            'affected_area' => 'nullable|numeric|min:0',
         ]);
 
         $petitioner = Petitioner::find($validated['petitioner_id']);
@@ -321,10 +326,53 @@ class ReportController extends Controller
         $validated['assigned'] = !empty($validated['assigned_to']);
         $validated['petitioner_other'] = $petitioner->name === 'Otro' ? $validated['petitioner_other'] : null;
 
-        $report->update($validated);
+    } else {
+        // Usuario normal (creador o asignado) puede editar campos limitados
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'background' => 'required|string',
+            'community' => 'required|string|max:100',
+            'province' => 'required|string|max:100',
+            'locality' => 'required|string|max:255',
+            'petitioner_other' => 'nullable|string|max:255',
+            'urgency' => ['required', \Illuminate\Validation\Rule::in(Report::VALID_URGENCIES)],
+            'date_petition' => 'required|date',
+            'date_damage' => 'required|date',
+            'status' => ['required', \Illuminate\Validation\Rule::in(Report::VALID_STATUSES)],
+            'pdf_report' => 'nullable|file|mimes:pdf|max:20480',
+            'location' => 'nullable|string|max:255',
+            'coordinates' => 'nullable|string|max:100',
+            'affected_area' => 'nullable|numeric|min:0',
+        ]);
 
-        return redirect()->route('reports.show', $report)->with('success', 'Caso actualizado correctamente.');
+        // Validar si cambió el petitioner_other
+        if ($report->petitioner && $report->petitioner->name === 'Otro' && empty($validated['petitioner_other'])) {
+            return back()
+                ->withErrors(['petitioner_other' => 'Debe especificar la unidad peticionaria.'])
+                ->withInput();
+        }
+
+        // Subir PDF si existe
+        if ($request->hasFile('pdf_report')) {
+            if ($report->pdf_report) {
+                Storage::disk('public')->delete($report->pdf_report);
+            }
+            
+            $originalName = $request->file('pdf_report')->getClientOriginalName();
+            $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+            $validated['pdf_report'] = $request->file('pdf_report')->storeAs('reports', time() . '_' . $sanitizedName, 'public');
+        }
+
+        // Mantener campos que no pueden editar
+        $validated['petitioner_other'] = $report->petitioner && $report->petitioner->name === 'Otro' 
+            ? $validated['petitioner_other'] 
+            : $report->petitioner_other;
     }
+
+    $report->update($validated);
+
+    return redirect()->route('reports.show', $report)->with('success', 'Caso actualizado correctamente.');
+}
 
     /**
      * Remove the specified resource from storage.
@@ -351,9 +399,9 @@ class ReportController extends Controller
     {
         $user = Auth::user();
         
-        // CAMBIO: Cualquier usuario autenticado puede asignar casos
+        // Cualquier usuario autenticado puede asignar casos
         // Admin tiene permiso total
-        // Usuarios pueden asignar casos no asignados o reasignar si son el creador o el asignado actual
+       
         $canAssign = $user->role === 'admin' || 
                      !$report->assigned || 
                      $report->user_id === $user->id || 
@@ -370,7 +418,8 @@ class ReportController extends Controller
         $report->update([
             'assigned_to' => $request->assigned_to,
             'assigned' => true,
-            'status' => $report->status === 'nuevo' ? 'en_proceso' : $report->status,
+            'status' => $report->isNuevo() ? Report::STATUS_EN_PROCESO : $report->status,
+            /*'status' => $report->status === 'nuevo' ? 'en_proceso' : $report->status,*/
         ]);
 
         return redirect()->back()->with('success', 'Caso asignado correctamente.');
@@ -414,7 +463,8 @@ class ReportController extends Controller
         $report->update([
             'assigned_to' => $user->id,
             'assigned' => true,
-            'status' => $report->status === 'nuevo' ? 'en_proceso' : $report->status,
+            'status' => $report->isNuevo() ? Report::STATUS_EN_PROCESO : $report->status,
+            /*'status' => $report->status === 'nuevo' ? 'en_proceso' : $report->status,*/
         ]);
 
         return redirect()->back()->with('success', 'Te has asignado el caso correctamente.');

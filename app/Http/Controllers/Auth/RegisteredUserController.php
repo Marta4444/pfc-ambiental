@@ -19,7 +19,12 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        // Contar administradores actuales para implementar un límite de solo 5 Admins en total.
+        $adminCount = User::where('role', 'admin')->count();
+        $canCreateAdmin = $adminCount < 5;
+        
+        return view('auth.register', compact('canCreateAdmin', 'adminCount'));
+    
     }
 
     /**
@@ -41,6 +46,17 @@ class RegisteredUserController extends Controller
         ]);
 
         $role = $request->role ?? 'user';  //si por lo que fuera no tuviera rol, le asigna User por defecto
+
+        //Validar que no haya ya 5 Admins en la BD cuando se intenta crear uno nuevo.
+        if ($role === 'admin') {
+            $adminCount = User::where('role', 'admin')->count();
+            
+            if ($adminCount >= 5) {
+                return back()
+                    ->withErrors(['role' => 'No se pueden crear más administradores. Ya existen 5 administradores en el sistema. Solo se pueden registrar usuarios normales.'])
+                    ->withInput();
+            }
+        }
 
         $user = User::create([
             'name' => $request->name,
