@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PetitionerController;
+use App\Http\Controllers\FieldController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; //esta se añade para la autenticación, sobre todo para el Auth::check
@@ -49,8 +50,24 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::post('subcategories/{subcategory}/toggle-active', [SubcategoryController::class, 'toggleActive'])->name('subcategories.toggleActive');
     
     // Rutas de gestión de peticionarios (solo admin)
-    Route::resource('petitioners', PetitionerController::class)->except(['show']);
+    Route::resource('petitioners', PetitionerController::class);
     Route::post('petitioners/{petitioner}/toggle-active', [PetitionerController::class, 'toggleActive'])->name('petitioners.toggleActive');
+
+    //Rutas para gestion de campos de subcategorías.
+    Route::resource('fields', FieldController::class);
+
+    // Activar/Desactivar Field
+    Route::post('fields/{field}/toggle-active', [FieldController::class, 'toggleActive'])
+        ->name('fields.toggleActive');
+    
+    // Asignar/Desasignar Fields a Subcategorías
+    Route::post('fields/{field}/assign', [FieldController::class, 'assignToSubcategory'])
+        ->name('fields.assignToSubcategory');
+    Route::delete('fields/{field}/subcategories/{subcategory}', [FieldController::class, 'unassignFromSubcategory'])
+        ->name('fields.unassignFromSubcategory');
+    Route::put('fields/{field}/subcategories/{subcategory}', [FieldController::class, 'updateSubcategoryPivot'])
+        ->name('fields.updateSubcategoryPivot');
+    
 });
 
 

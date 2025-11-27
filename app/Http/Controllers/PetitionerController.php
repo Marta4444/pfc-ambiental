@@ -4,20 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Petitioner;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class PetitionerController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (Auth::user()->role !== 'admin') {
-                abort(403, 'No tienes permiso para gestionar peticionarios.');
-            }
-            return $next($request);
-        });
-    }
-
     public function index()
     {
         $petitioners = Petitioner::orderBy('order')->paginate(10);
@@ -40,6 +29,15 @@ class PetitionerController extends Controller
         Petitioner::create($validated);
 
         return redirect()->route('petitioners.index')->with('success', 'Peticionario creado correctamente.');
+    }
+
+    public function show(Petitioner $petitioner)
+    {
+        $petitioner->load(['reports' => function ($query) {
+            $query->latest()->take(10);
+        }]);
+        
+        return view('petitioners.show', compact('petitioner'));
     }
 
     public function edit(Petitioner $petitioner)
@@ -70,5 +68,13 @@ class PetitionerController extends Controller
         $petitioner->delete();
 
         return redirect()->route('petitioners.index')->with('success', 'Peticionario eliminado correctamente.');
+    }
+
+    public function toggleActive(Petitioner $petitioner)
+    {
+        $petitioner->update(['active' => !$petitioner->active]);
+
+        return redirect()->route('petitioners.index')
+            ->with('success', 'Estado del peticionario actualizado.');
     }
 }

@@ -160,6 +160,20 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="office" value="Despacho/Oficina" />
+                            <x-text-input id="office" name="office" class="mt-1 block w-full" value="{{ old('office', $report->office) }}" />
+                            @error('office') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
+                            <x-input-label for="diligency" value="Diligencias" />
+                            <x-text-input id="diligency" name="diligency" placeholder="D-2025-001" class="mt-1 block w-full" value="{{ old('diligency', $report->diligency) }}" />
+                            @error('diligency') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     
                     <div>

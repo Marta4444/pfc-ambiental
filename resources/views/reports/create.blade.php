@@ -98,6 +98,12 @@
                         <x-text-input id="locality" name="locality" class="mt-1 block w-full" required value="{{ old('locality') }}" />
                         @error('locality')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
+
+                    <div>
+                        <x-input-label for="coordinates" value="Coordenadas (lat,lon)" />
+                        <x-text-input id="coordinates" name="coordinates" placeholder="41.12345,-1.23456" class="mt-1 block w-full" value="{{ old('coordinates') }}" />
+                        @error('coordinates')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
                 </div>
             </div>
 
@@ -129,6 +135,18 @@
                             placeholder="Especifique la unidad"
                         />
                         @error('petitioner_other')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <x-input-label for="office" value="Despacho/Oficina" />
+                        <x-text-input id="office" name="office" class="mt-1 block w-full" value="{{ old('office') }}" />
+                        @error('office')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div>
+                        <x-input-label for="diligency" value="Diligencias" />
+                        <x-text-input id="diligency" name="diligency" placeholder="D-2025-001" class="mt-1 block w-full" value="{{ old('diligency') }}" />
+                        @error('diligency')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
             </div>

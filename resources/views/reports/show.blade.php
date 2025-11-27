@@ -218,6 +218,13 @@
                             <label class="block text-sm font-medium text-gray-700">Localidad</label>
                             <p class="mt-1 text-sm text-gray-900">{{ $report->locality }}</p>
                         </div>
+
+                        @if($report->coordinates)
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Coordenadas GPS</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->coordinates }}</p>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -266,6 +273,88 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Información Administrativa --}}
+            @if($report->office || $report->diligency)
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        Información Administrativa
+                    </h3>
+        
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @if($report->office)
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Despacho/Oficina</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->office }}</p>
+                        </div>
+                        @endif
+
+                        @if($report->diligency)
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Diligencias</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->diligency }}</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- Valoraciones y Costes --}}
+            @if($report->vr_total || $report->ve_total || $report->vs_total || $report->total_cost)
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Valoraciones y Costes Económicos
+                    </h3>
+        
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        @if($report->vr_total)
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <label class="block text-xs font-medium text-blue-700 uppercase tracking-wider">Valor de Reposición (VR)</label>
+                            <p class="mt-2 text-2xl font-bold text-blue-900">{{ number_format($report->vr_total, 2, ',', '.') }} €</p>
+                        </div>
+                        @endif
+
+                        @if($report->ve_total)
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <label class="block text-xs font-medium text-green-700 uppercase tracking-wider">Valor Ecológico (VE)</label>
+                            <p class="mt-2 text-2xl font-bold text-green-900">{{ number_format($report->ve_total, 2, ',', '.') }} €</p>
+                        </div>
+                        @endif
+
+                        @if($report->vs_total)
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <label class="block text-xs font-medium text-yellow-700 uppercase tracking-wider">Valor de Servicios (VS)</label>
+                            <p class="mt-2 text-2xl font-bold text-yellow-900">{{ number_format($report->vs_total, 2, ',', '.') }} €</p>
+                        </div>
+                        @endif
+
+                        @if($report->total_cost)
+                        <div class="bg-red-50 p-4 rounded-lg border-2 border-red-200">
+                            <label class="block text-xs font-medium text-red-700 uppercase tracking-wider">Coste Total</label>
+                            <p class="mt-2 text-2xl font-bold text-red-900">{{ number_format($report->total_cost, 2, ',', '.') }} €</p>
+                        </div>
+                        @endif
+                    </div>
+
+                    @if($report->vr_total && $report->ve_total && $report->vs_total)
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <p class="text-xs text-gray-500">
+                            <strong>Nota:</strong> El coste total es la suma de VR + VE + VS
+                        </p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
 
             {{-- Documento PDF --}}
             @if($report->pdf_report)

@@ -73,8 +73,11 @@ class Report extends Model
         'community',
         'province',
         'locality',
+        'coordinates',
         'petitioner_id',
         'petitioner_other',
+        'office',
+        'diligency',
         'urgency',
         'date_petition',
         'date_damage',
@@ -82,12 +85,20 @@ class Report extends Model
         'assigned',
         'assigned_to',
         'pdf_report',
+        'vr_total',
+        've_total',
+        'vs_total',
+        'total_cost',
     ];
 
     protected $casts = [
         'date_petition' => 'date',
         'date_damage' => 'date',
         'assigned' => 'boolean',
+        'vr_total' => 'decimal:2',
+        've_total' => 'decimal:2',
+        'vs_total' => 'decimal:2',
+        'total_cost' => 'decimal:2',
     ];
 
     /**

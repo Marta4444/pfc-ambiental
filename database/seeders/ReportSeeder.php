@@ -29,6 +29,8 @@ class ReportSeeder extends Seeder
         $urgencies = ['normal', 'alta', 'urgente'];
         $communities = ['Andalucía', 'Cataluña', 'Madrid', 'Valencia', 'Galicia', 'Castilla y León'];
         $provinces = ['Sevilla', 'Barcelona', 'Madrid', 'Valencia', 'A Coruña', 'Valladolid'];
+        $offices = ['Despacho Central', 'Comandancia Cadiz', 'Oficina Sur', 'Comandancia Barcelona', 'Oficina Oeste'];
+
 
         for ($i = 1; $i <= 20; $i++) {
             $category = $categories->random();
@@ -51,14 +53,21 @@ class ReportSeeder extends Seeder
                 'community' => fake()->randomElement($communities),
                 'province' => fake()->randomElement($provinces),
                 'locality' => fake()->city(),
+                'coordinates' => fake()->latitude() . ',' . fake()->longitude(),
                 'petitioner_id' => $petitioners->random()->id,
                 'petitioner_other' => null,
+                'office' => fake()->randomElement($offices),
+                'diligency' => 'D-' . now()->year . '-' . str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT),
                 'urgency' => fake()->randomElement($urgencies),
                 'date_petition' => now()->subDays(rand(1, 30)),
                 'date_damage' => now()->subDays(rand(31, 90)),
                 'status' => fake()->randomElement($statuses),
                 'assigned' => !is_null($assignedTo),
                 'assigned_to' => $assignedTo,
+                'vr_total' => fake()->randomFloat(2, 1000, 50000),
+                've_total' => fake()->randomFloat(2, 500, 30000),
+                'vs_total' => fake()->randomFloat(2, 200, 15000),
+                'total_cost' => fake()->randomFloat(2, 2000, 95000),
             ]);
         }
 
