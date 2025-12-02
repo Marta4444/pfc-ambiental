@@ -6,6 +6,8 @@ use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PetitionerController;
 use App\Http\Controllers\FieldController;
+use App\Http\Controllers\SpeciesController;
+use App\Http\Controllers\ProtectedAreaController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth; //esta se añade para la autenticación, sobre todo para el Auth::check
@@ -39,6 +41,17 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('reports', ReportController::class);
     
+    // Rutas de Species (búsqueda para todos los usuarios autenticados)
+    Route::get('species/search', [SpeciesController::class, 'search'])->name('species.search');
+    Route::get('species/{species}', [SpeciesController::class, 'show'])->name('species.show');
+    Route::post('species/check-protection', [SpeciesController::class, 'checkProtection'])->name('species.checkProtection');
+
+    // Verificar coordenadas en áreas protegidas (AJAX)
+    Route::post('protected-areas/check', [ProtectedAreaController::class, 'checkCoordinates'])
+        ->name('protected-areas.check');
+    Route::get('protected-areas/search', [ProtectedAreaController::class, 'search'])
+        ->name('protected-areas.search');
+
 
 });
 
@@ -67,6 +80,16 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
         ->name('fields.unassignFromSubcategory');
     Route::put('fields/{field}/subcategories/{subcategory}', [FieldController::class, 'updateSubcategoryPivot'])
         ->name('fields.updateSubcategoryPivot');
+
+    // Gestión de Species (solo admin)
+    Route::get('species', [SpeciesController::class, 'index'])->name('species.index');
+
+    // Gestión de áreas protegidas (admin)
+    Route::get('protected-areas', [ProtectedAreaController::class, 'index'])
+        ->name('protected-areas.index');
+    Route::get('protected-areas/{protectedArea}', [ProtectedAreaController::class, 'show'])
+        ->name('protected-areas.show');
+
     
 });
 

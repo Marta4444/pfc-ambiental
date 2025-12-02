@@ -88,3 +88,19 @@ Se crean tablas "de registro" para :Category, Subcategory, Petitioners (unidades
 Tablas PIVOTE: Subcategory_fields (une subcategorías con los campos que se necesitan rellenar con info, para aplicar luego cálculos), subcategory_formula_items (une subcategorías con los distintos parámetros de las fórmulas a usar para los cálculos necesarios).
 
 Tabla Audit_log: Para auditorías. Los Admin pueden acceder a esta tabla y ver todos los cambios y acciones realizadas en la app por los usuarios. Se aplica usando un Observer y un helper para facilitar la implementación.
+
+## Tabla Species
+La idea es crear una tabla Species que obtenga información de Especies mediante APIs, del boe, cites y iucn.
+
+Cuando un usuario introduzca los detalles del caso e introduzca especies afectadas, esta especie se buscará en la tabla Species, y se deberían autorellenar ya otros campos del formulario, relativos al nivel de protección de dicha especie.
+Si la especie no está protegida, también se debe informar.
+
+Se va a usar un enfoque híbrido que va a consistir en:
+1. Carga inicial: Se hará una carga inicial de sólo las especies protegidas (boe, ccaas, cites y iucn).
+2. Carga bajo demanda: cuando el usuario introduzca una especie que no está en esta carga inicial de esta tabla, porque no está protegida, se hace una consulta a la API y se añade esta especie a la tabla con boe_status = null y iucn_category = 'LC' o 'NE' (Least Concern, Not Evaluated).
+3. Caché inteligente: las especies consultadas se guardan para futuras búsquedas.
+   
+Esto reduce mucho el tamaño de la tabla, ya que cargar inicialmente todas las especies existentes, crearía una tabla mucho mayor.
+
+Para la sincronización automática se crea un cron, que se crea mediante el comando en terminal: php artisan make:command SyncSpeciesData
+
