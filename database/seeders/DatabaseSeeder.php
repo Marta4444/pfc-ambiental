@@ -32,7 +32,10 @@ class DatabaseSeeder extends Seeder
             FieldSeeder::class,       
             SubcategoryFieldSeeder::class,
             PetitionerSeeder::class,
+            SpeciesSeeder::class,           
+            ProtectedAreaSeeder::class,     
             ReportSeeder::class,
+            ReportDetailSeeder::class,      
         ]);
     }
 }

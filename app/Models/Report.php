@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Report extends Model
 {
@@ -127,6 +128,35 @@ class Report extends Model
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function details(): HasMany
+    {
+        return $this->hasMany(ReportDetail::class);
+    }
+
+    /**
+     * Verificar si el report tiene detalles
+     */
+    public function hasDetails(): bool
+    {
+        return $this->details()->exists();
+    }
+
+    /**
+     * Obtener detalles agrupados
+     */
+    public function getGroupedDetails(): \Illuminate\Support\Collection
+    {
+        return ReportDetail::getGroupedDetails($this->id);
+    }
+
+    /**
+     * Obtener cantidad de grupos de detalles
+     */
+    public function getDetailsGroupsCountAttribute(): int
+    {
+        return count(ReportDetail::getGroupsForReport($this->id));
     }
 
     /**

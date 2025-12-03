@@ -4,13 +4,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportDetailController;
 use App\Http\Controllers\PetitionerController;
 use App\Http\Controllers\FieldController;
 use App\Http\Controllers\SpeciesController;
 use App\Http\Controllers\ProtectedAreaController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth; //esta se añade para la autenticación, sobre todo para el Auth::check
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     if(Auth::check()) {
@@ -40,19 +41,28 @@ Route::middleware('auth')->group(function () {
     Route::post('reports/{report}/unassign', [ReportController::class, 'unassign'])->name('reports.unassign');
 
     Route::resource('reports', ReportController::class);
+
+    // Report Details
+    Route::prefix('reports/{report}/details')->name('report-details.')->group(function () {
+        Route::get('/', [ReportDetailController::class, 'index'])->name('index');
+        Route::get('/create', [ReportDetailController::class, 'create'])->name('create');
+        Route::post('/', [ReportDetailController::class, 'store'])->name('store');
+        Route::get('/{groupKey}', [ReportDetailController::class, 'show'])->name('show');
+        Route::get('/{groupKey}/edit', [ReportDetailController::class, 'edit'])->name('edit');
+        Route::put('/{groupKey}', [ReportDetailController::class, 'update'])->name('update');
+        Route::delete('/{groupKey}', [ReportDetailController::class, 'destroy'])->name('destroy');
+    });
     
     // Rutas de Species (búsqueda para todos los usuarios autenticados)
     Route::get('species/search', [SpeciesController::class, 'search'])->name('species.search');
     Route::get('species/{species}', [SpeciesController::class, 'show'])->name('species.show');
     Route::post('species/check-protection', [SpeciesController::class, 'checkProtection'])->name('species.checkProtection');
 
-    // Verificar coordenadas en áreas protegidas (AJAX)
-    Route::post('protected-areas/check', [ProtectedAreaController::class, 'checkCoordinates'])
-        ->name('protected-areas.check');
+    // Rutas de Áreas Protegidas (para usuarios autenticados)
+    Route::post('protected-areas/check-coordinates', [ProtectedAreaController::class, 'checkCoordinates'])
+        ->name('protected-areas.check-coordinates');
     Route::get('protected-areas/search', [ProtectedAreaController::class, 'search'])
         ->name('protected-areas.search');
-
-
 });
 
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
@@ -66,14 +76,10 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::resource('petitioners', PetitionerController::class);
     Route::post('petitioners/{petitioner}/toggle-active', [PetitionerController::class, 'toggleActive'])->name('petitioners.toggleActive');
 
-    //Rutas para gestion de campos de subcategorías.
+    // Rutas para gestión de campos de subcategorías
     Route::resource('fields', FieldController::class);
-
-    // Activar/Desactivar Field
     Route::post('fields/{field}/toggle-active', [FieldController::class, 'toggleActive'])
         ->name('fields.toggleActive');
-    
-    // Asignar/Desasignar Fields a Subcategorías
     Route::post('fields/{field}/assign', [FieldController::class, 'assignToSubcategory'])
         ->name('fields.assignToSubcategory');
     Route::delete('fields/{field}/subcategories/{subcategory}', [FieldController::class, 'unassignFromSubcategory'])
@@ -84,14 +90,21 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     // Gestión de Species (solo admin)
     Route::get('species', [SpeciesController::class, 'index'])->name('species.index');
 
-    // Gestión de áreas protegidas (admin)
+    // Gestión de áreas protegidas (admin) - CRUD completo
     Route::get('protected-areas', [ProtectedAreaController::class, 'index'])
         ->name('protected-areas.index');
+    Route::get('protected-areas/create', [ProtectedAreaController::class, 'create'])
+        ->name('protected-areas.create');
+    Route::post('protected-areas', [ProtectedAreaController::class, 'store'])
+        ->name('protected-areas.store');
     Route::get('protected-areas/{protectedArea}', [ProtectedAreaController::class, 'show'])
         ->name('protected-areas.show');
-
-    
+    Route::get('protected-areas/{protectedArea}/edit', [ProtectedAreaController::class, 'edit'])
+        ->name('protected-areas.edit');
+    Route::put('protected-areas/{protectedArea}', [ProtectedAreaController::class, 'update'])
+        ->name('protected-areas.update');
+    Route::delete('protected-areas/{protectedArea}', [ProtectedAreaController::class, 'destroy'])
+        ->name('protected-areas.destroy');
 });
-
 
 require __DIR__.'/auth.php';

@@ -28,17 +28,16 @@ class SpeciesController extends Controller
                 'common_name',
                 'taxon_group',
                 'boe_status',
+                'boe_law_ref',
+                'ccaa_status',
                 'iucn_category',
                 'cites_appendix',
                 'is_protected',
             ])
-            ->orderByRaw('is_protected DESC') // Protegidas primero
+            ->orderByRaw('is_protected DESC')
             ->orderBy('scientific_name')
             ->limit($limit)
             ->get();
-
-        // Si no hay resultados locales, podríamos buscar en API externa
-        // TODO: Implementar búsqueda en GBIF/Catalogue of Life si no hay resultados
 
         return response()->json([
             'success' => true,
@@ -49,6 +48,13 @@ class SpeciesController extends Controller
                     'common_name' => $sp->common_name,
                     'taxon_group' => $sp->taxon_group,
                     'is_protected' => $sp->is_protected,
+                    // ✅ Añadir datos de protección completos
+                    'boe_status' => $sp->boe_status,
+                    'boe_law_ref' => $sp->boe_law_ref,
+                    'ccaa_status' => $sp->ccaa_status,
+                    'iucn_category' => $sp->iucn_category,
+                    'iucn_label' => Species::IUCN_CATEGORIES[$sp->iucn_category] ?? null,
+                    'cites_appendix' => $sp->cites_appendix,
                     'protection_summary' => $sp->protection_summary,
                     'label' => $sp->scientific_name . ($sp->common_name ? " ({$sp->common_name})" : ''),
                 ];
