@@ -103,8 +103,11 @@ class Report extends Model
     ];
 
     /**
-     * Relaciones
+     * ==========================================
+     * RELACIONES
+     * ==========================================
      */
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -136,6 +139,20 @@ class Report extends Model
     }
 
     /**
+     * Relación con los items de coste
+     */
+    public function costItems(): HasMany
+    {
+        return $this->hasMany(ReportCostItem::class);
+    }
+
+    /**
+     * ==========================================
+     * MÉTODOS DE DETALLES
+     * ==========================================
+     */
+
+    /**
      * Verificar si el report tiene detalles
      */
     public function hasDetails(): bool
@@ -160,8 +177,128 @@ class Report extends Model
     }
 
     /**
-     * Métodos de ayuda para estados
+     * Obtener los grupos únicos de detalles
      */
+    public function getDetailGroups(): array
+    {
+        return $this->details()
+            ->select('group_key')
+            ->distinct()
+            ->pluck('group_key')
+            ->toArray();
+    }
+
+    /**
+     * ==========================================
+     * MÉTODOS DE COSTES
+     * ==========================================
+     */
+
+    /**
+     * Verificar si el report tiene costes calculados
+     */
+    public function hasCostsCalculated(): bool
+    {
+        return $this->costItems()->exists();
+    }
+
+    /**
+     * Obtener items de coste agrupados por group_key
+     */
+    public function getGroupedCostItems(): \Illuminate\Support\Collection
+    {
+        return $this->costItems()
+            ->orderBy('group_key')
+            ->orderByRaw("FIELD(cost_type, 'VR', 'VE', 'VS')")
+            ->get()
+            ->groupBy('group_key');
+    }
+
+    /**
+     * Obtener totales por tipo de coste
+     */
+    public function getCostTotals(): array
+    {
+        if (!$this->hasCostsCalculated()) {
+            return [
+                'VR' => 0,
+                'VE' => 0,
+                'VS' => 0,
+                'total' => 0,
+            ];
+        }
+
+        return ReportCostItem::getTotalsByType($this->id);
+    }
+
+    /**
+     * Actualizar totales desde cost_items
+     */
+    public function updateTotalsFromCostItems(): void
+    {
+        $totals = ReportCostItem::getTotalsByType($this->id);
+
+        $this->update([
+            'vr_total' => $totals['VR'],
+            've_total' => $totals['VE'],
+            'vs_total' => $totals['VS'],
+            'total_cost' => $totals['total'],
+        ]);
+    }
+
+    /**
+     * Resetear todos los costes del report
+     */
+    public function resetCosts(): void
+    {
+        $this->costItems()->delete();
+
+        $this->update([
+            'vr_total' => 0,
+            've_total' => 0,
+            'vs_total' => 0,
+            'total_cost' => 0,
+        ]);
+    }
+
+    /**
+     * Obtener el total formateado
+     */
+    public function getFormattedTotalCostAttribute(): string
+    {
+        return number_format((float) $this->total_cost, 2, ',', '.') . ' €';
+    }
+
+    /**
+     * Obtener VR total formateado
+     */
+    public function getFormattedVrTotalAttribute(): string
+    {
+        return number_format((float) $this->vr_total, 2, ',', '.') . ' €';
+    }
+
+    /**
+     * Obtener VE total formateado
+     */
+    public function getFormattedVeTotalAttribute(): string
+    {
+        return number_format((float) $this->ve_total, 2, ',', '.') . ' €';
+    }
+
+    /**
+     * Obtener VS total formateado
+     */
+    public function getFormattedVsTotalAttribute(): string
+    {
+        return number_format((float) $this->vs_total, 2, ',', '.') . ' €';
+    }
+
+    /**
+     * ==========================================
+     * MÉTODOS DE ESTADO
+     * ==========================================
+     */
+
     public function isNuevo(): bool
     {
         return $this->status === self::STATUS_NUEVO;
@@ -223,5 +360,43 @@ class Report extends Model
             self::URGENCY_URGENTE => 'red',
             default => 'gray',
         };
+    }
+
+    /**
+     * ==========================================
+     * SCOPES
+     * ==========================================
+     */
+
+    /**
+     * Scope para reports con costes calculados
+     */
+    public function scopeWithCostsCalculated($query)
+    {
+        return $query->whereHas('costItems');
+    }
+
+    /**
+     * Scope para reports sin costes calculados
+     */
+    public function scopeWithoutCostsCalculated($query)
+    {
+        return $query->whereDoesntHave('costItems');
+    }
+
+    /**
+     * Scope para reports con detalles
+     */
+    public function scopeWithDetails($query)
+    {
+        return $query->whereHas('details');
+    }
+
+    /**
+     * Scope para reports listos para calcular costes (tienen detalles pero no costes)
+     */
+    public function scopeReadyForCostCalculation($query)
+    {
+        return $query->whereHas('details')->whereDoesntHave('costItems');
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportDetailController;
+use App\Http\Controllers\ReportCostItemController;
 use App\Http\Controllers\PetitionerController;
 use App\Http\Controllers\FieldController;
 use App\Http\Controllers\SpeciesController;
@@ -51,6 +52,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/{groupKey}/edit', [ReportDetailController::class, 'edit'])->name('edit');
         Route::put('/{groupKey}', [ReportDetailController::class, 'update'])->name('update');
         Route::delete('/{groupKey}', [ReportDetailController::class, 'destroy'])->name('destroy');
+    });
+
+    // Report Cost Items
+    Route::prefix('reports/{report}/costs')->name('report-costs.')->group(function () {
+        Route::get('/', [ReportCostItemController::class, 'index'])->name('index');
+        Route::post('/calculate', [ReportCostItemController::class, 'calculate'])->name('calculate');
+        Route::delete('/', [ReportCostItemController::class, 'destroy'])->name('destroy');
     });
 
     // Rutas de Species (búsqueda para todos los usuarios autenticados)

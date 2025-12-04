@@ -43,19 +43,59 @@
                             Editando: {{ ucfirst(str_replace('_', ' ', $groupKey)) }}
                         </h3>
 
+                        {{-- Aviso de campos de protección restringidos --}}
+                        @if(!auth()->user()->role !== 'admin')
+                            @php
+                                $protectionFields = ['boe_status', 'ccaa_status', 'iucn_category'];
+                                $hasProtectionFields = $fields->whereIn('key_name', $protectionFields)->isNotEmpty();
+                            @endphp
+                            @if($hasProtectionFields)
+                                <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <svg class="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        <div>
+                                            <h4 class="text-sm font-semibold text-amber-800">Campos de protección restringidos</h4>
+                                            <p class="text-sm text-amber-700 mt-1">
+                                                Los campos de nivel de protección (LESPRE/BOE, Catálogo CCAA e IUCN) solo pueden ser editados por un administrador.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+
                         <div class="space-y-4">
+                            @php
+                                // Campos de protección que solo admin puede editar
+                                $protectionFields = ['boe_status', 'ccaa_status', 'iucn_category'];
+                                $isAdmin = auth()->user()->role === 'admin';
+                            @endphp
+
                             @foreach($fields as $field)
                                 @php
                                     $currentValue = $existingValues[$field->key_name] ?? $field->pivot->default_value ?? '';
+                                    $isProtectionField = in_array($field->key_name, $protectionFields);
+                                    $isReadOnly = $isProtectionField && !$isAdmin;
                                 @endphp
-                                <div>
+                                
+                                <div class="{{ $isReadOnly ? 'opacity-75' : '' }}">
                                     <label for="field_{{ $field->key_name }}" class="block text-sm font-medium text-gray-700">
                                         {{ $field->label }}
-                                        @if($field->pivot->is_required)
+                                        @if($field->pivot->is_required && !$isReadOnly)
                                             <span class="text-red-500">*</span>
                                         @endif
                                         @if($field->units)
                                             <span class="text-gray-400 text-xs">({{ $field->units }})</span>
+                                        @endif
+                                        @if($isReadOnly)
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                                </svg>
+                                                Solo admin
+                                            </span>
                                         @endif
                                     </label>
 
@@ -63,89 +103,114 @@
                                         <p class="text-xs text-gray-500 mb-1">{{ $field->help_text }}</p>
                                     @endif
 
-                                    @switch($field->type)
-                                        @case('textarea')
-                                            <textarea 
-                                                name="fields[{{ $field->key_name }}]" 
-                                                id="field_{{ $field->key_name }}"
-                                                rows="3"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                placeholder="{{ $field->placeholder }}"
-                                                {{ $field->pivot->is_required ? 'required' : '' }}
-                                            >{{ old("fields.{$field->key_name}", $currentValue) }}</textarea>
-                                            @break
-
-                                        @case('select')
-                                            <select 
-                                                name="fields[{{ $field->key_name }}]" 
-                                                id="field_{{ $field->key_name }}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                {{ $field->pivot->is_required ? 'required' : '' }}
-                                            >
-                                                <option value="">{{ $field->placeholder ?: 'Seleccione...' }}</option>
-                                                @foreach($field->options ?? [] as $option)
-                                                    <option value="{{ $option }}" {{ old("fields.{$field->key_name}", $currentValue) == $option ? 'selected' : '' }}>
-                                                        {{ $option }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            @break
-
-                                        @case('number')
-                                        @case('decimal')
-                                            <input 
-                                                type="number" 
-                                                name="fields[{{ $field->key_name }}]" 
-                                                id="field_{{ $field->key_name }}"
-                                                value="{{ old("fields.{$field->key_name}", $currentValue) }}"
-                                                step="{{ $field->type === 'decimal' ? '0.01' : '1' }}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                placeholder="{{ $field->placeholder }}"
-                                                {{ $field->pivot->is_required ? 'required' : '' }}
-                                            >
-                                            @break
-
-                                        @case('date')
-                                            <input 
-                                                type="date" 
-                                                name="fields[{{ $field->key_name }}]" 
-                                                id="field_{{ $field->key_name }}"
-                                                value="{{ old("fields.{$field->key_name}", $currentValue) }}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                {{ $field->pivot->is_required ? 'required' : '' }}
-                                            >
-                                            @break
-
-                                        @case('boolean')
-                                            <div class="mt-1">
-                                                <label class="inline-flex items-center">
+                                    @if($isReadOnly)
+                                        {{-- Campo de solo lectura para no-admins --}}
+                                        <div class="mt-1 relative">
+                                            @switch($field->type)
+                                                @case('select')
+                                                    <div class="block w-full rounded-md border-gray-200 bg-gray-100 px-3 py-2 text-gray-600 cursor-not-allowed">
+                                                        {{ $currentValue ?: 'No especificado' }}
+                                                    </div>
+                                                    {{-- Campo oculto para mantener el valor --}}
+                                                    <input type="hidden" name="fields[{{ $field->key_name }}]" value="{{ $currentValue }}">
+                                                    @break
+                                                @default
                                                     <input 
-                                                        type="checkbox" 
-                                                        name="fields[{{ $field->key_name }}]" 
-                                                        value="1"
-                                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                        {{ old("fields.{$field->key_name}", $currentValue) ? 'checked' : '' }}
+                                                        type="text" 
+                                                        value="{{ $currentValue ?: 'No especificado' }}"
+                                                        class="mt-1 block w-full rounded-md border-gray-200 bg-gray-100 text-gray-600 cursor-not-allowed"
+                                                        disabled
                                                     >
-                                                    <span class="ml-2 text-sm text-gray-600">Sí</span>
-                                                </label>
-                                            </div>
-                                            @break
+                                                    {{-- Campo oculto para mantener el valor --}}
+                                                    <input type="hidden" name="fields[{{ $field->key_name }}]" value="{{ $currentValue }}">
+                                            @endswitch
+                                        </div>
+                                    @else
+                                        {{-- Campo editable --}}
+                                        @switch($field->type)
+                                            @case('textarea')
+                                                <textarea 
+                                                    name="fields[{{ $field->key_name }}]" 
+                                                    id="field_{{ $field->key_name }}"
+                                                    rows="3"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    placeholder="{{ $field->placeholder }}"
+                                                    {{ $field->pivot->is_required ? 'required' : '' }}
+                                                >{{ old("fields.{$field->key_name}", $currentValue) }}</textarea>
+                                                @break
 
-                                        @default
-                                            <input 
-                                                type="text" 
-                                                name="fields[{{ $field->key_name }}]" 
-                                                id="field_{{ $field->key_name }}"
-                                                value="{{ old("fields.{$field->key_name}", $currentValue) }}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                placeholder="{{ $field->placeholder }}"
-                                                {{ $field->pivot->is_required ? 'required' : '' }}
-                                                @if($field->key_name === 'especie')
-                                                    list="species-list"
-                                                    autocomplete="off"
-                                                @endif
-                                            >
-                                    @endswitch
+                                            @case('select')
+                                                <select 
+                                                    name="fields[{{ $field->key_name }}]" 
+                                                    id="field_{{ $field->key_name }}"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    {{ $field->pivot->is_required ? 'required' : '' }}
+                                                >
+                                                    <option value="">{{ $field->placeholder ?: 'Seleccione...' }}</option>
+                                                    @foreach($field->options ?? [] as $option)
+                                                        <option value="{{ $option }}" {{ old("fields.{$field->key_name}", $currentValue) == $option ? 'selected' : '' }}>
+                                                            {{ $option }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @break
+
+                                            @case('number')
+                                            @case('decimal')
+                                                <input 
+                                                    type="number" 
+                                                    name="fields[{{ $field->key_name }}]" 
+                                                    id="field_{{ $field->key_name }}"
+                                                    value="{{ old("fields.{$field->key_name}", $currentValue) }}"
+                                                    step="{{ $field->type === 'decimal' ? '0.01' : '1' }}"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    placeholder="{{ $field->placeholder }}"
+                                                    {{ $field->pivot->is_required ? 'required' : '' }}
+                                                >
+                                                @break
+
+                                            @case('date')
+                                                <input 
+                                                    type="date" 
+                                                    name="fields[{{ $field->key_name }}]" 
+                                                    id="field_{{ $field->key_name }}"
+                                                    value="{{ old("fields.{$field->key_name}", $currentValue) }}"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    {{ $field->pivot->is_required ? 'required' : '' }}
+                                                >
+                                                @break
+
+                                            @case('boolean')
+                                                <div class="mt-1">
+                                                    <label class="inline-flex items-center">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            name="fields[{{ $field->key_name }}]" 
+                                                            value="1"
+                                                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                            {{ old("fields.{$field->key_name}", $currentValue) ? 'checked' : '' }}
+                                                        >
+                                                        <span class="ml-2 text-sm text-gray-600">Sí</span>
+                                                    </label>
+                                                </div>
+                                                @break
+
+                                            @default
+                                                <input 
+                                                    type="text" 
+                                                    name="fields[{{ $field->key_name }}]" 
+                                                    id="field_{{ $field->key_name }}"
+                                                    value="{{ old("fields.{$field->key_name}", $currentValue) }}"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    placeholder="{{ $field->placeholder }}"
+                                                    {{ $field->pivot->is_required ? 'required' : '' }}
+                                                    @if($field->key_name === 'especie')
+                                                        list="species-list"
+                                                        autocomplete="off"
+                                                    @endif
+                                                >
+                                        @endswitch
+                                    @endif
 
                                     @error("fields.{$field->key_name}")
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

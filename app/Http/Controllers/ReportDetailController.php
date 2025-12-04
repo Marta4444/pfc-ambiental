@@ -16,26 +16,29 @@ class ReportDetailController extends Controller
 {
     /**
      * Mostrar todos los detalles de un report
+     * PÚBLICO: Todos los usuarios autenticados pueden ver
      */
     public function index(Report $report)
     {
-        $this->authorizeAccess($report);
-
         $groupedDetails = $report->getGroupedDetails();
         
         // Obtener los campos de la subcategoría para mostrar labels correctos
         $subcategory = $report->subcategory;
         $fields = $subcategory->fields()->get()->keyBy('key_name');
         
-        return view('report-details.index', compact('report', 'groupedDetails', 'fields'));
+        // Verificar si el usuario puede editar (para mostrar/ocultar botones)
+        $canEdit = $this->canEdit($report);
+        
+        return view('report-details.index', compact('report', 'groupedDetails', 'fields', 'canEdit'));
     }
 
     /**
      * Formulario para crear nuevos detalles
+     * RESTRINGIDO: Solo admin o asignado
      */
     public function create(Report $report)
     {
-        $this->authorizeAccess($report);
+        $this->authorizeEdit($report);
 
         // Obtener la subcategoría del report
         $subcategory = $report->subcategory;
@@ -69,10 +72,11 @@ class ReportDetailController extends Controller
 
     /**
      * Guardar nuevos detalles
+     * RESTRINGIDO: Solo admin o asignado
      */
     public function store(Request $request, Report $report)
     {
-        $this->authorizeAccess($report);
+        $this->authorizeEdit($report);
 
         $subcategory = $report->subcategory;
         $fields = $subcategory->fields()->get();
@@ -172,11 +176,10 @@ class ReportDetailController extends Controller
 
     /**
      * Mostrar un grupo específico de detalles
+     * PÚBLICO: Todos los usuarios autenticados pueden ver
      */
     public function show(Report $report, string $groupKey)
     {
-        $this->authorizeAccess($report);
-
         $details = ReportDetail::where('report_id', $report->id)
             ->where('group_key', $groupKey)
             ->orderBy('order_index')
@@ -189,16 +192,20 @@ class ReportDetailController extends Controller
 
         $subcategory = $report->subcategory;
         $fields = $subcategory->fields()->get()->keyBy('key_name');
+        
+        // Verificar si el usuario puede editar (para mostrar/ocultar botones)
+        $canEdit = $this->canEdit($report);
 
-        return view('report-details.show', compact('report', 'groupKey', 'details', 'fields'));
+        return view('report-details.show', compact('report', 'groupKey', 'details', 'fields', 'canEdit'));
     }
 
     /**
      * Formulario para editar un grupo de detalles
+     * RESTRINGIDO: Solo admin o asignado
      */
     public function edit(Report $report, string $groupKey)
     {
-        $this->authorizeAccess($report);
+        $this->authorizeEdit($report);
 
         $details = ReportDetail::where('report_id', $report->id)
             ->where('group_key', $groupKey)
@@ -231,10 +238,11 @@ class ReportDetailController extends Controller
 
     /**
      * Actualizar un grupo de detalles
+     * RESTRINGIDO: Solo admin o asignado
      */
     public function update(Request $request, Report $report, string $groupKey)
     {
-        $this->authorizeAccess($report);
+        $this->authorizeEdit($report);
 
         $subcategory = $report->subcategory;
         $fields = $subcategory->fields()->get();
@@ -329,10 +337,11 @@ class ReportDetailController extends Controller
 
     /**
      * Eliminar un grupo de detalles
+     * RESTRINGIDO: Solo admin o asignado
      */
     public function destroy(Report $report, string $groupKey)
     {
-        $this->authorizeAccess($report);
+        $this->authorizeEdit($report);
 
         ReportDetail::where('report_id', $report->id)
             ->where('group_key', $groupKey)
@@ -404,17 +413,23 @@ class ReportDetailController extends Controller
     }
 
     /**
-     * Verificar acceso al report
+     * Verificar si el usuario puede editar el report
+     * Solo admin o el usuario asignado pueden editar
      */
-    protected function authorizeAccess(Report $report): void
+    protected function canEdit(Report $report): bool
     {
         $user = Auth::user();
-        $canAccess = $user->role === 'admin' 
-            || $report->user_id === $user->id 
-            || $report->assigned_to === $user->id;
+        return $user->role === 'admin' || $report->assigned_to === $user->id;
+    }
 
-        if (!$canAccess) {
-            abort(403, 'No tienes permiso para acceder a los detalles de este caso.');
+    /**
+     * Autorizar edición del report
+     * Lanza 403 si el usuario no puede editar
+     */
+    protected function authorizeEdit(Report $report): void
+    {
+        if (!$this->canEdit($report)) {
+            abort(403, 'No tienes permiso para editar los detalles de este caso. Solo el agente asignado o un administrador pueden hacerlo.');
         }
     }
 

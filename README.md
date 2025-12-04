@@ -104,3 +104,11 @@ Esto reduce mucho el tamaño de la tabla, ya que cargar inicialmente todas las e
 
 Para la sincronización automática se crea un cron, que se crea mediante el comando en terminal: php artisan make:command SyncSpeciesData
 
+-- Como no existe API del boe, se ha cambiado a un enfoque en el que se haga una carga inicial con los datos que se puedan obtener mediante APIs. En los formularios que rellenan los agentes, al seleccionar una especie (obtenida de la tabla Species), se debe autorrellenar el nivel de protección, si existe. Si no existe, el campo se deja en blanco, el usuario añade el valor y este ya se actualiza en la tabla Species. Así para las siguientes veces que se use esta especie, ya se autorellenan todos los datos de protección, y ya no son editables para el usuario.
+
+
+## Restricciones
+- Solo puede haber 5 Administradores como máximo en la app. Al intentar crear el 6o, el usuario recibe un mensaje de error.
+- Si solo hay 1 Administrador en la app, este no puede borrar su cuenta. Debe haber siempre al menos 1 Admin.
+- Los niveles de protección, al editar los detalles de un caso, sólo los puede editar un Administrador.
+- Todos los usuarios pueden crear casos, y añadir detalles en el momento de la creación. Pero una vez creado el caso, sólo se pueden añadir detalles en los casos que el usuario tiene autoasignados.

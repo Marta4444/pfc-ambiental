@@ -35,7 +35,8 @@ class DatabaseSeeder extends Seeder
             SpeciesSeeder::class,           
             ProtectedAreaSeeder::class,     
             ReportSeeder::class,
-            ReportDetailSeeder::class,      
+            ReportDetailSeeder::class,   
+            ReportCostItemSeeder::class,    
         ]);
     }
 }
