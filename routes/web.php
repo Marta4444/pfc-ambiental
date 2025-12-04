@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    if(Auth::check()) {
+    if (Auth::check()) {
         return redirect()->route('dashboard');
     }
     return redirect()->route('login');
@@ -52,7 +52,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/{groupKey}', [ReportDetailController::class, 'update'])->name('update');
         Route::delete('/{groupKey}', [ReportDetailController::class, 'destroy'])->name('destroy');
     });
-    
+
     // Rutas de Species (búsqueda para todos los usuarios autenticados)
     Route::get('species/search', [SpeciesController::class, 'search'])->name('species.search');
     Route::get('species/{species}', [SpeciesController::class, 'show'])->name('species.show');
@@ -71,7 +71,7 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
 
     Route::resource('subcategories', SubcategoryController::class)->except(['index', 'show']);
     Route::post('subcategories/{subcategory}/toggle-active', [SubcategoryController::class, 'toggleActive'])->name('subcategories.toggleActive');
-    
+
     // Rutas de gestión de peticionarios (solo admin)
     Route::resource('petitioners', PetitionerController::class);
     Route::post('petitioners/{petitioner}/toggle-active', [PetitionerController::class, 'toggleActive'])->name('petitioners.toggleActive');
@@ -87,8 +87,11 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::put('fields/{field}/subcategories/{subcategory}', [FieldController::class, 'updateSubcategoryPivot'])
         ->name('fields.updateSubcategoryPivot');
 
-    // Gestión de Species (solo admin)
+    // Gestión de Species (admin)
     Route::get('species', [SpeciesController::class, 'index'])->name('species.index');
+    Route::get('species/{species}/show', [SpeciesController::class, 'adminShow'])->name('species.admin.show');
+    Route::get('species/{species}/edit', [SpeciesController::class, 'edit'])->name('species.edit');
+    Route::put('species/{species}', [SpeciesController::class, 'update'])->name('species.update');
 
     // Gestión de áreas protegidas (admin) - CRUD completo
     Route::get('protected-areas', [ProtectedAreaController::class, 'index'])
@@ -107,4 +110,4 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
         ->name('protected-areas.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -32,9 +32,7 @@
                             <h3 class="text-sm font-semibold text-red-800">
                                 ⚠️ ESPECIE PROTEGIDA
                             </h3>
-                            <div id="species-protection-details" class="mt-2 text-sm text-red-700">
-                                <!-- Se rellena con JavaScript -->
-                            </div>
+                            <div id="species-protection-details" class="mt-2 text-sm text-red-700"></div>
                         </div>
                     </div>
                 </div>
@@ -48,6 +46,23 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span class="ml-2 text-sm text-gray-600">Especie sin protección especial registrada</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Aviso de campos editables --}}
+            <div id="editable-fields-notice" class="mb-4 hidden">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-semibold text-yellow-800">Campos editables</h3>
+                            <p class="text-sm text-yellow-700">Los campos marcados en amarillo no tienen datos. Por favor, completa la información de protección. Se guardará automáticamente para futuras consultas.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -66,9 +81,7 @@
                             <h3 class="text-sm font-semibold text-green-800">
                                 🌿 UBICACIÓN EN ÁREA PROTEGIDA
                             </h3>
-                            <div id="protected-area-details" class="mt-2 text-sm text-green-700">
-                                <!-- Se rellena con JavaScript -->
-                            </div>
+                            <div id="protected-area-details" class="mt-2 text-sm text-green-700"></div>
                         </div>
                     </div>
                 </div>
@@ -208,14 +221,14 @@
 
                         {{-- Botones --}}
                         <div class="mt-6 pt-6 border-t border-gray-200 flex justify-between">
-                            <a href="{{ route('report-details.index', $report) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-200">
+                            <a href="{{ route('report-details.index', $report) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-blue-700">
                                 Cancelar
                             </a>
                             <div class="flex gap-2">
                                 <button type="submit" name="add_another" value="1" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
                                     Guardar y Añadir Otro
                                 </button>
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
                                     Guardar Detalles
                                 </button>
                             </div>
@@ -231,18 +244,15 @@
 
     @push('scripts')
     <script>
-        // =============================================
+        
         // AUTOCOMPLETADO Y AUTORELLENADO DE ESPECIES
-        // =============================================
         const speciesInput = document.getElementById('field_especie');
         const speciesDatalist = document.getElementById('species-list');
         
-        // Cache de especies buscadas
         let speciesCache = {};
         let selectedSpecies = null;
 
         if (speciesInput) {
-            // Debounce para no hacer muchas peticiones
             let searchTimeout;
             
             speciesInput.addEventListener('input', async function() {
@@ -253,6 +263,7 @@
                 if (term.length < 2) {
                     speciesDatalist.innerHTML = '';
                     hideSpeciesBadges();
+                    resetProtectionFields();
                     return;
                 }
 
@@ -265,7 +276,6 @@
                         speciesCache = {};
                         
                         data.data.forEach(species => {
-                            // Guardar en cache por nombre científico y común
                             speciesCache[species.scientific_name.toLowerCase()] = species;
                             if (species.common_name) {
                                 speciesCache[species.common_name.toLowerCase()] = species;
@@ -289,12 +299,10 @@
                 }, 300);
             });
 
-            // Cuando se selecciona una especie del datalist
             speciesInput.addEventListener('change', function() {
                 handleSpeciesSelection(this.value);
             });
 
-            // También verificar al perder el foco
             speciesInput.addEventListener('blur', function() {
                 setTimeout(() => handleSpeciesSelection(this.value), 100);
             });
@@ -310,77 +318,100 @@
                 showSpeciesBadge(species);
             } else if (value.trim() === '') {
                 hideSpeciesBadges();
+                resetProtectionFields();
             }
         }
 
         // Autorellenar campos de protección
         function autofillSpeciesProtection(species) {
-            // Mapeo de campos: posibles key_name del campo -> propiedad de species
-            const fieldMappings = {
-                // Protección nacional BOE
-                'proteccion_nacional': species.boe_status,
-                'nivel_proteccion_nacional': species.boe_status,
-                'proteccion_boe': species.boe_status,
-                'estado_proteccion': species.boe_status,
-                
-                // Referencia legal
-                'referencia_legal': species.boe_law_ref,
-                'ley_referencia': species.boe_law_ref,
-                
-                // Protección autonómica
-                'proteccion_autonomica': Array.isArray(species.ccaa_status) ? species.ccaa_status.join(', ') : species.ccaa_status,
-                'proteccion_ccaa': Array.isArray(species.ccaa_status) ? species.ccaa_status.join(', ') : species.ccaa_status,
-                
-                // IUCN
-                'categoria_iucn': species.iucn_category,
-                'clasificacion_iucn': species.iucn_category,
-                'iucn': species.iucn_category,
-                
-                // CITES
-                'cites': species.cites_appendix,
-                'apendice_cites': species.cites_appendix,
-                
-                // Grupo taxonómico
-                'grupo_taxonomico': species.taxon_group,
-                'taxon': species.taxon_group,
+            // Campos de protección y su correspondencia con la API
+            const protectionFields = {
+                'boe_status': { value: species.boe_status, hasData: species.has_boe_data },
+                'ccaa_status': { value: species.ccaa_status, hasData: species.has_ccaa_data },
+                'iucn_category': { value: species.iucn_category, hasData: species.has_iucn_data },
             };
 
-            Object.entries(fieldMappings).forEach(([fieldKey, value]) => {
-                if (!value) return;
-                
+            let hasEditableFields = false;
+
+            Object.entries(protectionFields).forEach(([fieldKey, data]) => {
                 const input = document.getElementById(`field_${fieldKey}`);
                 if (!input) return;
 
-                // Si es un select, buscar la opción correcta
-                if (input.tagName === 'SELECT') {
-                    const options = Array.from(input.options);
-                    const match = options.find(opt => 
-                        opt.value.toLowerCase() === String(value).toLowerCase() ||
-                        opt.textContent.toLowerCase().includes(String(value).toLowerCase())
-                    );
-                    if (match) {
-                        input.value = match.value;
+                // Resetear estilos
+                input.classList.remove('bg-green-50', 'border-green-300', 'bg-yellow-50', 'border-yellow-300', 'bg-gray-100', 'cursor-not-allowed');
+                input.readOnly = false;
+                input.title = '';
+
+                if (data.hasData && data.value) {
+                    // TIENE DATOS: Autorellenar y hacer readonly
+                    if (input.tagName === 'SELECT') {
+                        const options = Array.from(input.options);
+                        const match = options.find(opt => 
+                            opt.value.toLowerCase() === String(data.value).toLowerCase() ||
+                            opt.textContent.toLowerCase().includes(String(data.value).toLowerCase())
+                        );
+                        if (match) input.value = match.value;
+                    } else {
+                        input.value = data.value;
                     }
+                    
+                    // Hacer readonly - Ya tiene datos de la BD
+                    input.readOnly = true;
+                    input.classList.add('bg-gray-100', 'cursor-not-allowed');
+                    input.title = 'Este campo ya tiene datos registrados en el sistema.';
+                    
+                    // Indicador visual temporal de autorellenado
+                    input.classList.add('bg-green-50', 'border-green-300');
+                    setTimeout(() => {
+                        input.classList.remove('bg-green-50', 'border-green-300');
+                        input.classList.add('bg-gray-100');
+                    }, 1500);
                 } else {
-                    input.value = value;
+                    // NO TIENE DATOS: Dejar editable para que el usuario lo complete
+                    input.value = '';
+                    input.classList.add('bg-yellow-50', 'border-yellow-300');
+                    input.placeholder = 'Introduce el valor (se guardará para futuras consultas)';
+                    hasEditableFields = true;
                 }
-                
-                // Añadir indicador visual de autorellenado
-                input.classList.add('bg-yellow-50', 'border-yellow-300');
-                setTimeout(() => {
-                    input.classList.remove('bg-yellow-50', 'border-yellow-300');
-                }, 2000);
             });
+
+            // Mostrar aviso de campos editables si hay alguno
+            const editableNotice = document.getElementById('editable-fields-notice');
+            if (editableNotice) {
+                if (hasEditableFields) {
+                    editableNotice.classList.remove('hidden');
+                } else {
+                    editableNotice.classList.add('hidden');
+                }
+            }
         }
 
-        // Mostrar badge de especie protegida/no protegida
+        function resetProtectionFields() {
+            const protectionFieldKeys = ['boe_status', 'ccaa_status', 'iucn_category'];
+            
+            protectionFieldKeys.forEach(fieldKey => {
+                const input = document.getElementById(`field_${fieldKey}`);
+                if (!input) return;
+                
+                input.value = '';
+                input.readOnly = false;
+                input.classList.remove('bg-green-50', 'border-green-300', 'bg-yellow-50', 'border-yellow-300', 'bg-gray-100', 'cursor-not-allowed');
+                input.title = '';
+                input.placeholder = '';
+            });
+
+            const editableNotice = document.getElementById('editable-fields-notice');
+            if (editableNotice) {
+                editableNotice.classList.add('hidden');
+            }
+        }
+
         function showSpeciesBadge(species) {
             const protectedBadge = document.getElementById('species-protection-badge');
             const notProtectedBadge = document.getElementById('species-not-protected-badge');
             const detailsDiv = document.getElementById('species-protection-details');
 
             if (species.is_protected) {
-                // Construir detalles de protección
                 let details = [];
                 
                 if (species.boe_status) {
@@ -393,7 +424,7 @@
                 if (species.cites_appendix) {
                     details.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">CITES: ${species.cites_appendix}</span>`);
                 }
-                if (species.ccaa_status && (Array.isArray(species.ccaa_status) ? species.ccaa_status.length > 0 : species.ccaa_status)) {
+                if (species.ccaa_status) {
                     const ccaaText = Array.isArray(species.ccaa_status) ? species.ccaa_status.join(', ') : species.ccaa_status;
                     details.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">CCAA: ${ccaaText}</span>`);
                 }
@@ -414,14 +445,12 @@
         function hideSpeciesBadges() {
             document.getElementById('species-protection-badge')?.classList.add('hidden');
             document.getElementById('species-not-protected-badge')?.classList.add('hidden');
+            document.getElementById('editable-fields-notice')?.classList.add('hidden');
             selectedSpecies = null;
         }
 
-        // =============================================
+       
         // VERIFICACIÓN DE COORDENADAS EN ÁREA PROTEGIDA
-        // =============================================
-        
-        // Buscar campos de coordenadas con varios posibles nombres
         const latInputNames = ['latitud', 'lat', 'coordenada_lat', 'latitude', 'coord_lat'];
         const longInputNames = ['longitud', 'long', 'coordenada_long', 'longitude', 'coord_long', 'lng'];
         
@@ -450,7 +479,6 @@
                     return;
                 }
 
-                // Validar rango de coordenadas
                 if (lat < -90 || lat > 90 || long < -180 || long > 180) {
                     hideProtectedAreaBadge();
                     return;
@@ -471,7 +499,6 @@
                     
                     if (data.in_protected_area && data.areas.length > 0) {
                         showProtectedAreaBadge(data.areas);
-                        autofillProtectedArea(data.areas[0]);
                     } else {
                         hideProtectedAreaBadge();
                     }
@@ -480,7 +507,6 @@
                 }
             };
 
-            // Verificar cuando cambian las coordenadas
             [latInput, longInput].forEach(input => {
                 input.addEventListener('change', () => {
                     clearTimeout(coordTimeout);
@@ -518,45 +544,6 @@
 
         function hideProtectedAreaBadge() {
             document.getElementById('protected-area-badge')?.classList.add('hidden');
-        }
-
-        function autofillProtectedArea(area) {
-            // Mapeo de campos de área protegida
-            const areaMappings = {
-                'area_protegida': area.name,
-                'nombre_area_protegida': area.name,
-                'espacio_protegido': area.name,
-                'tipo_proteccion': area.protection_type,
-                'tipo_espacio': area.protection_type,
-                'en_area_protegida': '1',
-                'dentro_espacio_protegido': '1',
-            };
-
-            Object.entries(areaMappings).forEach(([fieldKey, value]) => {
-                if (!value) return;
-                
-                const input = document.getElementById(`field_${fieldKey}`);
-                if (!input) return;
-
-                if (input.type === 'checkbox') {
-                    input.checked = value === '1' || value === true;
-                } else if (input.tagName === 'SELECT') {
-                    const options = Array.from(input.options);
-                    const match = options.find(opt => 
-                        opt.value.toLowerCase() === String(value).toLowerCase() ||
-                        opt.textContent.toLowerCase().includes(String(value).toLowerCase())
-                    );
-                    if (match) input.value = match.value;
-                } else {
-                    input.value = value;
-                }
-                
-                // Indicador visual
-                input.classList.add('bg-green-50', 'border-green-300');
-                setTimeout(() => {
-                    input.classList.remove('bg-green-50', 'border-green-300');
-                }, 2000);
-            });
         }
     </script>
     @endpush

@@ -40,8 +40,7 @@ class ReportDetailController extends Controller
         // Obtener la subcategoría del report
         $subcategory = $report->subcategory;
         
-        // ✅ CORREGIDO: Obtener SOLO los campos asignados a esta subcategoría
-        // La relación fields() ya filtra por subcategory_id a través de la tabla pivot
+        // Obtener SOLO los campos asignados a esta subcategoría
         $fields = $subcategory->fields()
             ->orderBy('subcategory_fields.order_index')
             ->get();
@@ -76,8 +75,6 @@ class ReportDetailController extends Controller
         $this->authorizeAccess($report);
 
         $subcategory = $report->subcategory;
-        
-        // ✅ CORREGIDO: Obtener solo los campos de la subcategoría
         $fields = $subcategory->fields()->get();
 
         // Validar campos requeridos
@@ -97,7 +94,6 @@ class ReportDetailController extends Controller
                 $fieldRules[] = 'nullable';
             }
 
-            // Añadir reglas según tipo
             if ($field->is_numeric) {
                 $fieldRules[] = 'numeric';
             }
@@ -119,30 +115,27 @@ class ReportDetailController extends Controller
             $orderIndex = 0;
             $speciesId = null;
             $protectedAreaId = null;
-
-            // ✅ Solo procesar campos que pertenecen a la subcategoría
             $validFieldKeys = $fields->pluck('key_name')->toArray();
 
+            // Primero buscar la especie si existe el campo
+            if (!empty($fieldValues['especie'])) {
+                $species = Species::where('scientific_name', $fieldValues['especie'])
+                    ->orWhere('common_name', $fieldValues['especie'])
+                    ->first();
+                $speciesId = $species?->id;
+            }
+
             foreach ($fieldValues as $fieldKey => $value) {
-                // Ignorar campos que no pertenecen a esta subcategoría
                 if (!in_array($fieldKey, $validFieldKeys)) {
                     continue;
                 }
                 
                 if (empty($value) && $value !== '0') {
-                    continue; // Saltar campos vacíos
+                    continue;
                 }
 
                 $field = $fields->firstWhere('key_name', $fieldKey);
                 if (!$field) continue;
-
-                // Si es campo de especie, buscar/crear referencia
-                if ($fieldKey === 'especie' && !empty($value)) {
-                    $species = Species::where('scientific_name', $value)
-                        ->orWhere('common_name', $value)
-                        ->first();
-                    $speciesId = $species?->id;
-                }
 
                 ReportDetail::create([
                     'report_id' => $report->id,
@@ -155,9 +148,13 @@ class ReportDetailController extends Controller
                 ]);
             }
 
+            // Actualizar datos de protección en la tabla Species cuando el usuario los introduce manualmente si no existían antes.
+            if ($speciesId) {
+                $this->updateSpeciesProtectionData($speciesId, $fieldValues);
+            }
+
             DB::commit();
 
-            // Verificar si quiere añadir más
             if ($request->has('add_another')) {
                 return redirect()->route('report-details.create', $report)
                     ->with('success', 'Detalles guardados. Puedes añadir más.');
@@ -190,7 +187,6 @@ class ReportDetailController extends Controller
                 ->with('error', 'Grupo de detalles no encontrado.');
         }
 
-        // ✅ Obtener los campos de la subcategoría para mostrar labels
         $subcategory = $report->subcategory;
         $fields = $subcategory->fields()->get()->keyBy('key_name');
 
@@ -215,16 +211,11 @@ class ReportDetailController extends Controller
         }
 
         $subcategory = $report->subcategory;
-        
-        // ✅ CORREGIDO: Obtener solo los campos de la subcategoría
         $fields = $subcategory->fields()
             ->orderBy('subcategory_fields.order_index')
             ->get();
 
-        // Crear mapa de valores existentes
         $existingValues = $details->pluck('value', 'field_key')->toArray();
-        
-        // Verificar si hay campo de especie
         $hasSpeciesField = $fields->contains('key_name', 'especie');
 
         return view('report-details.edit', compact(
@@ -246,8 +237,6 @@ class ReportDetailController extends Controller
         $this->authorizeAccess($report);
 
         $subcategory = $report->subcategory;
-        
-        // ✅ CORREGIDO: Obtener solo los campos de la subcategoría
         $fields = $subcategory->fields()->get();
         $fieldValues = $request->input('fields', []);
 
@@ -291,25 +280,23 @@ class ReportDetailController extends Controller
             $orderIndex = 0;
             $speciesId = null;
             $protectedAreaId = null;
-            
-            // ✅ Solo procesar campos que pertenecen a la subcategoría
             $validFieldKeys = $fields->pluck('key_name')->toArray();
 
+            // Primero buscar la especie
+            if (!empty($fieldValues['especie'])) {
+                $species = Species::where('scientific_name', $fieldValues['especie'])
+                    ->orWhere('common_name', $fieldValues['especie'])
+                    ->first();
+                $speciesId = $species?->id;
+            }
+
             foreach ($fieldValues as $fieldKey => $value) {
-                // Ignorar campos que no pertenecen a esta subcategoría
                 if (!in_array($fieldKey, $validFieldKeys)) {
                     continue;
                 }
                 
                 if (empty($value) && $value !== '0') {
                     continue;
-                }
-
-                if ($fieldKey === 'especie' && !empty($value)) {
-                    $species = Species::where('scientific_name', $value)
-                        ->orWhere('common_name', $value)
-                        ->first();
-                    $speciesId = $species?->id;
                 }
 
                 ReportDetail::create([
@@ -321,6 +308,11 @@ class ReportDetailController extends Controller
                     'protected_area_id' => $protectedAreaId,
                     'order_index' => $orderIndex++,
                 ]);
+            }
+
+            // Actualizar datos de protección en la tabla Species
+            if ($speciesId) {
+                $this->updateSpeciesProtectionData($speciesId, $fieldValues);
             }
 
             DB::commit();
@@ -348,6 +340,67 @@ class ReportDetailController extends Controller
 
         return redirect()->route('report-details.index', $report)
             ->with('success', 'Grupo de detalles eliminado.');
+    }
+
+    /**
+     * Actualizar datos de protección en la tabla Species
+     * Solo actualiza campos que están vacíos en la tabla Species
+     */
+    protected function updateSpeciesProtectionData(int $speciesId, array $fieldValues): void
+    {
+        $species = Species::find($speciesId);
+        if (!$species) return;
+
+        $updated = false;
+
+        // Mapeo de campos del formulario a campos de la tabla Species
+        $protectionFieldsMap = [
+            'boe_status' => 'boe_status',
+            'ccaa_status' => 'ccaa_status',
+            'iucn_category' => 'iucn_category',
+        ];
+
+        foreach ($protectionFieldsMap as $formField => $dbField) {
+            $newValue = $fieldValues[$formField] ?? null;
+            
+            // Solo actualizar si:
+            // 1. El campo en Species está vacío
+            // 2. El nuevo valor no está vacío
+            if (empty($species->{$dbField}) && !empty($newValue)) {
+                $species->{$dbField} = $newValue;
+                $updated = true;
+            }
+        }
+
+        if ($updated) {
+            // Recalcular is_protected basándose en los datos actualizados
+            $species->is_protected = $this->calculateIsProtected($species);
+            $species->save();
+        }
+    }
+
+    /**
+     * Calcular si una especie está protegida
+     */
+    protected function calculateIsProtected(Species $species): bool
+    {
+        // Está protegida si tiene estado BOE
+        if (!empty($species->boe_status)) {
+            return true;
+        }
+
+        // O si tiene CITES
+        if (!empty($species->cites_appendix)) {
+            return true;
+        }
+
+        // O si tiene categoría IUCN de riesgo
+        $riskCategories = ['CR', 'EN', 'VU', 'NT'];
+        if (!empty($species->iucn_category) && in_array($species->iucn_category, $riskCategories)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

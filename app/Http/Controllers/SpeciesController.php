@@ -10,6 +10,7 @@ class SpeciesController extends Controller
 {
     /**
      * Búsqueda de especies (para autocompletado AJAX)
+     * Accesible por todos los usuarios autenticados
      */
     public function search(Request $request): JsonResponse
     {
@@ -48,14 +49,18 @@ class SpeciesController extends Controller
                     'common_name' => $sp->common_name,
                     'taxon_group' => $sp->taxon_group,
                     'is_protected' => $sp->is_protected,
-                    // ✅ Añadir datos de protección completos
+                    // Datos de protección para autorellenar
                     'boe_status' => $sp->boe_status,
                     'boe_law_ref' => $sp->boe_law_ref,
                     'ccaa_status' => $sp->ccaa_status,
                     'iucn_category' => $sp->iucn_category,
                     'iucn_label' => Species::IUCN_CATEGORIES[$sp->iucn_category] ?? null,
                     'cites_appendix' => $sp->cites_appendix,
-                    'protection_summary' => $sp->protection_summary,
+                    // Indicadores de qué campos tienen datos (para saber cuáles son editables)
+                    'has_boe_data' => !empty($sp->boe_status),
+                    'has_ccaa_data' => !empty($sp->ccaa_status),
+                    'has_iucn_data' => !empty($sp->iucn_category),
+                    'protection_summary' => $sp->protection_summary ?? null,
                     'label' => $sp->scientific_name . ($sp->common_name ? " ({$sp->common_name})" : ''),
                 ];
             }),
@@ -64,7 +69,8 @@ class SpeciesController extends Controller
     }
 
     /**
-     * Obtener detalles completos de una especie
+     * Obtener detalles de una especie (respuesta JSON para AJAX)
+     * Accesible por todos los usuarios autenticados
      */
     public function show(Species $species): JsonResponse
     {
@@ -80,18 +86,21 @@ class SpeciesController extends Controller
                 'ccaa_status' => $species->ccaa_status,
                 'iucn_category' => $species->iucn_category,
                 'iucn_label' => Species::IUCN_CATEGORIES[$species->iucn_category] ?? null,
-                'iucn_assessment_year' => $species->iucn_assessment_year,
                 'cites_appendix' => $species->cites_appendix,
                 'is_protected' => $species->is_protected,
-                'highest_protection' => $species->highest_protection,
-                'protection_summary' => $species->protection_summary,
-                'synced_at' => $species->synced_at?->format('d/m/Y H:i'),
+                'has_boe_data' => !empty($species->boe_status),
+                'has_ccaa_data' => !empty($species->ccaa_status),
+                'has_iucn_data' => !empty($species->iucn_category),
             ],
         ]);
     }
 
+  
+    // MÉTODOS DE ADMINISTRACIÓN (solo admin)
+
     /**
      * Listado de especies (admin)
+     * Protegido por AdminMiddleware en web.php
      */
     public function index(Request $request)
     {
@@ -105,8 +114,18 @@ class SpeciesController extends Controller
             $query->byTaxonGroup($request->taxon_group);
         }
 
-        if ($request->filled('protected_only') && $request->protected_only) {
-            $query->protected();
+        if ($request->filled('is_protected')) {
+            $query->where('is_protected', $request->is_protected === 'true');
+        }
+
+        if ($request->filled('has_boe')) {
+            if ($request->has_boe === 'true') {
+                $query->whereNotNull('boe_status')->where('boe_status', '!=', '');
+            } else {
+                $query->where(function ($q) {
+                    $q->whereNull('boe_status')->orWhere('boe_status', '');
+                });
+            }
         }
 
         $species = $query->orderBy('scientific_name')->paginate(25);
@@ -114,50 +133,64 @@ class SpeciesController extends Controller
         return view('species.index', [
             'species' => $species,
             'taxonGroups' => Species::TAXON_GROUPS,
+            'iucnCategories' => Species::IUCN_CATEGORIES,
         ]);
     }
 
     /**
-     * Validar/verificar protección de una especie en una CCAA específica
+     * Ver detalles de una especie (admin - vista HTML)
+     * Protegido por AdminMiddleware en web.php
      */
-    public function checkProtection(Request $request): JsonResponse
+    public function adminShow(Species $species)
     {
-        $request->validate([
-            'species_id' => 'required|exists:species,id',
-            'ccaa' => 'nullable|string|max:100',
+        return view('species.show', [
+            'species' => $species,
+            'iucnCategories' => Species::IUCN_CATEGORIES,
+        ]);
+    }
+
+    /**
+     * Formulario de edición de especie (admin)
+     * Protegido por AdminMiddleware en web.php
+     */
+    public function edit(Species $species)
+    {
+        return view('species.edit', [
+            'species' => $species,
+            'taxonGroups' => Species::TAXON_GROUPS,
+            'boeStatuses' => Species::BOE_STATUSES ?? [],
+            'iucnCategories' => Species::IUCN_CATEGORIES,
+            'citesAppendices' => Species::CITES_APPENDICES ?? ['I', 'II', 'III'],
+        ]);
+    }
+
+    /**
+     * Actualizar especie (admin)
+     * Protegido por AdminMiddleware en web.php
+     */
+    public function update(Request $request, Species $species)
+    {
+        $validated = $request->validate([
+            'scientific_name' => 'required|string|max:255',
+            'common_name' => 'nullable|string|max:255',
+            'taxon_group' => 'nullable|string|max:100',
+            'boe_status' => 'nullable|string|max:255',
+            'boe_law_ref' => 'nullable|string|max:255',
+            'ccaa_status' => 'nullable|string|max:255',
+            'iucn_category' => 'nullable|string|max:10',
+            'cites_appendix' => 'nullable|string|max:50',
         ]);
 
-        $species = Species::find($request->species_id);
-        $ccaa = $request->input('ccaa');
+        $species->fill($validated);
 
-        $response = [
-            'species' => $species->scientific_name,
-            'is_protected' => $species->is_protected,
-            'national' => [
-                'protected' => !empty($species->boe_status),
-                'status' => $species->boe_status,
-                'law' => $species->boe_law_ref,
-            ],
-            'iucn' => [
-                'category' => $species->iucn_category,
-                'label' => Species::IUCN_CATEGORIES[$species->iucn_category] ?? null,
-            ],
-            'cites' => [
-                'appendix' => $species->cites_appendix,
-            ],
-        ];
+        // Recalcular is_protected
+        $species->is_protected = !empty($species->boe_status) 
+            || !empty($species->cites_appendix)
+            || in_array($species->iucn_category, ['CR', 'EN', 'VU', 'NT']);
 
-        if ($ccaa && $species->ccaa_status) {
-            $response['ccaa'] = [
-                'name' => $ccaa,
-                'protected' => isset($species->ccaa_status[$ccaa]),
-                'status' => $species->ccaa_status[$ccaa] ?? null,
-            ];
-        }
+        $species->save();
 
-        return response()->json([
-            'success' => true,
-            'data' => $response,
-        ]);
+        return redirect()->route('species.index')
+            ->with('success', 'Especie actualizada correctamente.');
     }
 }

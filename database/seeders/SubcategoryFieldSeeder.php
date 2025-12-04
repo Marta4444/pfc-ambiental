@@ -22,13 +22,15 @@ class SubcategoryFieldSeeder extends Seeder
         if ($cazaFurtiva) {
             $cazaFurtivaFields = [
                 'especie' => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
-                'cantidad' => ['is_required' => true, 'order_index' => 2, 'default_value' => '1'],
-                'madurez' => ['is_required' => false, 'order_index' => 3, 'default_value' => 'Desconocido'],
-                'estado_vital' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
-                'metodo_captura' => ['is_required' => true, 'order_index' => 5, 'default_value' => null],
-                'coste_reposicion' => ['is_required' => false, 'order_index' => 6, 'default_value' => null],
-                've' => ['is_required' => false, 'order_index' => 7, 'default_value' => null],
-                'coordenadas_afectacion' => ['is_required' => false, 'order_index' => 8, 'default_value' => null],
+                'boe_status' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
+                'ccaa_status' => ['is_required' => true, 'order_index' => 3, 'default_value' => null],
+                'iucn_category' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
+                'cantidad' => ['is_required' => true, 'order_index' => 5, 'default_value' => '1'],
+                'madurez' => ['is_required' => false, 'order_index' => 6, 'default_value' => 'Desconocido'],
+                'estado_vital' => ['is_required' => true, 'order_index' => 7, 'default_value' => null],
+                'coste_reposicion' => ['is_required' => false, 'order_index' => 8, 'default_value' => null],
+                've' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
+                
             ];
 
             foreach ($cazaFurtivaFields as $keyName => $pivotData) {
@@ -46,9 +48,14 @@ class SubcategoryFieldSeeder extends Seeder
         if ($comercio) {
             $comercioFields = [
                 'especie' => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
-                'cantidad' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
-                'estado_vital' => ['is_required' => false, 'order_index' => 3, 'default_value' => null],
-                'coste_reposicion' => ['is_required' => false, 'order_index' => 4, 'default_value' => null],
+                'boe_status' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
+                'ccaa_status' => ['is_required' => true, 'order_index' => 3, 'default_value' => null],
+                'iucn_category' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
+                'cantidad' => ['is_required' => true, 'order_index' => 5, 'default_value' => '1'],
+                'madurez' => ['is_required' => false, 'order_index' => 6, 'default_value' => 'Desconocido'],
+                'estado_vital' => ['is_required' => true, 'order_index' => 7, 'default_value' => null],
+                'coste_reposicion' => ['is_required' => false, 'order_index' => 8, 'default_value' => null],
+                've' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
             ];
 
             foreach ($comercioFields as $keyName => $pivotData) {
@@ -66,9 +73,14 @@ class SubcategoryFieldSeeder extends Seeder
         if ($eei) {
             $eeiFields = [
                 'especie' => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
-                'cantidad' => ['is_required' => false, 'order_index' => 2, 'default_value' => null],
-                'superficie_afectada' => ['is_required' => false, 'order_index' => 3, 'default_value' => null],
-                'coordenadas_afectacion' => ['is_required' => false, 'order_index' => 4, 'default_value' => null],
+                'boe_status' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
+                'ccaa_status' => ['is_required' => true, 'order_index' => 3, 'default_value' => null],
+                'iucn_category' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
+                'cantidad' => ['is_required' => true, 'order_index' => 5, 'default_value' => '1'],
+                'madurez' => ['is_required' => false, 'order_index' => 6, 'default_value' => 'Desconocido'],
+                'estado_vital' => ['is_required' => true, 'order_index' => 7, 'default_value' => null],
+                'coste_reposicion' => ['is_required' => false, 'order_index' => 8, 'default_value' => null],
+                've' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
             ];
 
             foreach ($eeiFields as $keyName => $pivotData) {
@@ -88,8 +100,7 @@ class SubcategoryFieldSeeder extends Seeder
                 'caudal' => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
                 'origen_agua' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
                 'volumen' => ['is_required' => false, 'order_index' => 3, 'default_value' => null],
-                'coordenadas_afectacion' => ['is_required' => false, 'order_index' => 4, 'default_value' => null],
-            ];
+                            ];
 
             foreach ($extraccionAguasFields as $keyName => $pivotData) {
                 if (isset($fields[$keyName])) {
