@@ -264,6 +264,38 @@
                 ->orderByDesc('total')
                 ->take(6)
                 ->get();
+
+            // ===== ESTADÍSTICAS DE COSTES =====
+            // Coste total global
+            $costeTotalGlobal = \App\Models\Report::sum('total_cost');
+            $vrTotalGlobal = \App\Models\Report::sum('vr_total');
+            $veTotalGlobal = \App\Models\Report::sum('ve_total');
+            $vsTotalGlobal = \App\Models\Report::sum('vs_total');
+            
+            // Casos con costes calculados
+            $casosConCostes = \App\Models\Report::where('total_cost', '>', 0)->count();
+            
+            // Costes por categoría
+            $costesPorCategoria = \App\Models\Report::selectRaw('category_id, SUM(total_cost) as total_cost, SUM(vr_total) as vr, SUM(ve_total) as ve, SUM(vs_total) as vs, COUNT(*) as casos')
+                ->where('total_cost', '>', 0)
+                ->groupBy('category_id')
+                ->with('category')
+                ->orderByDesc('total_cost')
+                ->get();
+
+            // Mis costes (casos asignados a mí)
+            $misCostesTotal = \App\Models\Report::where('assigned_to', $userId)->sum('total_cost');
+            $misCasosConCostes = \App\Models\Report::where('assigned_to', $userId)->where('total_cost', '>', 0)->count();
+            
+            // Top 5 casos con mayor coste
+            $topCasosCoste = \App\Models\Report::where('total_cost', '>', 0)
+                ->orderByDesc('total_cost')
+                ->with(['category', 'subcategory'])
+                ->take(5)
+                ->get();
+
+            // Coste promedio por caso
+            $costePromedio = $casosConCostes > 0 ? $costeTotalGlobal / $casosConCostes : 0;
             @endphp
 
             {{-- Mensaje de bienvenida --}}
@@ -376,6 +408,127 @@
                             @endif
                         </div>
                     </div>
+
+                    {{-- ===== NUEVA SECCIÓN: ESTADÍSTICAS DE COSTES ===== --}}
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-4 border-b border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Estadísticas de Costes
+                            </h4>
+                        </div>
+                        <div class="p-4">
+                            {{-- Resumen general de costes --}}
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 text-center">
+                                    <p class="text-xs text-emerald-600 font-medium uppercase">Coste Total</p>
+                                    <p class="text-xl font-bold text-emerald-700">{{ number_format($costeTotalGlobal, 2, ',', '.') }} €</p>
+                                    <p class="text-xs text-emerald-500 mt-1">{{ $casosConCostes }} casos valorados</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center">
+                                    <p class="text-xs text-blue-600 font-medium uppercase">VR Total</p>
+                                    <p class="text-lg font-bold text-blue-700">{{ number_format($vrTotalGlobal, 2, ',', '.') }} €</p>
+                                    <p class="text-xs text-blue-500 mt-1">Valor Reposición</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 text-center">
+                                    <p class="text-xs text-purple-600 font-medium uppercase">VE Total</p>
+                                    <p class="text-lg font-bold text-purple-700">{{ number_format($veTotalGlobal, 2, ',', '.') }} €</p>
+                                    <p class="text-xs text-purple-500 mt-1">Valor Ecológico</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 text-center">
+                                    <p class="text-xs text-orange-600 font-medium uppercase">VS Total</p>
+                                    <p class="text-lg font-bold text-orange-700">{{ number_format($vsTotalGlobal, 2, ',', '.') }} €</p>
+                                    <p class="text-xs text-orange-500 mt-1">Valor Social</p>
+                                </div>
+                            </div>
+
+                            {{-- Costes por categoría --}}
+                            @if($costesPorCategoria->isNotEmpty())
+                            <div class="mb-6">
+                                <h5 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    Costes por Categoría
+                                </h5>
+                                <div class="space-y-3">
+                                    @foreach($costesPorCategoria as $item)
+                                    @php
+                                        $porcentaje = $costeTotalGlobal > 0 ? ($item->total_cost / $costeTotalGlobal) * 100 : 0;
+                                    @endphp
+                                    <div class="bg-gray-50 rounded-lg p-3">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-sm font-medium text-gray-700">{{ $item->category->name ?? 'Sin categoría' }}</span>
+                                            <span class="text-sm font-bold text-gray-900">{{ number_format($item->total_cost, 2, ',', '.') }} €</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                            <div class="bg-emerald-500 h-2 rounded-full" style="width: {{ min($porcentaje, 100) }}%"></div>
+                                        </div>
+                                        <div class="flex justify-between text-xs text-gray-500">
+                                            <span>{{ $item->casos }} casos</span>
+                                            <div class="flex gap-3">
+                                                <span>VR: {{ number_format($item->vr, 0, ',', '.') }}€</span>
+                                                <span>VE: {{ number_format($item->ve, 0, ',', '.') }}€</span>
+                                                <span>VS: {{ number_format($item->vs, 0, ',', '.') }}€</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- Top casos con mayor coste --}}
+                            @if($topCasosCoste->isNotEmpty())
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                    </svg>
+                                    Top 5 Casos con Mayor Coste
+                                </h5>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Caso</th>
+                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                                                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Coste Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200">
+                                            @foreach($topCasosCoste as $index => $caso)
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-3 py-2">
+                                                    <a href="{{ route('reports.show', $caso) }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                                        {{ $caso->ip }}
+                                                    </a>
+                                                    <p class="text-xs text-gray-500 truncate max-w-xs">{{ $caso->title }}</p>
+                                                </td>
+                                                <td class="px-3 py-2 text-sm text-gray-600">
+                                                    {{ $caso->category->name ?? '-' }}
+                                                </td>
+                                                <td class="px-3 py-2 text-right">
+                                                    <span class="text-sm font-bold text-emerald-600">{{ number_format($caso->total_cost, 2, ',', '.') }} €</span>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            @else
+                            <div class="text-center py-6">
+                                <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <p class="mt-2 text-sm text-gray-500">No hay casos con costes calculados aún</p>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Columna derecha: Estadísticas --}}
@@ -415,6 +568,33 @@
                         </div>
                     </div>
 
+                    {{-- Mis costes (casos asignados) --}}
+                    <div class="bg-white rounded-lg shadow border-l-4 border-emerald-500">
+                        <div class="p-4 border-b border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                Mis Costes
+                            </h4>
+                        </div>
+                        <div class="p-4">
+                            <div class="text-center mb-4">
+                                <p class="text-2xl font-bold text-emerald-600">{{ number_format($misCostesTotal, 2, ',', '.') }} €</p>
+                                <p class="text-xs text-gray-500">Total en mis casos asignados</p>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">Casos valorados:</span>
+                                <span class="font-medium text-gray-800">{{ $misCasosConCostes }} de {{ $totalMisAsignados }}</span>
+                            </div>
+                            @if($totalMisAsignados > 0)
+                            <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: {{ ($misCasosConCostes / $totalMisAsignados) * 100 }}%"></div>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+
                     {{-- Estadísticas globales (compactado) --}}
                     <div class="bg-white rounded-lg shadow">
                         <div class="p-4 border-b border-gray-200">
@@ -449,10 +629,33 @@
                         </div>
                     </div>
 
+                    {{-- Resumen de costes global (compacto) --}}
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-4 border-b border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-800">Resumen Costes</h4>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">Coste Promedio/Caso</span>
+                                <span class="px-2 py-1 text-xs font-medium bg-emerald-100 text-emerald-800 rounded">{{ number_format($costePromedio, 2, ',', '.') }} €</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">Casos Valorados</span>
+                                <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">{{ $casosConCostes }} de {{ $totalCasos }}</span>
+                            </div>
+                            <div class="pt-3 border-t border-gray-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium text-gray-700">Coste Total Sistema</span>
+                                    <span class="text-sm font-bold text-emerald-600">{{ number_format($costeTotalGlobal, 2, ',', '.') }} €</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Casos por categoría --}}
                     <div class="bg-white rounded-lg shadow">
                         <div class="p-4 border-b border-gray-200">
-                            <h4 class="text-lg font-semibold text-gray-800">Por Categoría</h4>
+                            <h4 class="text-lg font-semibold text-gray-800">Casos Por Categoría</h4>
                         </div>
                         <div class="p-4 space-y-3">
                             @forelse($casosPorCategoria as $item)

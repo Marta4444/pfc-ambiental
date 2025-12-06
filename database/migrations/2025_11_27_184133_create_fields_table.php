@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('fields', function (Blueprint $table) {
             $table->id();
-            $table->string('key_name', 100)->unique(); // Nombre clave del campo (ej: 'tree_species', 'water_ph')
-            $table->string('label', 255); // Etiqueta legible del campo
+            $table->string('key_name', 100)->unique(); 
+            $table->string('label', 255); 
             $table->enum('type', [
                 'text', 
                 'textarea', 
@@ -27,12 +27,12 @@ return new class extends Migration
                 'file', 
                 'boolean'
             ])->default('text');
-            $table->string('units', 50)->nullable(); // Unidades (ej: 'kg', 'm²', '€', 'litros')
-            $table->json('options_json')->nullable(); // Opciones para select/multiselect/radio (JSON array)
-            $table->text('help_text')->nullable(); // Texto de ayuda/descripción
-            $table->string('placeholder', 255)->nullable(); // Placeholder para inputs
-            $table->boolean('is_numeric')->default(false); // Si el campo es numérico (para validaciones y cálculos)
-            $table->boolean('active')->default(true); // Si el campo está activo
+            $table->string('units', 50)->nullable(); 
+            $table->json('options_json')->nullable(); 
+            $table->text('help_text')->nullable(); 
+            $table->string('placeholder', 255)->nullable(); 
+            $table->boolean('is_numeric')->default(false); 
+            $table->boolean('active')->default(true); 
             $table->timestamps();
 
             // Índices

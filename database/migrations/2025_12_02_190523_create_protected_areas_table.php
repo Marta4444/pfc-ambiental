@@ -16,12 +16,12 @@ return new class extends Migration
             
             // Identificación
             $table->string('name', 255);
-            $table->string('wdpa_id', 50)->nullable()->unique(); // ID en Protected Planet
+            $table->string('wdpa_id', 50)->nullable()->unique(); 
             
             // Tipo de protección
-            $table->string('protection_type', 100); // Parque Nacional, ZEPA, LIC, ZEC, Reserva, etc.
-            $table->string('iucn_category', 20)->nullable(); // Ia, Ib, II, III, IV, V, VI
-            $table->string('designation', 255)->nullable(); // Designación oficial
+            $table->string('protection_type', 100); 
+            $table->string('iucn_category', 20)->nullable(); 
+            $table->string('designation', 255)->nullable(); 
             
             // Bounding box (para búsqueda rápida por coordenadas)
             $table->decimal('lat_min', 10, 7)->nullable();
@@ -31,18 +31,18 @@ return new class extends Migration
             
             // Geometría completa (para verificación precisa)
             // Usamos JSON porque MySQL geometry requiere extensiones especiales
-            $table->json('geometry')->nullable(); // GeoJSON del polígono
+            $table->json('geometry')->nullable(); 
             
             // Información adicional
             $table->text('description')->nullable();
-            $table->decimal('area_km2', 12, 4)->nullable(); // Superficie en km²
-            $table->string('region', 100)->nullable(); // Comunidad Autónoma
-            $table->year('established_year')->nullable(); // Año de declaración
+            $table->decimal('area_km2', 12, 4)->nullable(); 
+            $table->string('region', 100)->nullable(); 
+            $table->year('established_year')->nullable(); 
             
             // Fuente y sincronización
-            $table->string('source', 100)->default('WDPA'); // WDPA, MITECO, manual
+            $table->string('source', 100)->default('WDPA'); 
             $table->timestamp('synced_at')->nullable();
-            $table->json('source_json')->nullable(); // Datos raw de la API
+            $table->json('source_json')->nullable(); 
             
             // Estado
             $table->boolean('active')->default(true);

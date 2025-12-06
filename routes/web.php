@@ -10,6 +10,7 @@ use App\Http\Controllers\PetitionerController;
 use App\Http\Controllers\FieldController;
 use App\Http\Controllers\SpeciesController;
 use App\Http\Controllers\ProtectedAreaController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -74,6 +75,11 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
+    // Auditoría (solo admin)
+    Route::get('audit', [AuditLogController::class, 'index'])->name('audit.index');
+    Route::get('audit/{auditLog}', [AuditLogController::class, 'show'])->name('audit.show');
+    Route::get('audit/user/{user}', [AuditLogController::class, 'userActivity'])->name('audit.user-activity');
+
     Route::resource('categories', CategoryController::class)->except(['index', 'show']);
     Route::post('categories/{category}/toggle-active', [CategoryController::class, 'toggleActive'])->name('categories.toggleActive');
 

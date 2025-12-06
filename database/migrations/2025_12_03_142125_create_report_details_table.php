@@ -20,11 +20,7 @@ return new class extends Migration
             // Agrupación de campos relacionados (misma especie, mismo residuo, etc.)
             // Formato: "species_1", "species_2", "residue_1", "emission_1", etc.
             $table->string('group_key', 50);
-            
-            // Clave del campo (de la tabla subcategory_fields)
-            $table->string('field_key', 100);
-            
-            // Valor del campo (texto, número, fecha, etc. - todo como string)
+            $table->string('field_key', 100);   
             $table->text('value')->nullable();
             
             // Referencias opcionales a tablas relacionadas

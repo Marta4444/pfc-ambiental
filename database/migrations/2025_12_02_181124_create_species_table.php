@@ -17,29 +17,29 @@ return new class extends Migration
             // Identificación taxonómica
             $table->string('scientific_name', 255)->unique();
             $table->string('common_name', 255)->nullable();
-            $table->string('taxon_group', 100)->nullable(); // Mamíferos, Aves, Reptiles, Anfibios, Peces, Invertebrados, Flora
+            $table->string('taxon_group', 100)->nullable(); 
             
             // Protección BOE (nacional)
-            $table->string('boe_status', 100)->nullable(); // En peligro de extinción, Vulnerable, etc.
-            $table->string('boe_law_ref', 255)->nullable(); // Real Decreto 139/2011, Ley 42/2007, etc.
+            $table->string('boe_status', 100)->nullable(); 
+            $table->string('boe_law_ref', 255)->nullable(); 
             
             // Protección CCAA (autonómica)
-            $table->json('ccaa_status')->nullable(); // {"Andalucía": "En peligro", "Cataluña": "Vulnerable", ...}
+            $table->json('ccaa_status')->nullable(); 
             
             // IUCN Red List
-            $table->string('iucn_category', 20)->nullable(); // EX, EW, CR, EN, VU, NT, LC, DD, NE
+            $table->string('iucn_category', 20)->nullable(); 
             $table->year('iucn_assessment_year')->nullable();
             
             // CITES
-            $table->string('cites_appendix', 10)->nullable(); // I, II, III, null
+            $table->string('cites_appendix', 10)->nullable(); 
             
             // Metadatos de sincronización
-            $table->timestamp('synced_at')->nullable(); // Última sincronización con APIs
-            $table->json('source_json')->nullable(); // Datos raw de las APIs para debug/auditoría
+            $table->timestamp('synced_at')->nullable(); 
+            $table->json('source_json')->nullable(); 
             
             // Control de origen
-            $table->boolean('is_protected')->default(false); // True si tiene alguna protección
-            $table->boolean('manually_added')->default(false); // True si fue añadida manualmente
+            $table->boolean('is_protected')->default(false); 
+            $table->boolean('manually_added')->default(false); 
             
             $table->timestamps();
             

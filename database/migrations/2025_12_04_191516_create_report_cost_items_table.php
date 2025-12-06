@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('report_cost_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('report_id')->constrained()->onDelete('cascade');
-            $table->string('group_key', 100)->comment('Mismo valor que en report_details para agrupar');
-            $table->enum('cost_type', ['VR', 'VE', 'VS'])->comment('Tipo de coste: Valor Reposición, Ecológico, Social');
-            $table->string('concept_name', 255)->comment('Nombre del concepto (especie, residuo, etc.)');
-            $table->decimal('base_value', 12, 2)->default(0)->comment('Valor base antes de coeficientes');
-            $table->decimal('cr_value', 8, 4)->nullable()->comment('Coeficiente de rareza (copiado de report_details)');
-            $table->decimal('gi_value', 8, 4)->nullable()->comment('Índice de gravedad calculado');
+            $table->string('group_key', 100);
+            $table->enum('cost_type', ['VR', 'VE', 'VS']);
+            $table->string('concept_name', 255);
+            $table->decimal('base_value', 12, 2)->default(0);
+            $table->decimal('cr_value', 8, 4)->nullable();
+            $table->decimal('gi_value', 8, 4)->nullable();
             $table->decimal('total_cost', 14, 2)->default(0)->comment('Coste total tras aplicar coeficientes');
-            $table->json('coef_info_json')->nullable()->comment('Info de coeficientes aplicados');
+            $table->json('coef_info_json')->nullable();
             $table->timestamps();
 
             // Índices para búsquedas frecuentes

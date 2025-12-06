@@ -111,4 +111,12 @@ Para la sincronización automática se crea un cron, que se crea mediante el com
 - Solo puede haber 5 Administradores como máximo en la app. Al intentar crear el 6o, el usuario recibe un mensaje de error.
 - Si solo hay 1 Administrador en la app, este no puede borrar su cuenta. Debe haber siempre al menos 1 Admin.
 - Los niveles de protección, al editar los detalles de un caso, sólo los puede editar un Administrador.
-- Todos los usuarios pueden crear casos, y añadir detalles en el momento de la creación. Pero una vez creado el caso, sólo se pueden añadir detalles en los casos que el usuario tiene autoasignados.
+- Todos los usuarios pueden crear casos, y añadir detalles en el momento de la creación. Pero una vez creado el caso, sólo se pueden añadir detalles en los casos que el usuario tiene autoasignados o en los que es el autor.
+- Los detalles de los casos los pueden editar sólo los usuarios asignados a ese caso y el administrador.
+
+
+## Audit log -> registro de cambios
+El control de cambios se va a realizar con una tabla Audit_logs. Para auditar las acciones CRUD de manera más sencilla, se usa un Observer, no asociado a ningún modelo, y por tanto sirve para todos los modelos. El observer se crea con este comando en la terminal:
+php artisan make:observer AuditObserver
+
+Adicionalmente se crea un Helper (para ello se crea la carpeta Helpers en app, y dentro de esta carpeta, el archivo AuditHelper.php). Luego se registra el Observer en App\Providers\AppServiceProvider.
