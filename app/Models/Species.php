@@ -185,8 +185,10 @@ class Species extends Model
             ];
         }
 
-        if ($this->ccaa_status && count($this->ccaa_status) > 0) {
+        if ($this->ccaa_status && is_array($this->ccaa_status) && count($this->ccaa_status) > 0) {
             $summary['autonomica'] = $this->ccaa_status;
+        } elseif ($this->ccaa_status && is_string($this->ccaa_status)) {
+            $summary['autonomica'] = [$this->ccaa_status];
         }
 
         if ($this->iucn_category) {

@@ -203,6 +203,14 @@ class Report extends Model
     }
 
     /**
+     * Alias de hasCostsCalculated para mayor claridad
+     */
+    public function hasCosts(): bool
+    {
+        return $this->hasCostsCalculated();
+    }
+
+    /**
      * Obtener items de coste agrupados por group_key
      */
     public function getGroupedCostItems(): \Illuminate\Support\Collection

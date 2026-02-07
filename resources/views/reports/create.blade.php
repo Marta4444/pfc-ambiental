@@ -214,20 +214,10 @@
 
             {{-- Botones de acción --}}
             <div class="flex items-center justify-between pt-4 border-t">
-                <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-gray-200 rounded text-sm text-blue-700 hover:bg-gray-50">
+                <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-200">
                     Cancelar
                 </a>
-                <div class="flex gap-2">
-                    {{-- Guardar y añadir detalles --}}
-                    <button type="submit" name="add_details" value="1" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition ease-in-out duration-150">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Guardar y Añadir Detalles
-                    </button>
-                    {{-- Solo guardar --}}
-                    <x-primary-button>Crear Caso</x-primary-button>
-                </div>
+                <x-primary-button>Crear Caso</x-primary-button>
             </div>
         </form>
     </div>

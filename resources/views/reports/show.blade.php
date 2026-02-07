@@ -436,6 +436,78 @@
                     @endif
                 </div>
             </div>
+
+            {{-- Sección de Costes --}}
+            @if($report->hasDetails())
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            Cálculo de Costes
+                        </h3>
+
+                        <div class="flex gap-2">
+                            {{-- Botón Ver Costes (solo si hay costes calculados) --}}
+                            @if($report->hasCosts())
+                                <a href="{{ route('report-costs.index', $report) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition ease-in-out duration-150">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Ver Costes
+                                </a>
+                            @endif
+
+                            {{-- Botón Calcular Costes (visible para admin, creador o asignado) --}}
+                            @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id())
+                                <form action="{{ route('report-costs.calculate', $report) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-700 transition ease-in-out duration-150" onclick="return confirm('{{ $report->hasCosts() ? '¿Recalcular costes? Esto reemplazará los costes actuales.' : '¿Calcular costes para este caso?' }}')">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                        </svg>
+                                        {{ $report->hasCosts() ? 'Recalcular Costes' : 'Calcular Costes' }}
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if($report->hasCosts())
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-sm text-green-800">
+                                    <strong>Costes calculados.</strong> 
+                                    Coste total: <strong>{{ number_format($report->total_cost, 2, ',', '.') }} €</strong>
+                                </span>
+                            </div>
+                            <p class="text-xs text-green-600 mt-2">
+                                VR: {{ number_format($report->vr_total ?? 0, 2, ',', '.') }} € | 
+                                VE: {{ number_format($report->ve_total ?? 0, 2, ',', '.') }} € | 
+                                VS: {{ number_format($report->vs_total ?? 0, 2, ',', '.') }} €
+                            </p>
+                        </div>
+                    @else
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-sm text-yellow-800">
+                                    <strong>Costes pendientes de calcular.</strong> 
+                                    Pulsa "Calcular Costes" para generar la valoración económica.
+                                </span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 

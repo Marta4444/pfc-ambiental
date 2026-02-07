@@ -14,58 +14,78 @@ class SpeciesController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $request->validate([
-            'q' => 'required|string|min:2|max:255',
-            'limit' => 'integer|min:1|max:50',
-        ]);
+        try {
+            $request->validate([
+                'q' => 'required|string|min:2|max:255',
+                'limit' => 'integer|min:1|max:50',
+            ]);
 
-        $term = $request->input('q');
-        $limit = $request->input('limit', 10);
+            $term = $request->input('q');
+            $limit = $request->input('limit', 10);
 
-        $species = Species::search($term)
-            ->select([
-                'id',
-                'scientific_name',
-                'common_name',
-                'taxon_group',
-                'boe_status',
-                'boe_law_ref',
-                'ccaa_status',
-                'iucn_category',
-                'cites_appendix',
-                'is_protected',
-            ])
-            ->orderByRaw('is_protected DESC')
-            ->orderBy('scientific_name')
-            ->limit($limit)
-            ->get();
+            $species = Species::search($term)
+                ->select([
+                    'id',
+                    'scientific_name',
+                    'common_name',
+                    'taxon_group',
+                    'boe_status',
+                    'boe_law_ref',
+                    'ccaa_status',
+                    'iucn_category',
+                    'cites_appendix',
+                    'is_protected',
+                ])
+                ->orderByRaw('is_protected DESC')
+                ->orderBy('scientific_name')
+                ->limit($limit)
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $species->map(function ($sp) {
-                return [
-                    'id' => $sp->id,
-                    'scientific_name' => $sp->scientific_name,
-                    'common_name' => $sp->common_name,
-                    'taxon_group' => $sp->taxon_group,
-                    'is_protected' => $sp->is_protected,
-                    // Datos de protección para autorellenar
-                    'boe_status' => $sp->boe_status,
-                    'boe_law_ref' => $sp->boe_law_ref,
-                    'ccaa_status' => $sp->ccaa_status,
-                    'iucn_category' => $sp->iucn_category,
-                    'iucn_label' => Species::IUCN_CATEGORIES[$sp->iucn_category] ?? null,
-                    'cites_appendix' => $sp->cites_appendix,
-                    // Indicadores de qué campos tienen datos (para saber cuáles son editables)
-                    'has_boe_data' => !empty($sp->boe_status),
-                    'has_ccaa_data' => !empty($sp->ccaa_status),
-                    'has_iucn_data' => !empty($sp->iucn_category),
-                    'protection_summary' => $sp->protection_summary ?? null,
-                    'label' => $sp->scientific_name . ($sp->common_name ? " ({$sp->common_name})" : ''),
-                ];
-            }),
-            'count' => $species->count(),
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => $species->map(function ($sp) {
+                    // Manejar ccaa_status que puede ser string o array
+                    $ccaaStatus = $sp->ccaa_status;
+                    if (is_string($ccaaStatus) && !empty($ccaaStatus)) {
+                        $ccaaStatus = [$ccaaStatus];
+                    }
+
+                    return [
+                        'id' => $sp->id,
+                        'scientific_name' => $sp->scientific_name,
+                        'common_name' => $sp->common_name,
+                        'taxon_group' => $sp->taxon_group,
+                        'is_protected' => $sp->is_protected,
+                        // Datos de protección para autorellenar
+                        'boe_status' => $sp->boe_status,
+                        'boe_law_ref' => $sp->boe_law_ref,
+                        'ccaa_status' => $ccaaStatus,
+                        'iucn_category' => $sp->iucn_category,
+                        'iucn_label' => Species::IUCN_CATEGORIES[$sp->iucn_category] ?? null,
+                        'cites_appendix' => $sp->cites_appendix,
+                        // Indicadores de qué campos tienen datos (para saber cuáles son editables)
+                        'has_boe_data' => !empty($sp->boe_status),
+                        'has_ccaa_data' => !empty($sp->ccaa_status),
+                        'has_iucn_data' => !empty($sp->iucn_category),
+                        'label' => $sp->scientific_name . ($sp->common_name ? " ({$sp->common_name})" : ''),
+                    ];
+                }),
+                'count' => $species->count(),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Validación fallida',
+                'messages' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error en búsqueda de especies: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Error interno del servidor',
+                'message' => config('app.debug') ? $e->getMessage() : 'Ocurrió un error al buscar especies',
+            ], 500);
+        }
     }
 
     /**

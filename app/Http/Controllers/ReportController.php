@@ -226,12 +226,6 @@ class ReportController extends Controller
             'total_cost' => $validated['total_cost'] ?? null,
         ]);
 
-        // Verificar si el usuario quiere añadir detalles
-        if ($request->has('add_details')) {
-            return redirect()->route('report-details.create', $report)
-                ->with('success', 'Caso creado correctamente. Ahora puedes añadir los detalles.');
-        }
-
         return redirect()->route('reports.show', $report)->with('success', 'Caso creado correctamente.');
     }
 

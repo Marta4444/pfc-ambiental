@@ -296,7 +296,7 @@
                     } catch (error) {
                         console.error('Error buscando especies:', error);
                     }
-                }, 300);
+                }, 100);
             });
 
             speciesInput.addEventListener('change', function() {
