@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('group_key', 100);
             $table->enum('cost_type', ['VR', 'VE', 'VS']);
             $table->string('concept_name', 255);
-            $table->decimal('base_value', 12, 2)->default(0);
-            $table->decimal('cr_value', 8, 4)->nullable();
-            $table->decimal('gi_value', 8, 4)->nullable();
-            $table->decimal('total_cost', 14, 2)->default(0)->comment('Coste total tras aplicar coeficientes');
+            $table->decimal('base_value', 14, 2)->default(0);
+            $table->decimal('cr_value', 14, 2)->nullable()->comment('Coste de reposición');
+            $table->decimal('gi_value', 6, 4)->nullable()->comment('Índice de gravedad (0-1)');
+            $table->decimal('total_cost', 16, 2)->default(0)->comment('Coste total tras aplicar coeficientes');
             $table->json('coef_info_json')->nullable();
             $table->timestamps();
 

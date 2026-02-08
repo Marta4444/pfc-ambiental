@@ -25,12 +25,15 @@ class SubcategoryFieldSeeder extends Seeder
                 'boe_status' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
                 'ccaa_status' => ['is_required' => true, 'order_index' => 3, 'default_value' => null],
                 'iucn_category' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
-                'cantidad' => ['is_required' => true, 'order_index' => 5, 'default_value' => '1'],
-                'madurez' => ['is_required' => false, 'order_index' => 6, 'default_value' => 'Desconocido'],
-                'estado_vital' => ['is_required' => true, 'order_index' => 7, 'default_value' => null],
-                'coste_reposicion' => ['is_required' => false, 'order_index' => 8, 'default_value' => null],
-                've' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
-                
+                'cites_appendix' => ['is_required' => false, 'order_index' => 5, 'default_value' => null],
+                'cantidad' => ['is_required' => true, 'order_index' => 6, 'default_value' => '1'],
+                'madurez' => ['is_required' => false, 'order_index' => 7, 'default_value' => 'Desconocido'],
+                'estado_vital' => ['is_required' => true, 'order_index' => 8, 'default_value' => null],
+                'coste_reposicion' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
+                've' => ['is_required' => false, 'order_index' => 10, 'default_value' => null],
+                'nivel_trofico' => ['is_required' => true, 'order_index' => 11, 'default_value' => null],
+                'reproduccion_cautiverio' => ['is_required' => true, 'order_index' => 12, 'default_value' => null],
+                'ubicacion_proteccion' => ['is_required' => true, 'order_index' => 13, 'default_value' => null],
             ];
 
             foreach ($cazaFurtivaFields as $keyName => $pivotData) {
@@ -51,11 +54,15 @@ class SubcategoryFieldSeeder extends Seeder
                 'boe_status' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
                 'ccaa_status' => ['is_required' => true, 'order_index' => 3, 'default_value' => null],
                 'iucn_category' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
-                'cantidad' => ['is_required' => true, 'order_index' => 5, 'default_value' => '1'],
-                'madurez' => ['is_required' => false, 'order_index' => 6, 'default_value' => 'Desconocido'],
-                'estado_vital' => ['is_required' => true, 'order_index' => 7, 'default_value' => null],
-                'coste_reposicion' => ['is_required' => false, 'order_index' => 8, 'default_value' => null],
-                've' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
+                'cites_appendix' => ['is_required' => false, 'order_index' => 5, 'default_value' => null],
+                'cantidad' => ['is_required' => true, 'order_index' => 6, 'default_value' => '1'],
+                'madurez' => ['is_required' => false, 'order_index' => 7, 'default_value' => 'Desconocido'],
+                'estado_vital' => ['is_required' => true, 'order_index' => 8, 'default_value' => null],
+                'coste_reposicion' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
+                've' => ['is_required' => false, 'order_index' => 10, 'default_value' => null],
+                'nivel_trofico' => ['is_required' => true, 'order_index' => 11, 'default_value' => null],
+                'reproduccion_cautiverio' => ['is_required' => true, 'order_index' => 12, 'default_value' => null],
+                'ubicacion_proteccion' => ['is_required' => true, 'order_index' => 13, 'default_value' => null],
             ];
 
             foreach ($comercioFields as $keyName => $pivotData) {
@@ -76,16 +83,78 @@ class SubcategoryFieldSeeder extends Seeder
                 'boe_status' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
                 'ccaa_status' => ['is_required' => true, 'order_index' => 3, 'default_value' => null],
                 'iucn_category' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
-                'cantidad' => ['is_required' => true, 'order_index' => 5, 'default_value' => '1'],
-                'madurez' => ['is_required' => false, 'order_index' => 6, 'default_value' => 'Desconocido'],
-                'estado_vital' => ['is_required' => true, 'order_index' => 7, 'default_value' => null],
-                'coste_reposicion' => ['is_required' => false, 'order_index' => 8, 'default_value' => null],
-                've' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
+                'cites_appendix' => ['is_required' => false, 'order_index' => 5, 'default_value' => null],
+                'cantidad' => ['is_required' => true, 'order_index' => 6, 'default_value' => '1'],
+                'madurez' => ['is_required' => false, 'order_index' => 7, 'default_value' => 'Desconocido'],
+                'estado_vital' => ['is_required' => true, 'order_index' => 8, 'default_value' => null],
+                'coste_reposicion' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
+                've' => ['is_required' => false, 'order_index' => 10, 'default_value' => null],
+                'nivel_trofico' => ['is_required' => true, 'order_index' => 11, 'default_value' => null],
+                'reproduccion_cautiverio' => ['is_required' => true, 'order_index' => 12, 'default_value' => null],
+                'ubicacion_proteccion' => ['is_required' => true, 'order_index' => 13, 'default_value' => null],
             ];
 
             foreach ($eeiFields as $keyName => $pivotData) {
                 if (isset($fields[$keyName])) {
                     $eei->fields()->syncWithoutDetaching([
+                        $fields[$keyName] => $pivotData
+                    ]);
+                }
+            }
+        }
+
+        // BIODIVERSIDAD - Endemismos
+      
+        $endemismos = Subcategory::where('name', 'Endemismos')->first();
+        if ($endemismos) {
+            $endemismosFields = [
+                'especie' => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
+                'boe_status' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
+                'ccaa_status' => ['is_required' => true, 'order_index' => 3, 'default_value' => null],
+                'iucn_category' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
+                'cites_appendix' => ['is_required' => false, 'order_index' => 5, 'default_value' => null],
+                'cantidad' => ['is_required' => true, 'order_index' => 6, 'default_value' => '1'],
+                'madurez' => ['is_required' => false, 'order_index' => 7, 'default_value' => 'Desconocido'],
+                'estado_vital' => ['is_required' => true, 'order_index' => 8, 'default_value' => null],
+                'coste_reposicion' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
+                've' => ['is_required' => false, 'order_index' => 10, 'default_value' => null],
+                'nivel_trofico' => ['is_required' => true, 'order_index' => 11, 'default_value' => null],
+                'reproduccion_cautiverio' => ['is_required' => true, 'order_index' => 12, 'default_value' => null],
+                'ubicacion_proteccion' => ['is_required' => true, 'order_index' => 13, 'default_value' => null],
+            ];
+
+            foreach ($endemismosFields as $keyName => $pivotData) {
+                if (isset($fields[$keyName])) {
+                    $endemismos->fields()->syncWithoutDetaching([
+                        $fields[$keyName] => $pivotData
+                    ]);
+                }
+            }
+        }
+
+        // BIODIVERSIDAD - Especies cinegéticas
+      
+        $especiesCinegeticas = Subcategory::where('name', 'Especies cinegéticas')->first();
+        if ($especiesCinegeticas) {
+            $especiesCinegeticasFields = [
+                'especie' => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
+                'boe_status' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
+                'ccaa_status' => ['is_required' => true, 'order_index' => 3, 'default_value' => null],
+                'iucn_category' => ['is_required' => true, 'order_index' => 4, 'default_value' => null],
+                'cites_appendix' => ['is_required' => false, 'order_index' => 5, 'default_value' => null],
+                'cantidad' => ['is_required' => true, 'order_index' => 6, 'default_value' => '1'],
+                'madurez' => ['is_required' => false, 'order_index' => 7, 'default_value' => 'Desconocido'],
+                'estado_vital' => ['is_required' => true, 'order_index' => 8, 'default_value' => null],
+                'coste_reposicion' => ['is_required' => false, 'order_index' => 9, 'default_value' => null],
+                've' => ['is_required' => false, 'order_index' => 10, 'default_value' => null],
+                'nivel_trofico' => ['is_required' => true, 'order_index' => 11, 'default_value' => null],
+                'reproduccion_cautiverio' => ['is_required' => true, 'order_index' => 12, 'default_value' => null],
+                'ubicacion_proteccion' => ['is_required' => true, 'order_index' => 13, 'default_value' => null],
+            ];
+
+            foreach ($especiesCinegeticasFields as $keyName => $pivotData) {
+                if (isset($fields[$keyName])) {
+                    $especiesCinegeticas->fields()->syncWithoutDetaching([
                         $fields[$keyName] => $pivotData
                     ]);
                 }

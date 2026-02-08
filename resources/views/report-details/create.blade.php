@@ -329,6 +329,7 @@
                 'boe_status': { value: species.boe_status, hasData: species.has_boe_data },
                 'ccaa_status': { value: species.ccaa_status, hasData: species.has_ccaa_data },
                 'iucn_category': { value: species.iucn_category, hasData: species.has_iucn_data },
+                'cites_appendix': { value: species.cites_appendix, hasData: species.has_cites_data },
             };
 
             let hasEditableFields = false;
@@ -387,7 +388,7 @@
         }
 
         function resetProtectionFields() {
-            const protectionFieldKeys = ['boe_status', 'ccaa_status', 'iucn_category'];
+            const protectionFieldKeys = ['boe_status', 'ccaa_status', 'iucn_category', 'cites_appendix'];
             
             protectionFieldKeys.forEach(fieldKey => {
                 const input = document.getElementById(`field_${fieldKey}`);

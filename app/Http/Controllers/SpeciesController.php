@@ -67,6 +67,7 @@ class SpeciesController extends Controller
                         'has_boe_data' => !empty($sp->boe_status),
                         'has_ccaa_data' => !empty($sp->ccaa_status),
                         'has_iucn_data' => !empty($sp->iucn_category),
+                        'has_cites_data' => !empty($sp->cites_appendix),
                         'label' => $sp->scientific_name . ($sp->common_name ? " ({$sp->common_name})" : ''),
                     ];
                 }),

@@ -4,12 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\ReportCostItem;
+use App\Services\CostCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
 class ReportCostItemController extends Controller
 {
+    protected CostCalculationService $costService;
+
+    public function __construct(CostCalculationService $costService)
+    {
+        $this->costService = $costService;
+    }
+
     /**
      * Mostrar los costes de un report
      */
@@ -26,159 +34,55 @@ class ReportCostItemController extends Controller
         // Totales por tipo
         $totals = ReportCostItem::getTotalsByType($report->id);
 
-        return view('reports.costs.index', compact('report', 'groupedCosts', 'totals'));
+        // Obtener info de las fórmulas para la categoría
+        $formulaInfo = CostCalculationService::getFormulaInfo($report->category->name ?? '');
+
+        return view('reports.costs.index', compact('report', 'groupedCosts', 'totals', 'formulaInfo'));
     }
 
     /**
-     * Calcular costes para un report (llamará al servicio)
+     * Calcular costes para un report usando el servicio
      */
     public function calculate(Report $report): RedirectResponse
     {
+        \Log::info('Iniciando cálculo de costes', ['report_id' => $report->id]);
+
         // Verificar que hay detalles
         if (!$report->hasDetails()) {
-            return back()->with('error', 'El caso no tiene detalles. Añade detalles antes de calcular costes.');
+            \Log::warning('El report no tiene detalles', ['report_id' => $report->id]);
+            return redirect()->route('reports.show', $report)
+                ->with('error', 'El caso no tiene detalles. Añade detalles antes de calcular costes.');
         }
-
-        // TODO: Implementar CostCalculationService
-        // Por ahora, usamos una lógica básica similar al seeder
 
         try {
-            // Eliminar costes anteriores
-            $report->costItems()->delete();
+            // Usar el servicio de cálculo de costes
+            $results = $this->costService->calculateForReport($report);
 
-            // Obtener grupos de detalles
-            $groups = $report->details()
-                ->select('group_key')
-                ->distinct()
-                ->pluck('group_key');
+            \Log::info('Cálculo completado', [
+                'report_id' => $report->id,
+                'totals' => $results['totals'],
+                'errors' => $results['errors'] ?? [],
+            ]);
 
-            foreach ($groups as $groupKey) {
-                $this->calculateGroupCosts($report, $groupKey);
+            // Verificar si hubo errores
+            if (!empty($results['errors'])) {
+                $errorMsg = implode('. ', $results['errors']);
+                return redirect()->route('report-costs.index', $report)
+                    ->with('warning', "Costes calculados con advertencias: {$errorMsg}");
             }
 
-            // Actualizar totales del report
-            $report->updateTotalsFromCostItems();
-
-            return back()->with('success', 'Costes calculados correctamente.');
+            $total = number_format($results['totals']['total'], 2, ',', '.');
+            return redirect()->route('report-costs.index', $report)
+                ->with('success', "Costes calculados correctamente. Total: {$total} €");
         } catch (\Exception $e) {
-            return back()->with('error', 'Error al calcular costes: ' . $e->getMessage());
+            \Log::error('Error al calcular costes', [
+                'report_id' => $report->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->route('reports.show', $report)
+                ->with('error', 'Error al calcular costes: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Calcular costes para un grupo específico
-     */
-    protected function calculateGroupCosts(Report $report, string $groupKey): void
-    {
-        $groupDetails = $report->details()
-            ->where('group_key', $groupKey)
-            ->get()
-            ->keyBy('field_key');
-
-        $conceptName = $this->getConceptName($groupDetails, $groupKey);
-        $cantidad = (int) ($groupDetails->get('cantidad')?->value ?? 1);
-
-        // VR
-        $vrBase = (float) ($groupDetails->get('coste_reposicion')?->value ?? rand(500, 5000));
-        $crValue = $this->extractCrValue($groupDetails);
-        
-        ReportCostItem::create([
-            'report_id' => $report->id,
-            'group_key' => $groupKey,
-            'cost_type' => 'VR',
-            'concept_name' => $conceptName,
-            'base_value' => $vrBase,
-            'cr_value' => $crValue,
-            'gi_value' => null,
-            'total_cost' => $vrBase * $cantidad * ($crValue ?? 1),
-            'coef_info_json' => ['tipo' => 'VR', 'fecha' => now()->toDateTimeString()],
-        ]);
-
-        // VE
-        $veBase = (float) ($groupDetails->get('ve')?->value ?? rand(1000, 10000));
-        $giValue = $this->calculateGravityIndex($groupDetails, $report);
-        
-        ReportCostItem::create([
-            'report_id' => $report->id,
-            'group_key' => $groupKey,
-            'cost_type' => 'VE',
-            'concept_name' => $conceptName,
-            'base_value' => $veBase,
-            'cr_value' => $crValue,
-            'gi_value' => $giValue,
-            'total_cost' => $veBase * $cantidad * $giValue,
-            'coef_info_json' => ['tipo' => 'VE', 'fecha' => now()->toDateTimeString()],
-        ]);
-
-        // VS
-        $vsBase = rand(200, 2000);
-        
-        ReportCostItem::create([
-            'report_id' => $report->id,
-            'group_key' => $groupKey,
-            'cost_type' => 'VS',
-            'concept_name' => $conceptName,
-            'base_value' => $vsBase,
-            'cr_value' => null,
-            'gi_value' => null,
-            'total_cost' => $vsBase * $cantidad,
-            'coef_info_json' => ['tipo' => 'VS', 'fecha' => now()->toDateTimeString()],
-        ]);
-    }
-
-    /**
-     * Obtener nombre del concepto
-     */
-    protected function getConceptName($groupDetails, string $groupKey): string
-    {
-        if ($groupDetails->has('especie')) {
-            return $groupDetails->get('especie')->value;
-        }
-        if ($groupDetails->has('tipo_residuo')) {
-            return 'Residuo: ' . $groupDetails->get('tipo_residuo')->value;
-        }
-        return ucfirst(str_replace('_', ' ', $groupKey));
-    }
-
-    /**
-     * Extraer valor CR
-     */
-    protected function extractCrValue($groupDetails): ?float
-    {
-        if ($groupDetails->has('estado_vital')) {
-            $estado = strtolower($groupDetails->get('estado_vital')->value);
-            return match ($estado) {
-                'muerto' => 1.0,
-                'herido', 'crítico' => 0.7,
-                'vivo' => 0.3,
-                default => 0.5,
-            };
-        }
-        return 1.0;
-    }
-
-    /**
-     * Calcular índice de gravedad
-     */
-    protected function calculateGravityIndex($groupDetails, Report $report): float
-    {
-        $gi = match ($report->urgency) {
-            'urgente' => 1.5,
-            'alta' => 1.3,
-            default => 1.0,
-        };
-
-        if ($groupDetails->has('estado_vital')) {
-            $estado = strtolower($groupDetails->get('estado_vital')->value);
-            $gi *= match ($estado) {
-                'muerto' => 1.5,
-                'crítico' => 1.4,
-                'herido' => 1.2,
-                default => 1.0,
-            };
-        }
-
-        return round($gi, 4);
     }
 
     /**

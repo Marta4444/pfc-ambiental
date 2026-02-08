@@ -183,9 +183,14 @@
                                         </tr>
 
                                         @foreach($items as $item)
-                                            <tr class="hover:bg-gray-50">
+                                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="showCostDetail({{ json_encode($item) }})">
                                                 <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 pl-10">
-                                                    {{ $item->concept_name }}
+                                                    <div class="flex items-center">
+                                                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                        </svg>
+                                                        {{ $item->concept_name }}
+                                                    </div>
                                                 </td>
                                                 <td class="px-6 py-3 whitespace-nowrap">
                                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -287,25 +292,25 @@
                         {{-- VE --}}
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
-                                <span class="text-green-700 font-medium">Valor Ecológico (VE)</span>
+                                <span class="font-medium" style="color: #047857;">Valor Ecológico (VE)</span>
                                 <span class="text-gray-600">{{ $vePercent }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-4">
-                                <div class="bg-green-600 h-4 rounded-full" style="width: {{ $vePercent }}%"></div>
+                                <div class="h-4 rounded-full" style="width: {{ $vePercent }}%; background-color: #10b981;"></div>
                             </div>
-                            <p class="text-right text-sm font-semibold text-green-800">{{ number_format($totals['VE'], 2, ',', '.') }} €</p>
+                            <p class="text-right text-sm font-semibold" style="color: #065f46;">{{ number_format($totals['VE'], 2, ',', '.') }} €</p>
                         </div>
 
                         {{-- VS --}}
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
-                                <span class="text-yellow-700 font-medium">Valor Social (VS)</span>
+                                <span class="font-medium" style="color: #b45309;">Valor Social (VS)</span>
                                 <span class="text-gray-600">{{ $vsPercent }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-4">
-                                <div class="bg-yellow-500 h-4 rounded-full" style="width: {{ $vsPercent }}%"></div>
+                                <div class="h-4 rounded-full" style="width: {{ $vsPercent }}%; background-color: #f59e0b;"></div>
                             </div>
-                            <p class="text-right text-sm font-semibold text-yellow-800">{{ number_format($totals['VS'], 2, ',', '.') }} €</p>
+                            <p class="text-right text-sm font-semibold" style="color: #92400e;">{{ number_format($totals['VS'], 2, ',', '.') }} €</p>
                         </div>
                     </div>
                 </div>
@@ -313,4 +318,250 @@
             @endif
         </div>
     </div>
+
+    {{-- Modal de Detalle de Cálculo --}}
+    <div id="costDetailModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            {{-- Overlay --}}
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeCostDetail()"></div>
+
+            {{-- Modal --}}
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Detalle del Cálculo
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500" id="modal-subtitle"></p>
+                        </div>
+                        <button type="button" onclick="closeCostDetail()" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="mt-4" id="modal-content">
+                        {{-- Contenido dinámico --}}
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="closeCostDetail()" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCostDetail(item) {
+            const modal = document.getElementById('costDetailModal');
+            const subtitle = document.getElementById('modal-subtitle');
+            const content = document.getElementById('modal-content');
+            
+            const coefInfo = item.coef_info_json || {};
+            const costType = item.cost_type;
+            
+            subtitle.textContent = `${item.concept_name} - ${costType}`;
+            
+            let html = '';
+            
+            // Fórmula principal
+            if (coefInfo.formula) {
+                html += `
+                    <div class="mb-4 p-3 bg-gray-100 rounded-lg">
+                        <p class="text-sm font-mono font-semibold text-gray-800">${coefInfo.formula}</p>
+                    </div>
+                `;
+            }
+            
+            // Detalle según tipo de coste
+            if (costType === 'VR') {
+                html += renderVRDetail(coefInfo, item);
+            } else if (costType === 'VE') {
+                html += renderVEDetail(coefInfo, item);
+            } else if (costType === 'VS') {
+                html += renderVSDetail(coefInfo, item);
+            }
+            
+            // Resultado final
+            html += `
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <div class="flex justify-between items-center text-lg font-bold">
+                        <span class="text-gray-700">Total ${costType}:</span>
+                        <span class="text-green-700">${formatMoney(item.total_cost)} €</span>
+                    </div>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+            modal.classList.remove('hidden');
+        }
+        
+        function renderVRDetail(coef, item) {
+            return `
+                <div class="space-y-3">
+                    <h4 class="font-semibold text-gray-700 mb-2">Componentes del cálculo:</h4>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <p class="text-xs text-blue-600 font-medium">CB (Coste Base)</p>
+                            <p class="text-lg font-bold text-blue-800">${formatMoney(coef.CB || 300)} €</p>
+                        </div>
+                        
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-purple-600 font-medium">L (Situación Legal - IUCN)</p>
+                            <p class="text-lg font-bold text-purple-800">×${coef.L || 1}</p>
+                            <p class="text-xs text-purple-500">${coef.L_source || ''}</p>
+                        </div>
+                        
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <p class="text-xs text-amber-600 font-medium">N (CITES)</p>
+                            <p class="text-lg font-bold text-amber-800">×${coef.N || 1}</p>
+                            <p class="text-xs text-amber-500">${coef.N_source || ''}</p>
+                        </div>
+                        
+                        <div class="p-3 bg-green-50 rounded-lg">
+                            <p class="text-xs text-green-600 font-medium">B (Madurez)</p>
+                            <p class="text-lg font-bold text-green-800">×${coef.B || 1}</p>
+                            <p class="text-xs text-green-500">${coef.B_source || ''}</p>
+                        </div>
+                        
+                        <div class="p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs text-indigo-600 font-medium">q (Cantidad)</p>
+                            <p class="text-lg font-bold text-indigo-800">${coef.q || 1} uds.</p>
+                        </div>
+                        
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <p class="text-xs text-red-600 font-medium">CR (Coste Reposición)</p>
+                            <p class="text-lg font-bold text-red-800">+${formatMoney(coef.CR || 0)} €</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                        <p class="text-sm text-gray-600">
+                            <strong>Cálculo:</strong> (${coef.CB || 300} × ${coef.L || 1} × ${coef.N || 1} × ${coef.B || 1}) × ${coef.q || 1} + ${coef.CR || 0}
+                        </p>
+                        <p class="text-sm text-gray-600 mt-1">
+                            = ${formatMoney(item.base_value)} × ${coef.q || 1} + ${formatMoney(coef.CR || 0)} = <strong>${formatMoney(item.total_cost)} €</strong>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderVEDetail(coef, item) {
+            return `
+                <div class="space-y-3">
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <p class="text-sm text-green-600 font-medium">Valor introducido manualmente</p>
+                        <p class="text-2xl font-bold text-green-800">${formatMoney(coef.valor_manual || item.total_cost)} €</p>
+                    </div>
+                    <p class="text-sm text-gray-500 italic">
+                        El Valor Ecológico (VE) se introduce manualmente basándose en tasaciones específicas o informes periciales.
+                    </p>
+                </div>
+            `;
+        }
+        
+        function renderVSDetail(coef, item) {
+            const igComponents = coef.IG_components || {};
+            
+            let componentsHtml = '';
+            
+            if (igComponents.ubicacion) {
+                componentsHtml += `
+                    <div class="p-3 bg-indigo-50 rounded-lg">
+                        <p class="text-xs text-indigo-600 font-medium">Ubicación</p>
+                        <p class="text-sm text-indigo-800 font-semibold">${igComponents.ubicacion.valor || '-'}</p>
+                        <div class="flex justify-between text-xs text-indigo-500 mt-1">
+                            <span>Puntos: ${igComponents.ubicacion.puntuacion || 0}</span>
+                            <span>Peso: ${((igComponents.ubicacion.ponderacion || 0) * 100)}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            if (igComponents.nivel_trofico) {
+                componentsHtml += `
+                    <div class="p-3 bg-purple-50 rounded-lg">
+                        <p class="text-xs text-purple-600 font-medium">Nivel Trófico</p>
+                        <p class="text-sm text-purple-800 font-semibold">${igComponents.nivel_trofico.valor || '-'}</p>
+                        <div class="flex justify-between text-xs text-purple-500 mt-1">
+                            <span>Puntos: ${igComponents.nivel_trofico.puntuacion || 0}</span>
+                            <span>Peso: ${((igComponents.nivel_trofico.ponderacion || 0) * 100)}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            if (igComponents.reproduccion_cautiverio) {
+                componentsHtml += `
+                    <div class="p-3 bg-pink-50 rounded-lg">
+                        <p class="text-xs text-pink-600 font-medium">Reproducción en Cautiverio</p>
+                        <p class="text-sm text-pink-800 font-semibold">${igComponents.reproduccion_cautiverio.valor || '-'}</p>
+                        <div class="flex justify-between text-xs text-pink-500 mt-1">
+                            <span>Puntos: ${igComponents.reproduccion_cautiverio.puntuacion || 0}</span>
+                            <span>Peso: ${((igComponents.reproduccion_cautiverio.ponderacion || 0) * 100)}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            if (igComponents.estado_vital) {
+                componentsHtml += `
+                    <div class="p-3 bg-red-50 rounded-lg">
+                        <p class="text-xs text-red-600 font-medium">Estado Vital</p>
+                        <p class="text-sm text-red-800 font-semibold">${igComponents.estado_vital.valor || '-'}</p>
+                        <div class="flex justify-between text-xs text-red-500 mt-1">
+                            <span>Puntos: ${igComponents.estado_vital.puntuacion || 0}</span>
+                            <span>Peso: ${((igComponents.estado_vital.ponderacion || 0) * 100)}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="space-y-3">
+                    <h4 class="font-semibold text-gray-700 mb-2">Índice de Gravedad (IG):</h4>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        ${componentsHtml}
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-yellow-700">IG Calculado:</span>
+                            <span class="text-xl font-bold text-yellow-800">${(coef.IG || item.gi_value || 0).toFixed(4)}</span>
+                        </div>
+                        <p class="text-xs text-yellow-600 mt-1">Cada dimensión pondera un 25% del total</p>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-yellow-500">
+                        <p class="text-sm text-gray-600">
+                            <strong>Cálculo:</strong> VR × IG = ${formatMoney(coef.VR || item.base_value)} × ${(coef.IG || item.gi_value || 0).toFixed(4)}
+                        </p>
+                        <p class="text-sm text-gray-600 mt-1">
+                            = <strong>${formatMoney(item.total_cost)} €</strong>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function formatMoney(value) {
+            return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value || 0);
+        }
+        
+        function closeCostDetail() {
+            document.getElementById('costDetailModal').classList.add('hidden');
+        }
+        
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCostDetail();
+            }
+        });
+    </script>
 </x-app-layout>
