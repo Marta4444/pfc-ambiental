@@ -325,14 +325,14 @@
 
                         @if($report->ve_total)
                         <div class="bg-green-50 p-4 rounded-lg">
-                            <label class="block text-xs font-medium text-green-700 uppercase tracking-wider">Valor Ecológico (VE)</label>
+                            <label class="block text-xs font-medium text-green-700 uppercase tracking-wider">Valor del recurso extraido (VE)</label>
                             <p class="mt-2 text-2xl font-bold text-green-900">{{ number_format($report->ve_total, 2, ',', '.') }} €</p>
                         </div>
                         @endif
 
                         @if($report->vs_total)
                         <div class="bg-yellow-50 p-4 rounded-lg">
-                            <label class="block text-xs font-medium text-yellow-700 uppercase tracking-wider">Valor de Servicios (VS)</label>
+                            <label class="block text-xs font-medium text-yellow-700 uppercase tracking-wider">Valor ecosistémico (VS)</label>
                             <p class="mt-2 text-2xl font-bold text-yellow-900">{{ number_format($report->vs_total, 2, ',', '.') }} €</p>
                         </div>
                         @endif

@@ -466,7 +466,7 @@ class CostCalculationService
             // VE: valor manual
             $veTotal = $veManual;
 
-            // VS: 20% del VR como valor social básico
+            // VS: 20% del VR como valor ecosistémico básico
             $vsTotal = $vrTotal * 0.2;
 
             ReportCostItem::create([
@@ -540,11 +540,11 @@ class CostCalculationService
                 ],
                 'VE' => [
                     'formula' => 'VE = valor introducido manualmente',
-                    'descripcion' => 'Valor Ecológico',
+                    'descripcion' => 'Valor del recurso extraido',
                 ],
                 'VS' => [
                     'formula' => 'VS = VR × IG',
-                    'descripcion' => 'Valor Social',
+                    'descripcion' => 'Valor ecosistémico',
                     'variables' => [
                         'VR' => 'Valor de Reposición calculado',
                         'IG' => 'Índice de Gravedad (suma ponderada de 4 dimensiones)',

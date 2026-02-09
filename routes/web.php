@@ -11,6 +11,7 @@ use App\Http\Controllers\FieldController;
 use App\Http\Controllers\SpeciesController;
 use App\Http\Controllers\ProtectedAreaController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\SpeciesAdminController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -64,6 +65,7 @@ Route::middleware('auth')->group(function () {
 
     // Rutas de Species (búsqueda para todos los usuarios autenticados)
     Route::get('species/search', [SpeciesController::class, 'search'])->name('species.search');
+    Route::post('species/find-or-create', [SpeciesController::class, 'findOrCreate'])->name('species.findOrCreate');
     Route::get('species/{species}', [SpeciesController::class, 'show'])->name('species.show');
     Route::post('species/check-protection', [SpeciesController::class, 'checkProtection'])->name('species.checkProtection');
 
@@ -106,6 +108,22 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('species/{species}/show', [SpeciesController::class, 'adminShow'])->name('species.admin.show');
     Route::get('species/{species}/edit', [SpeciesController::class, 'edit'])->name('species.edit');
     Route::put('species/{species}', [SpeciesController::class, 'update'])->name('species.update');
+
+    // Administración de especies con sincronización API
+    Route::prefix('admin/species')->name('admin.species.')->group(function () {
+        Route::get('/', [SpeciesAdminController::class, 'index'])->name('index');
+        Route::get('/create', [SpeciesAdminController::class, 'create'])->name('create');
+        Route::post('/', [SpeciesAdminController::class, 'store'])->name('store');
+        Route::get('/{species}/edit', [SpeciesAdminController::class, 'edit'])->name('edit');
+        Route::put('/{species}', [SpeciesAdminController::class, 'update'])->name('update');
+        Route::delete('/{species}', [SpeciesAdminController::class, 'destroy'])->name('destroy');
+        Route::post('/{species}/sync', [SpeciesAdminController::class, 'sync'])->name('sync');
+        Route::post('/sync-all', [SpeciesAdminController::class, 'syncAll'])->name('syncAll');
+        Route::get('/search-api', [SpeciesAdminController::class, 'search'])->name('search');
+        Route::post('/import-spanish', [SpeciesAdminController::class, 'importSpanish'])->name('importSpanish');
+        Route::get('/logs', [SpeciesAdminController::class, 'logs'])->name('logs');
+        Route::get('/export', [SpeciesAdminController::class, 'export'])->name('export');
+    });
 
     // Gestión de áreas protegidas (admin) - CRUD completo
     Route::get('protected-areas', [ProtectedAreaController::class, 'index'])

@@ -129,7 +129,7 @@ class ReportCostItemSeeder extends Seeder
             $itemsCreated++;
         }
 
-        // === VE (Valor Ecológico) ===
+        // === VE (Valor del recurso extraido) ===
         $veBase = $this->calculateVeBase($groupDetails, $groupKey);
         if ($veBase > 0) {
             $veCoefs = $this->getCoefficientsInfo('VE', $groupDetails);
@@ -149,7 +149,7 @@ class ReportCostItemSeeder extends Seeder
             $itemsCreated++;
         }
 
-        // === VS (Valor Social) ===
+        // === VS (Valor ecosistémico) ===
         $vsBase = $this->calculateVsBase($groupDetails, $groupKey);
         if ($vsBase > 0) {
             $vsCoefs = $this->getCoefficientsInfo('VS', $groupDetails);

@@ -435,12 +435,12 @@
                                 <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 text-center">
                                     <p class="text-xs text-purple-600 font-medium uppercase">VE Total</p>
                                     <p class="text-lg font-bold text-purple-700">{{ number_format($veTotalGlobal, 2, ',', '.') }} €</p>
-                                    <p class="text-xs text-purple-500 mt-1">Valor Ecológico</p>
+                                    <p class="text-xs text-purple-500 mt-1">Valor recurso extraido</p>
                                 </div>
                                 <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 text-center">
                                     <p class="text-xs text-orange-600 font-medium uppercase">VS Total</p>
                                     <p class="text-lg font-bold text-orange-700">{{ number_format($vsTotalGlobal, 2, ',', '.') }} €</p>
-                                    <p class="text-xs text-orange-500 mt-1">Valor Social</p>
+                                    <p class="text-xs text-orange-500 mt-1">Valor ecosistémico</p>
                                 </div>
                             </div>
 

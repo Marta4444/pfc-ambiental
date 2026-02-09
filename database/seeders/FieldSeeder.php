@@ -114,11 +114,11 @@ class FieldSeeder extends Seeder
             ],
             [
                 'key_name' => 've',
-                'label' => 'Valor Ecológico (VE)',
+                'label' => 'Valor del recurso extraido (VE)',
                 'type' => 'decimal',
                 'units' => '€',
                 'options_json' => null,
-                'help_text' => 'Valor ecológico del daño calculado',
+                'help_text' => 'Valor del recurso extraido calculado',
                 'placeholder' => 'Ej: 2500.00',
                 'is_numeric' => true,
                 'active' => true,

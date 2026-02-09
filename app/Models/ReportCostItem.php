@@ -14,13 +14,13 @@ class ReportCostItem extends Model
      * Tipos de coste disponibles
      */
     public const COST_TYPE_VR = 'VR'; // Valor de Reposición
-    public const COST_TYPE_VE = 'VE'; // Valor Ecológico
-    public const COST_TYPE_VS = 'VS'; // Valor Social
+    public const COST_TYPE_VE = 'VE'; // Valor del recurso extraido
+    public const COST_TYPE_VS = 'VS'; // Valor ecosistémico
 
     public const COST_TYPES = [
         self::COST_TYPE_VR => 'Valor de Reposición',
-        self::COST_TYPE_VE => 'Valor Ecológico',
-        self::COST_TYPE_VS => 'Valor Social',
+        self::COST_TYPE_VE => 'Valor del recurso extraido',
+        self::COST_TYPE_VS => 'Valor ecosistémico',
     ];
 
     protected $fillable = [

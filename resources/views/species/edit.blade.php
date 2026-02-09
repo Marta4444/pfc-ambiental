@@ -133,11 +133,16 @@
                             <label for="ccaa_status" class="block text-sm font-medium text-gray-700">
                                 Estado en Comunidades Autónomas
                             </label>
-                            <input type="text" name="ccaa_status" id="ccaa_status" 
-                                value="{{ old('ccaa_status', is_array($species->ccaa_status) ? implode(', ', $species->ccaa_status) : $species->ccaa_status) }}"
-                                placeholder="Ej: En peligro (Andalucía), Vulnerable (Castilla y León)"
+                            <select name="ccaa_status" id="ccaa_status" 
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <p class="mt-1 text-xs text-gray-500">Separe múltiples estados con comas</p>
+                                <option value="">Sin protección autonómica</option>
+                                @foreach($ccaaStatuses as $key => $label)
+                                    <option value="{{ $key }}" {{ old('ccaa_status', $species->ccaa_status) == $key ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Categoría de protección más restrictiva aplicada por alguna comunidad autónoma</p>
                             @error('ccaa_status')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror

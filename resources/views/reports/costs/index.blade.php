@@ -29,75 +29,32 @@
                 </div>
             @endif
 
-            {{-- Panel de Resumen de Totales --}}
+            {{-- Panel de Resumen de Totales - Cards en fila --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        Resumen de Costes - {{ $report->title }}
-                    </h3>
-
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="p-4">
+                    <div class="flex flex-wrap gap-4">
                         {{-- VR Total --}}
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-medium text-blue-700 uppercase tracking-wider">Valor de Reposición (VR)</p>
-                                    <p class="mt-2 text-2xl font-bold text-blue-900">{{ number_format($totals['VR'], 2, ',', '.') }} €</p>
-                                </div>
-                                <div class="p-3 bg-blue-100 rounded-full">
-                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                    </svg>
-                                </div>
-                            </div>
+                        <div class="flex-1 min-w-[140px] bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                            <p class="text-xs font-medium text-blue-600 uppercase">VR</p>
+                            <p class="text-xl font-bold text-blue-900 mt-1">{{ number_format($totals['VR'], 2, ',', '.') }} €</p>
                         </div>
 
                         {{-- VE Total --}}
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-medium text-green-700 uppercase tracking-wider">Valor Ecológico (VE)</p>
-                                    <p class="mt-2 text-2xl font-bold text-green-900">{{ number_format($totals['VE'], 2, ',', '.') }} €</p>
-                                </div>
-                                <div class="p-3 bg-green-100 rounded-full">
-                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                            </div>
+                        <div class="flex-1 min-w-[140px] bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                            <p class="text-xs font-medium text-green-600 uppercase">VE</p>
+                            <p class="text-xl font-bold text-green-900 mt-1">{{ number_format($totals['VE'], 2, ',', '.') }} €</p>
                         </div>
 
                         {{-- VS Total --}}
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-medium text-yellow-700 uppercase tracking-wider">Valor Social (VS)</p>
-                                    <p class="mt-2 text-2xl font-bold text-yellow-900">{{ number_format($totals['VS'], 2, ',', '.') }} €</p>
-                                </div>
-                                <div class="p-3 bg-yellow-100 rounded-full">
-                                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                    </svg>
-                                </div>
-                            </div>
+                        <div class="flex-1 min-w-[140px] bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                            <p class="text-xs font-medium text-yellow-600 uppercase">VS</p>
+                            <p class="text-xl font-bold text-yellow-900 mt-1">{{ number_format($totals['VS'], 2, ',', '.') }} €</p>
                         </div>
 
                         {{-- Total General --}}
-                        <div class="bg-red-50 border-2 border-red-300 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-xs font-medium text-red-700 uppercase tracking-wider">Coste Total</p>
-                                    <p class="mt-2 text-2xl font-bold text-red-900">{{ number_format($totals['total'], 2, ',', '.') }} €</p>
-                                </div>
-                                <div class="p-3 bg-red-100 rounded-full">
-                                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                            </div>
+                        <div class="flex-1 min-w-[140px] bg-red-50 border-2 border-red-300 rounded-lg p-4 text-center">
+                            <p class="text-xs font-medium text-red-600 uppercase">Total</p>
+                            <p class="text-xl font-bold text-red-900 mt-1">{{ number_format($totals['total'], 2, ',', '.') }} €</p>
                         </div>
                     </div>
                 </div>
@@ -171,7 +128,8 @@
                                     @foreach($groupedCosts as $groupKey => $items)
                                         @php
                                             $groupTotal = $items->sum('total_cost');
-                                            $groupLabel = ucfirst(str_replace('_', ' ', $groupKey));
+                                            // Obtener el nombre de la especie del primer item del grupo
+                                            $groupLabel = $items->first()->concept_name ?? ucfirst(str_replace('_', ' ', $groupKey));
                                         @endphp
                                         
                                         {{-- Fila de encabezado del grupo --}}
@@ -239,7 +197,7 @@
                                 </div>
                                 <div>
                                     <strong>GI (Índice de Gravedad):</strong> 
-                                    Multiplicador basado en la urgencia del caso y el estado del recurso afectado.
+                                    Multiplicador basado en el estado del recurso afectado.
                                 </div>
                             </div>
                         </div>
@@ -292,7 +250,7 @@
                         {{-- VE --}}
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
-                                <span class="font-medium" style="color: #047857;">Valor Ecológico (VE)</span>
+                                <span class="font-medium" style="color: #047857;">Valor del recurso extraido (VE)</span>
                                 <span class="text-gray-600">{{ $vePercent }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-4">
@@ -304,7 +262,7 @@
                         {{-- VS --}}
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
-                                <span class="font-medium" style="color: #b45309;">Valor Social (VS)</span>
+                                <span class="font-medium" style="color: #b45309;">Valor ecosistémico (VS)</span>
                                 <span class="text-gray-600">{{ $vsPercent }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-4">
@@ -461,7 +419,7 @@
                         <p class="text-2xl font-bold text-green-800">${formatMoney(coef.valor_manual || item.total_cost)} €</p>
                     </div>
                     <p class="text-sm text-gray-500 italic">
-                        El Valor Ecológico (VE) se introduce manualmente basándose en tasaciones específicas o informes periciales.
+                        El Valor del recurso extraido (VE) se introduce manualmente basándose en tasaciones específicas o informes periciales.
                     </p>
                 </div>
             `;

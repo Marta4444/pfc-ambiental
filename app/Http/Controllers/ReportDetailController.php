@@ -390,22 +390,27 @@ class ReportDetailController extends Controller
 
     /**
      * Calcular si una especie está protegida
+     * Solo considera valores válidos de las constantes definidas
      */
     protected function calculateIsProtected(Species $species): bool
     {
-        // Está protegida si tiene estado BOE
-        if (!empty($species->boe_status)) {
+        // Está protegida si tiene estado BOE válido
+        if (Species::isValidBoeStatus($species->boe_status)) {
             return true;
         }
 
-        // O si tiene CITES
-        if (!empty($species->cites_appendix)) {
+        // O si tiene estado CCAA válido
+        if (Species::isValidCcaaStatus($species->ccaa_status)) {
+            return true;
+        }
+
+        // O si tiene CITES válido
+        if (Species::isValidCitesAppendix($species->cites_appendix)) {
             return true;
         }
 
         // O si tiene categoría IUCN de riesgo
-        $riskCategories = ['CR', 'EN', 'VU', 'NT'];
-        if (!empty($species->iucn_category) && in_array($species->iucn_category, $riskCategories)) {
+        if (Species::isProtectedIucnCategory($species->iucn_category)) {
             return true;
         }
 
