@@ -47,6 +47,12 @@ class ReportCostItemController extends Controller
     {
         \Log::info('Iniciando cálculo de costes', ['report_id' => $report->id]);
 
+        // Bloquear si el caso está finalizado
+        if ($report->isFinalizado()) {
+            return redirect()->route('reports.show', $report)
+                ->with('error', 'Este caso está finalizado y no se puede modificar. Contacte con un administrador para reabrirlo.');
+        }
+
         // Verificar que hay detalles
         if (!$report->hasDetails()) {
             \Log::warning('El report no tiene detalles', ['report_id' => $report->id]);
@@ -90,6 +96,12 @@ class ReportCostItemController extends Controller
      */
     public function destroy(Report $report): RedirectResponse
     {
+        // Bloquear si el caso está finalizado
+        if ($report->isFinalizado()) {
+            return redirect()->route('reports.show', $report)
+                ->with('error', 'Este caso está finalizado y no se puede modificar. Contacte con un administrador para reabrirlo.');
+        }
+
         $report->costItems()->delete();
         
         $report->update([

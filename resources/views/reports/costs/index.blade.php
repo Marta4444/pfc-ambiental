@@ -29,6 +29,21 @@
                 </div>
             @endif
 
+            {{-- Alerta de caso finalizado --}}
+            @if($report->isFinalizado())
+                <div class="mb-4 bg-gray-100 border-l-4 border-gray-500 text-gray-700 p-4 rounded relative" role="alert">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 mr-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="font-bold">Caso Finalizado</p>
+                            <p class="text-sm">Este caso está cerrado y no se puede modificar. Si necesita reabrirlo, contacte con un administrador.</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Panel de Resumen de Totales - Cards en fila --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-4">
@@ -72,8 +87,8 @@
                         </h3>
 
                         <div class="flex gap-2">
-                            {{-- Botón Recalcular --}}
-                            @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id())
+                            {{-- Botón Recalcular (oculto si está finalizado) --}}
+                            @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
                                 <form action="{{ route('report-costs.calculate', $report) }}" method="POST" class="inline">
                                     @csrf
                                     <button type="submit" class="inline-flex items-center px-3 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-700 transition ease-in-out duration-150" onclick="return confirm('¿Recalcular todos los costes?')">

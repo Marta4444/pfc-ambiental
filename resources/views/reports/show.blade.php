@@ -5,8 +5,8 @@
                 {{ __('Detalles del Caso') }} - {{ $report->ip }}
             </h2>
             <div class="flex gap-2">
-                {{-- Botón Editar: visible para admin, creador o asignado --}}
-                @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id())
+                {{-- Botón Editar: visible para admin, creador o asignado, pero NO si está finalizado (excepto admin para reabrir) --}}
+                @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
                     <a href="{{ route('reports.edit', $report) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -46,6 +46,34 @@
                 </div>
             @endif
 
+            {{-- Alerta de caso finalizado --}}
+            @if($report->isFinalizado())
+                <div class="mb-4 bg-gray-100 border-l-4 border-gray-500 text-gray-700 p-4 rounded relative" role="alert">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 mr-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="font-bold">Caso Finalizado</p>
+                            <p class="text-sm">Este caso está cerrado y no se puede editar. Si necesita reabrirlo, contacte con un administrador.</p>
+                        </div>
+                    </div>
+                    @if(Auth::user()->role === 'admin')
+                        <div class="mt-3">
+                            <form action="{{ route('reports.reopen', $report) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-150" style="background-color: #16a34a;" onclick="return confirm('¿Estás seguro de que deseas reabrir este caso? El caso volverá a ser editable.')">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                                    </svg>
+                                    Reabrir Caso
+                                </button>
+                            </form>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             {{-- Panel de Asignación --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
@@ -78,6 +106,7 @@
                         </div>
 
                         <div class="flex gap-2">
+                            @if(!$report->isFinalizado())
                             @if(!$report->assigned || ($report->assigned && $report->assigned_to !== Auth::id()))
                                 {{-- Botón de autoasignación (solo si no está asignado o está asignado a otro) --}}
                                 @if(!$report->assigned)
@@ -123,6 +152,7 @@
                                     </button>
                                 @endif
                             @endif
+                            @endif {{-- fin de !$report->isFinalizado() --}}
                         </div>
                     </div>
                 </div>
@@ -399,8 +429,8 @@
                                     Ver Detalles
                                 </a>
                                 
-                                {{-- Botón Añadir Más (visible para admin, creador o asignado) --}}
-                                @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id())
+                                {{-- Botón Añadir Más (visible para admin, creador o asignado, pero NO si está finalizado) --}}
+                                @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
                                     <a href="{{ route('report-details.create', $report) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition ease-in-out duration-150">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -409,8 +439,8 @@
                                     </a>
                                 @endif
                             @else
-                                {{-- Botón Añadir Detalles (visible para admin, creador o asignado) --}}
-                                @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id())
+                                {{-- Botón Añadir Detalles (visible para admin, creador o asignado, pero NO si está finalizado) --}}
+                                @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
                                     <a href="{{ route('report-details.create', $report) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition ease-in-out duration-150">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -460,8 +490,8 @@
                                 </a>
                             @endif
 
-                            {{-- Botón Calcular Costes (visible para admin, creador o asignado) --}}
-                            @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id())
+                            {{-- Botón Calcular Costes (visible para admin, creador o asignado, pero NO si está finalizado) --}}
+                            @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
                                 <form action="{{ route('report-costs.calculate', $report) }}" method="POST" class="inline">
                                     @csrf
                                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-700 transition ease-in-out duration-150" onclick="return confirm('{{ $report->hasCosts() ? '¿Recalcular costes? Esto reemplazará los costes actuales.' : '¿Calcular costes para este caso?' }}')">
@@ -471,6 +501,16 @@
                                         {{ $report->hasCosts() ? 'Recalcular Costes' : 'Calcular Costes' }}
                                     </button>
                                 </form>
+                            @endif
+
+                            {{-- Botón Finalizar Caso (visible si puede ser finalizado y el usuario tiene permisos) --}}
+                            @if($report->canBeFinalized() && (Auth::user()->role === 'admin' || $report->assigned_to === Auth::id()))
+                                <button type="button" onclick="document.getElementById('finalizeModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-150" style="background-color: #dc2626;">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Finalizar Caso
+                                </button>
                             @endif
                         </div>
                     </div>
@@ -555,6 +595,54 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de Confirmación para Finalizar Caso --}}
+    <div id="finalizeModal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="finalize-modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('finalizeModal').classList.add('hidden')"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="finalize-modal-title">
+                                Finalizar Caso
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">
+                                    ¿Está seguro de que desea finalizar este caso? 
+                                </p>
+                                <p class="text-sm text-red-600 font-semibold mt-2">
+                                    <strong>Atención:</strong> Una vez finalizado, el caso no podrá ser editado. Solo un administrador podrá reabrirlo posteriormente.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <form action="{{ route('reports.finalize', $report) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm" style="background-color: #dc2626;">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Sí, Finalizar Caso
+                        </button>
+                    </form>
+                    <button type="button" onclick="document.getElementById('finalizeModal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
             </div>
         </div>
     </div>

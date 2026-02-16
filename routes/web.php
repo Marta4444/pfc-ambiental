@@ -42,6 +42,10 @@ Route::middleware('auth')->group(function () {
     Route::post('reports/{report}/self-assign', [ReportController::class, 'selfAssign'])->name('reports.selfAssign');
     Route::post('reports/{report}/assign', [ReportController::class, 'assign'])->name('reports.assign');
     Route::post('reports/{report}/unassign', [ReportController::class, 'unassign'])->name('reports.unassign');
+    
+    // Rutas para finalizar y reabrir reportes
+    Route::post('reports/{report}/finalize', [ReportController::class, 'finalize'])->name('reports.finalize');
+    Route::post('reports/{report}/reopen', [ReportController::class, 'reopen'])->name('reports.reopen');
 
     Route::resource('reports', ReportController::class);
 

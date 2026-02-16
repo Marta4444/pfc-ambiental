@@ -6,9 +6,10 @@
     @php
         $user = auth()->user();
         $isAdmin = $user && $user->role === 'admin';
+        $isFinalizado = $report->isFinalizado();
         $completedStatuses = ['completado'];
         $isCompleted = in_array($report->status, $completedStatuses, true);
-        $canEdit = $isAdmin || (! $isCompleted && $user && ($user->id === $report->user_id || $user->id === $report->assigned_to));
+        $canEdit = !$isFinalizado && ($isAdmin || (! $isCompleted && $user && ($user->id === $report->user_id || $user->id === $report->assigned_to)));
         $categories = $categories ?? \App\Models\Category::where('active', true)->get();
         $subcategories = $subcategories ?? \App\Models\Subcategory::where('active', true)->get();
     @endphp
@@ -23,7 +24,19 @@
             <a href="{{ route('reports.show', $report) }}" class="inline-flex items-center px-3 py-1 bg-gray-100 border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50">Volver</a>
         </div>
 
-        @if(! $canEdit)
+        @if($isFinalizado)
+            <div class="mb-4 p-4 bg-gray-100 border-l-4 border-gray-500 text-gray-700 rounded">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 mr-3 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <p class="font-bold">Caso Finalizado</p>
+                        <p class="text-sm">Este caso está cerrado y no se puede editar. Si necesita reabrirlo, contacte con un administrador.</p>
+                    </div>
+                </div>
+            </div>
+        @elseif(! $canEdit)
             <div class="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded">
                 @if($isCompleted && ! $isAdmin)
                     Este informe está marcado como completado. Solo un administrador puede editarlo.
@@ -32,6 +45,8 @@
                 @endif
             </div>
         @endif
+
+        @if($canEdit)
 
         <form method="POST" action="{{ route('reports.update', $report) }}" enctype="multipart/form-data" class="bg-white shadow rounded-lg p-6">
             @csrf
@@ -365,6 +380,7 @@
                 <a href="{{ route('reports.show', $report) }}" class="inline-flex items-center px-3 py-1 bg-gray-100 border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50">Cancelar</a>
             </div>
         </form>
+        @endif {{-- fin de if canEdit --}}
     </div>
 
     @if($isAdmin)

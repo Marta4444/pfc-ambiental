@@ -328,6 +328,32 @@ class Report extends Model
     }
 
     /**
+     * Verificar si el report está finalizado (completado)
+     * Un caso finalizado es aquel con estado 'completado'
+     */
+    public function isFinalizado(): bool
+    {
+        return $this->status === self::STATUS_COMPLETADO;
+    }
+
+    /**
+     * Verificar si el report puede ser finalizado
+     * Requiere que tenga detalles y costes calculados y que no esté ya completado
+     */
+    public function canBeFinalized(): bool
+    {
+        return $this->hasDetails() && $this->hasCostsCalculated() && !$this->isCompletado();
+    }
+
+    /**
+     * Verificar si el report puede ser editado
+     */
+    public function canBeEdited(): bool
+    {
+        return !$this->isFinalizado();
+    }
+
+    /**
      * Obtener etiqueta legible del estado
      */
     public function getStatusLabel(): string

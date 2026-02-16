@@ -247,6 +247,12 @@ class ReportController extends Controller
      */
     public function edit(Report $report)
     {
+        // Bloquear edición si el caso está finalizado
+        if ($report->isFinalizado()) {
+            return redirect()->route('reports.show', $report)
+                ->with('error', 'Este caso está finalizado y no se puede editar. Contacte con un administrador para reabrirlo.');
+        }
+
         // CAMBIO: Permitir edición a creador, asignado o admin
         $user = Auth::user();
         $canEdit = $user->role === 'admin' || 
@@ -270,6 +276,12 @@ class ReportController extends Controller
      */
     public function update(Request $request, Report $report)
 {
+    // Bloquear actualización si el caso está finalizado
+    if ($report->isFinalizado()) {
+        return redirect()->route('reports.show', $report)
+            ->with('error', 'Este caso está finalizado y no se puede editar. Contacte con un administrador para reabrirlo.');
+    }
+
     $user = Auth::user();
     $isAdmin = $user->role === 'admin';
     $isOwner = $user->id === $report->user_id;
@@ -490,5 +502,55 @@ class ReportController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Te has asignado el caso correctamente.');
+    }
+
+    /**
+     * Finalize a report (close it permanently).
+     */
+    public function finalize(Report $report)
+    {
+        $user = Auth::user();
+        
+        // Verificar permisos: admin puede finalizar cualquier caso, usuario solo si está asignado a él
+        $canFinalize = $user->role === 'admin' || $report->assigned_to === $user->id;
+        
+        if (!$canFinalize) {
+            return redirect()->back()->with('error', 'No tienes permiso para finalizar este caso.');
+        }
+
+        // Verificar que el caso puede ser finalizado (tiene detalles y costes)
+        if (!$report->canBeFinalized()) {
+            return redirect()->back()->with('error', 'El caso no puede ser finalizado. Debe tener detalles y costes calculados.');
+        }
+
+        $report->update([
+            'status' => Report::STATUS_COMPLETADO,
+        ]);
+
+        return redirect()->route('reports.show', $report)->with('success', 'El caso ha sido finalizado correctamente. Ya no se puede editar.');
+    }
+
+    /**
+     * Reopen a finalized report (admin only).
+     */
+    public function reopen(Report $report)
+    {
+        $user = Auth::user();
+        
+        // Solo admin puede reabrir casos
+        if ($user->role !== 'admin') {
+            abort(403, 'Solo los administradores pueden reabrir casos finalizados.');
+        }
+
+        // Verificar que el caso está finalizado
+        if (!$report->isFinalizado()) {
+            return redirect()->back()->with('error', 'El caso no está finalizado.');
+        }
+
+        $report->update([
+            'status' => Report::STATUS_EN_PROCESO,
+        ]);
+
+        return redirect()->route('reports.show', $report)->with('success', 'El caso ha sido reabierto y ahora puede ser editado.');
     }
 }

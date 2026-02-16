@@ -420,9 +420,15 @@ class ReportDetailController extends Controller
     /**
      * Verificar si el usuario puede editar el report
      * Solo admin o el usuario asignado pueden editar
+     * No se puede editar si el caso está finalizado
      */
     protected function canEdit(Report $report): bool
     {
+        // Si el caso está finalizado, nadie puede editar
+        if ($report->isFinalizado()) {
+            return false;
+        }
+
         $user = Auth::user();
         return $user->role === 'admin' || $report->assigned_to === $user->id;
     }
@@ -433,6 +439,11 @@ class ReportDetailController extends Controller
      */
     protected function authorizeEdit(Report $report): void
     {
+        // Si el caso está finalizado, redirigir con mensaje
+        if ($report->isFinalizado()) {
+            abort(403, 'Este caso está finalizado y no se puede editar. Contacte con un administrador para reabrirlo.');
+        }
+
         if (!$this->canEdit($report)) {
             abort(403, 'No tienes permiso para editar los detalles de este caso. Solo el agente asignado o un administrador pueden hacerlo.');
         }
