@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Dashboard') }}
+                {{ __('Sistema de Valoración de Daños Ambientales') }}
             </h2>
 
             {{-- Botones de acción rápida --}}
@@ -43,7 +43,7 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                         <h3 class="text-xl font-bold text-gray-800">Panel de Administración</h3>
-                        <p class="text-sm text-gray-600">Gestión del sistema ambiental SEPRONA</p>
+                        <p class="text-sm text-gray-600">Gestión del sistema ambiental</p>
                     </div>
                     <div class="flex flex-wrap gap-4 md:gap-6">
                         <div class="text-center px-3 md:px-4 md:border-r border-gray-200">

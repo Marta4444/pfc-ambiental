@@ -284,3 +284,14 @@ Los logs de las sincronizaciones automáticas se guardan en:
 ```bash
 php artisan species:sync --source=all --limit=10
 ```
+
+
+## Estadísticas
+- Se crea el controlador StatisticsController.php, con 2 métodos:
+  - index: para estadísticas para usaurios.
+  - admin: para estadísticas de administradores.
+- Se crea una vista con tarjetas resumen y gráficos, con Chart.js.
+- Para usar chart.js, en las vistas de estadísticas se añade:
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>, que lo carga desde internet, y con JS se crean los gráficos.
+  Esto requiere conexión a internet. 
+  - Otra opción sería instalar chart.js localmente con npm.

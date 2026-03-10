@@ -14,14 +14,14 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             {{-- Filtros --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <form method="GET" action="{{ route('audit.index') }}" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4">
+                    <form method="GET" action="{{ route('audit.index') }}">
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px;">
                             {{-- Filtro por usuario --}}
                             <div>
-                                <label for="user_id" class="block text-sm font-medium text-gray-700">Usuario</label>
-                                <select name="user_id" id="user_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <option value="">Todos los usuarios</option>
+                                <label for="user_id" class="block text-xs font-medium text-gray-700 mb-1">Usuario</label>
+                                <select name="user_id" id="user_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                    <option value="">Todos</option>
                                     @foreach($users as $user)
                                         <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
                                             {{ $user->name }}
@@ -32,9 +32,9 @@
 
                             {{-- Filtro por acción --}}
                             <div>
-                                <label for="action" class="block text-sm font-medium text-gray-700">Acción</label>
-                                <select name="action" id="action" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <option value="">Todas las acciones</option>
+                                <label for="action" class="block text-xs font-medium text-gray-700 mb-1">Acción</label>
+                                <select name="action" id="action" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                    <option value="">Todas</option>
                                     @foreach($actions as $key => $label)
                                         <option value="{{ $key }}" {{ request('action') == $key ? 'selected' : '' }}>
                                             {{ $label }}
@@ -45,9 +45,9 @@
 
                             {{-- Filtro por modelo --}}
                             <div>
-                                <label for="model_type" class="block text-sm font-medium text-gray-700">Tipo de registro</label>
-                                <select name="model_type" id="model_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <option value="">Todos los tipos</option>
+                                <label for="model_type" class="block text-xs font-medium text-gray-700 mb-1">Tipo de registro</label>
+                                <select name="model_type" id="model_type" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                    <option value="">Todos</option>
                                     @foreach($modelTypes as $type => $label)
                                         <option value="{{ $type }}" {{ request('model_type') == $type ? 'selected' : '' }}>
                                             {{ $label }}
@@ -56,35 +56,35 @@
                                 </select>
                             </div>
 
-                            {{-- Búsqueda --}}
-                            <div>
-                                <label for="search" class="block text-sm font-medium text-gray-700">Buscar</label>
-                                <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Buscar en descripción..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {{-- Fecha desde --}}
                             <div>
-                                <label for="date_from" class="block text-sm font-medium text-gray-700">Desde</label>
-                                <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <label for="date_from" class="block text-xs font-medium text-gray-700 mb-1">Desde</label>
+                                <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
                             </div>
 
                             {{-- Fecha hasta --}}
                             <div>
-                                <label for="date_to" class="block text-sm font-medium text-gray-700">Hasta</label>
-                                <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <label for="date_to" class="block text-xs font-medium text-gray-700 mb-1">Hasta</label>
+                                <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; align-items: end;">
+                            {{-- Búsqueda --}}
+                            <div style="grid-column: span 3;">
+                                <label for="search" class="block text-xs font-medium text-gray-700 mb-1">Buscar</label>
+                                <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Buscar en descripción..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
                             </div>
 
                             {{-- Botones --}}
-                            <div class="flex items-end gap-2 lg:col-span-2">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div style="grid-column: span 2; display: flex; gap: 8px; justify-content: flex-end;">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 rounded-md text-sm text-white font-medium hover:bg-blue-700">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                     </svg>
                                     Filtrar
                                 </button>
-                                <a href="{{ route('audit.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-200">
+                                <a href="{{ route('audit.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-300">
                                     Limpiar
                                 </a>
                             </div>

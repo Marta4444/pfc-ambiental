@@ -5,8 +5,8 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ route('dashboard') }}" class="text-xl font-bold text-blue-600 hover:text-blue-800">
+                        SAVDA
                     </a>
                 </div>
 
@@ -33,6 +33,14 @@
                             {{ __('Auditoría') }}
                         </x-nav-link>
                     @endif
+
+                    {{-- Estadísticas para todos los usuarios --}}
+                    <x-nav-link :href="route('statistics.index')" :active="request()->routeIs('statistics.*')">
+                        <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        {{ __('Estadísticas') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -105,6 +113,11 @@
                     {{ __('Auditoría') }}
                 </x-responsive-nav-link>
             @endif
+
+            {{-- Estadísticas para todos los usuarios en móvil --}}
+            <x-responsive-nav-link :href="route('statistics.index')" :active="request()->routeIs('statistics.*')">
+                {{ __('Estadísticas') }}
+            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->

@@ -12,6 +12,7 @@ use App\Http\Controllers\SpeciesController;
 use App\Http\Controllers\ProtectedAreaController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\SpeciesAdminController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -78,6 +79,9 @@ Route::middleware('auth')->group(function () {
         ->name('protected-areas.check-coordinates');
     Route::get('protected-areas/search', [ProtectedAreaController::class, 'search'])
         ->name('protected-areas.search');
+
+    // Estadísticas (para todos los usuarios autenticados)
+    Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
 });
 
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
@@ -85,6 +89,9 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('audit', [AuditLogController::class, 'index'])->name('audit.index');
     Route::get('audit/{auditLog}', [AuditLogController::class, 'show'])->name('audit.show');
     Route::get('audit/user/{user}', [AuditLogController::class, 'userActivity'])->name('audit.user-activity');
+
+    // Estadísticas de administración (solo admin)
+    Route::get('statistics/admin', [StatisticsController::class, 'admin'])->name('statistics.admin');
 
     Route::resource('categories', CategoryController::class)->except(['index', 'show']);
     Route::post('categories/{category}/toggle-active', [CategoryController::class, 'toggleActive'])->name('categories.toggleActive');
