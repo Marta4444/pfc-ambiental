@@ -141,6 +141,8 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
         ->name('protected-areas.index');
     Route::get('protected-areas/create', [ProtectedAreaController::class, 'create'])
         ->name('protected-areas.create');
+    Route::get('protected-areas/check', [ProtectedAreaController::class, 'checkTool'])
+        ->name('protected-areas.check');
     Route::post('protected-areas', [ProtectedAreaController::class, 'store'])
         ->name('protected-areas.store');
     Route::get('protected-areas/{protectedArea}', [ProtectedAreaController::class, 'show'])

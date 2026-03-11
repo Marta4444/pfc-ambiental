@@ -22,9 +22,6 @@ class SyncProtectedAreas extends Command
     private int $updated = 0;
     private int $errors = 0;
 
-    // Token de Protected Planet (obtener en https://api.protectedplanet.net/)
-    // Por ahora usamos el endpoint público que no requiere token para búsquedas básicas
-
     public function handle(): int
     {
         $source = $this->option('source');
@@ -64,15 +61,10 @@ class SyncProtectedAreas extends Command
         }
     }
 
-    /**
-     * Sincronizar desde Protected Planet API (WDPA)
-     */
     protected function syncFromWdpa(?string $region, bool $dryRun): void
     {
         $this->info("📍 Obteniendo áreas protegidas de España desde WDPA...");
 
-        // La API de Protected Planet requiere token para datos completos
-        // Usamos el endpoint de búsqueda por país
         $token = env('WDPA_API_TOKEN', '');
 
         if (empty($token)) {
@@ -93,7 +85,7 @@ class SyncProtectedAreas extends Command
             $response = Http::timeout(30)
                 ->withToken($token)
                 ->get('https://api.protectedplanet.net/v3/protected_areas', [
-                    'country' => 'ESP', // España
+                    'country' => 'ESP', // aqui se puede cambiar el pais
                     'per_page' => $perPage,
                     'page' => $page,
                     'with_geometry' => 'true',
@@ -131,9 +123,6 @@ class SyncProtectedAreas extends Command
         }
     }
 
-    /**
-     * Procesar un área de WDPA
-     */
     protected function processWdpaArea(array $data, bool $dryRun): void
     {
         try {

@@ -213,11 +213,17 @@
                                 </svg>
                                 <span class="text-sm text-gray-700 group-hover:text-blue-700">Ver todas</span>
                             </a>
+                            <a href="{{ route('protected-areas.check') }}" class="flex-1 flex items-center justify-center p-2 bg-teal-50 rounded hover:bg-teal-100 transition group">
+                                <svg class="w-4 h-4 text-teal-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                </svg>
+                                <span class="text-sm text-gray-700 group-hover:text-teal-700">Mapa</span>
+                            </a>
                             <a href="{{ route('protected-areas.create') }}" class="flex-1 flex items-center justify-center p-2 bg-blue-50 rounded hover:bg-blue-100 transition group">
                                 <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                <span class="text-sm text-gray-700 group-hover:text-blue-700">Crear nueva</span>
+                                <span class="text-sm text-gray-700 group-hover:text-blue-700">Nueva</span>
                             </a>
                         </div>
                     </div>

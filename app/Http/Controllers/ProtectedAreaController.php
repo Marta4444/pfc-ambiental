@@ -101,6 +101,43 @@ class ProtectedAreaController extends Controller
     }
 
     /**
+     * Formulario para crear nueva área protegida
+     */
+    public function create()
+    {
+        return view('protected-areas.create', [
+            'protectionTypes' => ProtectedArea::PROTECTION_TYPES,
+            'iucnCategories' => ProtectedArea::IUCN_CATEGORIES,
+        ]);
+    }
+
+    /**
+     * Formulario para editar área protegida
+     */
+    public function edit(ProtectedArea $protectedArea)
+    {
+        return view('protected-areas.edit', [
+            'area' => $protectedArea,
+            'protectionTypes' => ProtectedArea::PROTECTION_TYPES,
+            'iucnCategories' => ProtectedArea::IUCN_CATEGORIES,
+        ]);
+    }
+
+    /**
+     * Herramienta para verificar coordenadas en mapa
+     */
+    public function checkTool()
+    {
+        $areas = ProtectedArea::where('active', true)
+            ->select(['id', 'name', 'protection_type', 'iucn_category', 'region', 'lat_min', 'lat_max', 'long_min', 'long_max'])
+            ->get();
+        
+        return view('protected-areas.check', [
+            'areas' => $areas,
+        ]);
+    }
+
+    /**
      * Mostrar detalle de un área protegida
      */
     public function show(ProtectedArea $protectedArea): JsonResponse

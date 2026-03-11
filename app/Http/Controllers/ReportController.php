@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\User;
 use App\Models\Petitioner;
+use App\Models\ProtectedArea;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -239,7 +240,43 @@ class ReportController extends Controller
         // Obtener lista de agentes para asignación
         $agents = User::where('role', 'user')->orderBy('name')->get();
         
-        return view('reports.show', compact('report', 'agents'));
+        // Verificar si las coordenadas están en área protegida
+        $protectedAreas = collect();
+        if ($report->coordinates) {
+            $coords = $this->parseCoordinates($report->coordinates);
+            if ($coords) {
+                $protectedAreas = ProtectedArea::findAreasContainingPoint($coords['lat'], $coords['long']);
+            }
+        }
+        
+        return view('reports.show', compact('report', 'agents', 'protectedAreas'));
+    }
+    
+    /**
+     * Parsear coordenadas desde string "lat,long" o "lat, long"
+     */
+    private function parseCoordinates(?string $coordinates): ?array
+    {
+        if (empty($coordinates)) {
+            return null;
+        }
+        
+        // Soportar formatos: "lat,long", "lat, long", "lat;long"
+        $parts = preg_split('/[,;]\s*/', trim($coordinates));
+        
+        if (count($parts) !== 2) {
+            return null;
+        }
+        
+        $lat = (float) trim($parts[0]);
+        $long = (float) trim($parts[1]);
+        
+        // Validar rangos
+        if ($lat < -90 || $lat > 90 || $long < -180 || $long > 180) {
+            return null;
+        }
+        
+        return ['lat' => $lat, 'long' => $long];
     }
 
     /**
