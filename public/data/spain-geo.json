@@ -1,0 +1,307 @@
+{
+    "comunidades": {
+        "Andalucía": {
+            "bbox": { "minLat": 36.00, "maxLat": 38.73, "minLng": -7.52, "maxLng": -1.63 },
+            "provincias": {
+                "Almería": {
+                    "bbox": { "minLat": 36.68, "maxLat": 37.75, "minLng": -2.99, "maxLng": -1.63 },
+                    "municipios": ["Almería", "Roquetas de Mar", "El Ejido", "Níjar", "Vícar", "Adra", "Huércal-Overa", "Vera", "Garrucha", "Mojácar", "Dalías", "Berja", "Cuevas del Almanzora", "Pulpí", "Albox", "Purchena", "Huércal de Almería", "Carboneras", "Macael", "Olula del Río"]
+                },
+                "Cádiz": {
+                    "bbox": { "minLat": 35.99, "maxLat": 37.05, "minLng": -6.44, "maxLng": -5.26 },
+                    "municipios": ["Cádiz", "Jerez de la Frontera", "Algeciras", "San Fernando", "El Puerto de Santa María", "Chiclana de la Frontera", "Sanlúcar de Barrameda", "La Línea de la Concepción", "Puerto Real", "Arcos de la Frontera", "Rota", "San Roque", "Barbate", "Conil de la Frontera", "Ubrique", "Tarifa", "Vejer de la Frontera", "Medina-Sidonia", "Los Barrios", "Chipiona"]
+                },
+                "Córdoba": {
+                    "bbox": { "minLat": 37.25, "maxLat": 38.73, "minLng": -5.64, "maxLng": -4.22 },
+                    "municipios": ["Córdoba", "Lucena", "Puente Genil", "Montilla", "Priego de Córdoba", "Cabra", "Baena", "Palma del Río", "Pozoblanco", "Aguilar de la Frontera", "La Carlota", "Peñarroya-Pueblonuevo", "Fernán-Núñez", "Rute", "Villanueva de Córdoba", "Castro del Río", "Fuente Palmera", "La Rambla", "Hinojosa del Duque", "Montoro"]
+                },
+                "Granada": {
+                    "bbox": { "minLat": 36.70, "maxLat": 38.05, "minLng": -4.34, "maxLng": -2.84 },
+                    "municipios": ["Granada", "Motril", "Almuñécar", "Baza", "Guadix", "Loja", "Armilla", "Maracena", "Las Gabias", "Salobreña", "Santa Fe", "Huéscar", "Albolote", "Peligros", "Atarfe", "La Zubia", "Monachil", "Ogíjares", "Cúllar Vega", "Alhendín"]
+                },
+                "Huelva": {
+                    "bbox": { "minLat": 37.10, "maxLat": 38.27, "minLng": -7.52, "maxLng": -6.20 },
+                    "municipios": ["Huelva", "Lepe", "Almonte", "Moguer", "Isla Cristina", "Ayamonte", "Cartaya", "Punta Umbría", "Gibraleón", "Aljaraque", "Bollullos Par del Condado", "La Palma del Condado", "Palos de la Frontera", "Nerva", "Valverde del Camino", "Aracena", "San Juan del Puerto", "Trigueros", "Minas de Riotinto", "Rociana del Condado"]
+                },
+                "Jaén": {
+                    "bbox": { "minLat": 37.40, "maxLat": 38.60, "minLng": -4.15, "maxLng": -2.38 },
+                    "municipios": ["Jaén", "Linares", "Andújar", "Úbeda", "Martos", "Alcalá la Real", "Baeza", "La Carolina", "Alcaudete", "Bailén", "Jódar", "Torredonjimeno", "Villacarrillo", "Mancha Real", "Torre del Campo", "Villanueva del Arzobispo", "Mengíbar", "Cazorla", "Porcuna", "Santisteban del Puerto"]
+                },
+                "Málaga": {
+                    "bbox": { "minLat": 36.29, "maxLat": 37.30, "minLng": -5.61, "maxLng": -3.72 },
+                    "municipios": ["Málaga", "Marbella", "Mijas", "Vélez-Málaga", "Fuengirola", "Torremolinos", "Benalmádena", "Estepona", "Rincón de la Victoria", "Antequera", "Alhaurín de la Torre", "Nerja", "Ronda", "Alhaurín el Grande", "Cártama", "Coín", "Torre del Mar", "Manilva", "Torrox", "Álora"]
+                },
+                "Sevilla": {
+                    "bbox": { "minLat": 36.83, "maxLat": 38.17, "minLng": -6.54, "maxLng": -4.95 },
+                    "municipios": ["Sevilla", "Dos Hermanas", "Alcalá de Guadaíra", "Utrera", "Mairena del Aljarafe", "Écija", "Los Palacios y Villafranca", "Coria del Río", "La Rinconada", "Carmona", "Morón de la Frontera", "Tomares", "San Juan de Aznalfarache", "Lebrija", "Bormujos", "Camas", "Osuna", "Marchena", "Arahal", "Gines"]
+                }
+            }
+        },
+        "Aragón": {
+            "bbox": { "minLat": 39.86, "maxLat": 42.92, "minLng": -2.17, "maxLng": 0.77 },
+            "provincias": {
+                "Huesca": {
+                    "bbox": { "minLat": 41.60, "maxLat": 42.92, "minLng": -0.76, "maxLng": 0.77 },
+                    "municipios": ["Huesca", "Monzón", "Barbastro", "Fraga", "Jaca", "Sabiñánigo", "Binéfar", "Sariñena", "Tamarite de Litera", "Graus", "Ainsa-Sobrarbe", "Benasque", "Ayerbe", "Almudévar", "Canfranc", "Boltaña", "Gurrea de Gállego", "Albalate de Cinca", "Altorricón", "Alcampell"]
+                },
+                "Teruel": {
+                    "bbox": { "minLat": 39.86, "maxLat": 41.09, "minLng": -1.79, "maxLng": 0.21 },
+                    "municipios": ["Teruel", "Alcañiz", "Andorra", "Calamocha", "Utrillas", "Monreal del Campo", "Cella", "Mora de Rubielos", "Valderrobres", "Albarracín", "Alcorisa", "Calanda", "Híjar", "Escucha", "Santa Eulalia", "Cantavieja", "Rubielos de Mora", "Calaceite", "Oliete", "Ariño"]
+                },
+                "Zaragoza": {
+                    "bbox": { "minLat": 40.96, "maxLat": 42.33, "minLng": -2.17, "maxLng": 0.30 },
+                    "municipios": ["Zaragoza", "Calatayud", "Utebo", "Ejea de los Caballeros", "Tarazona", "Caspe", "La Almunia de Doña Godina", "Cuarte de Huerva", "Zuera", "Tauste", "Alagón", "Illueca", "María de Huerva", "Borja", "Épila", "Mallén", "Fuentes de Ebro", "Gallur", "Pinseque", "Alfajarín"]
+                }
+            }
+        },
+        "Asturias": {
+            "bbox": { "minLat": 42.87, "maxLat": 43.67, "minLng": -7.18, "maxLng": -4.51 },
+            "provincias": {
+                "Asturias": {
+                    "bbox": { "minLat": 42.87, "maxLat": 43.67, "minLng": -7.18, "maxLng": -4.51 },
+                    "municipios": ["Oviedo", "Gijón", "Avilés", "Siero", "Langreo", "Mieres", "Castrillón", "San Martín del Rey Aurelio", "Corvera de Asturias", "Laviana", "Llanera", "Villaviciosa", "Llanes", "Cangas del Narcea", "Lena", "Tineo", "Navia", "Carreño", "Pravia", "Ribadesella"]
+                }
+            }
+        },
+        "Canarias": {
+            "bbox": { "minLat": 27.63, "maxLat": 29.42, "minLng": -18.17, "maxLng": -13.33 },
+            "provincias": {
+                "Las Palmas": {
+                    "bbox": { "minLat": 27.63, "maxLat": 29.42, "minLng": -15.87, "maxLng": -13.33 },
+                    "municipios": ["Las Palmas de Gran Canaria", "Telde", "Santa Lucía de Tirajana", "Arrecife", "San Bartolomé de Tirajana", "Arucas", "Agüimes", "Puerto del Rosario", "Ingenio", "Gáldar", "Mogán", "Pájara", "La Oliva", "Teror", "Santa María de Guía", "Valsequillo", "Firgas", "Moya", "Tías", "San Mateo"]
+                },
+                "Santa Cruz de Tenerife": {
+                    "bbox": { "minLat": 27.63, "maxLat": 29.42, "minLng": -18.17, "maxLng": -15.85 },
+                    "municipios": ["Santa Cruz de Tenerife", "San Cristóbal de La Laguna", "Arona", "Adeje", "La Orotava", "Granadilla de Abona", "Los Realejos", "Puerto de la Cruz", "Candelaria", "Tacoronte", "Güímar", "Santiago del Teide", "Icod de los Vinos", "Los Llanos de Aridane", "San Miguel de Abona", "El Rosario", "Santa Úrsula", "La Victoria de Acentejo", "Tegueste", "San Sebastián de la Gomera"]
+                }
+            }
+        },
+        "Cantabria": {
+            "bbox": { "minLat": 42.76, "maxLat": 43.51, "minLng": -4.85, "maxLng": -3.15 },
+            "provincias": {
+                "Cantabria": {
+                    "bbox": { "minLat": 42.76, "maxLat": 43.51, "minLng": -4.85, "maxLng": -3.15 },
+                    "municipios": ["Santander", "Torrelavega", "Castro-Urdiales", "Camargo", "Piélagos", "El Astillero", "Laredo", "Santa Cruz de Bezana", "Los Corrales de Buelna", "Reinosa", "Santoña", "Colindres", "Suances", "Cabezón de la Sal", "San Vicente de la Barquera", "Medio Cudeyo", "Reocín", "Noja", "Marina de Cudeyo", "Ramales de la Victoria"]
+                }
+            }
+        },
+        "Castilla y León": {
+            "bbox": { "minLat": 40.11, "maxLat": 43.24, "minLng": -7.03, "maxLng": -1.77 },
+            "provincias": {
+                "Ávila": {
+                    "bbox": { "minLat": 40.11, "maxLat": 41.30, "minLng": -5.69, "maxLng": -4.30 },
+                    "municipios": ["Ávila", "Arévalo", "Arenas de San Pedro", "Las Navas del Marqués", "Candeleda", "El Tiemblo", "Sotillo de la Adrada", "Piedrahíta", "El Barco de Ávila", "Cebreros", "Mombeltrán", "La Adrada", "Madrigal de las Altas Torres", "San Martín de Valdeiglesias", "Navaluenga", "Casavieja", "Burgohondo", "Fontiveros", "Guisando", "Pedro Bernardo"]
+                },
+                "Burgos": {
+                    "bbox": { "minLat": 41.55, "maxLat": 43.12, "minLng": -4.34, "maxLng": -2.70 },
+                    "municipios": ["Burgos", "Miranda de Ebro", "Aranda de Duero", "Villarcayo", "Briviesca", "Medina de Pomar", "Lerma", "Roa", "Salas de los Infantes", "Villagonzalo Pedernales", "Pradoluengo", "Belorado", "Quintanar de la Sierra", "Valle de Mena", "Espinosa de los Monteros", "Oña", "Pampliega", "Peñaranda de Duero", "Cardeñajimeno", "Alfoz de Burgos"]
+                },
+                "León": {
+                    "bbox": { "minLat": 42.00, "maxLat": 43.24, "minLng": -7.03, "maxLng": -4.72 },
+                    "municipios": ["León", "Ponferrada", "San Andrés del Rabanedo", "Villaquilambre", "Astorga", "La Bañeza", "Bembibre", "Villablino", "Cacabelos", "Valencia de Don Juan", "Cistierna", "Sahagún", "La Robla", "Camponaraya", "Santa María del Páramo", "Hospital de Órbigo", "Boñar", "Cubillos del Sil", "Mansilla de las Mulas", "Fabero"]
+                },
+                "Palencia": {
+                    "bbox": { "minLat": 41.78, "maxLat": 42.96, "minLng": -5.03, "maxLng": -3.99 },
+                    "municipios": ["Palencia", "Aguilar de Campoo", "Guardo", "Venta de Baños", "Dueñas", "Villamuriel de Cerrato", "Paredes de Nava", "Carrión de los Condes", "Saldaña", "Cervera de Pisuerga", "Barruelo de Santullán", "Astudillo", "Osorno la Mayor", "Herrera de Pisuerga", "Frómista", "Villada", "Torquemada", "Villarramiel", "Baltanás", "Ampudia"]
+                },
+                "Salamanca": {
+                    "bbox": { "minLat": 40.18, "maxLat": 41.32, "minLng": -6.95, "maxLng": -5.19 },
+                    "municipios": ["Salamanca", "Santa Marta de Tormes", "Béjar", "Ciudad Rodrigo", "Villares de la Reina", "Carbajosa de la Sagrada", "Cabrerizos", "Peñaranda de Bracamonte", "Alba de Tormes", "Guijuelo", "Villamayor", "Terradillos", "Ledesma", "Vitigudino", "Fuentes de Oñoro", "Lumbrales", "Tamames", "Castellanos de Moriscos", "Doñinos de Salamanca", "San Cristóbal de la Cuesta"]
+                },
+                "Segovia": {
+                    "bbox": { "minLat": 40.74, "maxLat": 41.59, "minLng": -4.43, "maxLng": -3.16 },
+                    "municipios": ["Segovia", "Cuéllar", "San Ildefonso", "El Espinar", "Cantalejo", "Nava de la Asunción", "Carbonero el Mayor", "Riaza", "Sepúlveda", "Ayllón", "Turégano", "Coca", "Villacastín", "Santa María la Real de Nieva", "San Cristóbal de Segovia", "Palazuelos de Eresma", "Navalmanzano", "Valverde del Majano", "La Lastrilla", "Mozoncillo"]
+                },
+                "Soria": {
+                    "bbox": { "minLat": 41.15, "maxLat": 42.14, "minLng": -3.38, "maxLng": -1.77 },
+                    "municipios": ["Soria", "Almazán", "El Burgo de Osma", "San Esteban de Gormaz", "Ólvega", "San Leonardo de Yagüe", "Ágreda", "Arcos de Jalón", "Covaleda", "Duruelo de la Sierra", "Navaleno", "Vinuesa", "Almarza", "Medinaceli", "Berlanga de Duero", "Quintana Redonda", "Golmayo", "Los Rábanos", "San Pedro Manrique", "Garray"]
+                },
+                "Valladolid": {
+                    "bbox": { "minLat": 41.18, "maxLat": 42.07, "minLng": -5.40, "maxLng": -4.04 },
+                    "municipios": ["Valladolid", "Laguna de Duero", "Medina del Campo", "Arroyo de la Encomienda", "Tordesillas", "Tudela de Duero", "Íscar", "Peñafiel", "Olmedo", "Simancas", "Zaratán", "Cigales", "Portillo", "La Cistérniga", "Boecillo", "Mojados", "Santovenia de Pisuerga", "Rueda", "Aldeamayor de San Martín", "Villanubla"]
+                },
+                "Zamora": {
+                    "bbox": { "minLat": 41.15, "maxLat": 42.30, "minLng": -6.77, "maxLng": -5.34 },
+                    "municipios": ["Zamora", "Benavente", "Toro", "Morales del Vino", "Puebla de Sanabria", "Fuentesaúco", "Villalpando", "Corrales del Vino", "Fermoselle", "Moraleja del Vino", "Villaralbo", "Santa Cristina de la Polvorosa", "Bermillo de Sayago", "Alcañices", "Santibáñez de Vidriales", "Manganeses de la Polvorosa", "Coreses", "San Cristóbal de Entreviñas", "Villabrázaro", "Muelas del Pan"]
+                }
+            }
+        },
+        "Castilla-La Mancha": {
+            "bbox": { "minLat": 38.40, "maxLat": 41.43, "minLng": -5.40, "maxLng": -0.92 },
+            "provincias": {
+                "Albacete": {
+                    "bbox": { "minLat": 38.40, "maxLat": 39.43, "minLng": -2.88, "maxLng": -0.92 },
+                    "municipios": ["Albacete", "Hellín", "Villarrobledo", "Almansa", "La Roda", "Caudete", "Tobarra", "Chinchilla de Montearagón", "Madrigueras", "Tarazona de la Mancha", "Casas-Ibáñez", "Munera", "La Gineta", "El Bonillo", "Fuentealbilla", "Minaya", "Alpera", "Barrax", "Ontur", "Montealegre del Castillo"]
+                },
+                "Ciudad Real": {
+                    "bbox": { "minLat": 38.37, "maxLat": 39.52, "minLng": -5.09, "maxLng": -2.77 },
+                    "municipios": ["Ciudad Real", "Puertollano", "Tomelloso", "Alcázar de San Juan", "Valdepeñas", "Daimiel", "Manzanares", "Miguelturra", "La Solana", "Socuéllamos", "Bolaños de Calatrava", "Campo de Criptana", "Almagro", "Herencia", "Malagón", "Almodóvar del Campo", "Argamasilla de Alba", "Villanueva de los Infantes", "Pedro Muñoz", "Piedrabuena"]
+                },
+                "Cuenca": {
+                    "bbox": { "minLat": 39.27, "maxLat": 40.51, "minLng": -3.16, "maxLng": -1.18 },
+                    "municipios": ["Cuenca", "Tarancón", "Quintanar del Rey", "San Clemente", "Las Pedroñeras", "Motilla del Palancar", "Mota del Cuervo", "Horcajo de Santiago", "Iniesta", "Villamayor de Santiago", "Casasimarro", "Belmonte", "Sisante", "El Provencio", "Ledaña", "Villanueva de la Jara", "San Lorenzo de la Parrilla", "Honrubia", "Landete", "Campillo de Altobuey"]
+                },
+                "Guadalajara": {
+                    "bbox": { "minLat": 40.24, "maxLat": 41.43, "minLng": -3.37, "maxLng": -1.50 },
+                    "municipios": ["Guadalajara", "Azuqueca de Henares", "Alovera", "Sigüenza", "Cabanillas del Campo", "El Casar", "Marchamalo", "Molina de Aragón", "Villanueva de la Torre", "Yunquera de Henares", "Torrejón del Rey", "Cifuentes", "Mondéjar", "Chiloeches", "Brihuega", "Jadraque", "Pastrana", "Atienza", "Alcolea del Pinar", "Cogolludo"]
+                },
+                "Toledo": {
+                    "bbox": { "minLat": 39.27, "maxLat": 40.31, "minLng": -5.40, "maxLng": -2.78 },
+                    "municipios": ["Toledo", "Talavera de la Reina", "Illescas", "Seseña", "Sonseca", "Torrijos", "Mora", "Madridejos", "Consuegra", "Quintanar de la Orden", "Fuensalida", "Yuncos", "Villacañas", "Ocaña", "Bargas", "Yeles", "Pepino", "Casarrubios del Monte", "La Puebla de Montalbán", "Orgaz"]
+                }
+            }
+        },
+        "Cataluña": {
+            "bbox": { "minLat": 40.52, "maxLat": 42.86, "minLng": 0.16, "maxLng": 3.33 },
+            "provincias": {
+                "Barcelona": {
+                    "bbox": { "minLat": 41.26, "maxLat": 42.33, "minLng": 1.36, "maxLng": 2.77 },
+                    "municipios": ["Barcelona", "L'Hospitalet de Llobregat", "Badalona", "Terrassa", "Sabadell", "Mataró", "Santa Coloma de Gramenet", "Cornellà de Llobregat", "Sant Boi de Llobregat", "Sant Cugat del Vallès", "Rubí", "Vilanova i la Geltrú", "Manresa", "El Prat de Llobregat", "Castelldefels", "Viladecans", "Granollers", "Cerdanyola del Vallès", "Mollet del Vallès", "Gavà"]
+                },
+                "Girona": {
+                    "bbox": { "minLat": 41.66, "maxLat": 42.47, "minLng": 1.73, "maxLng": 3.33 },
+                    "municipios": ["Girona", "Figueres", "Blanes", "Lloret de Mar", "Olot", "Salt", "Palafrugell", "Sant Feliu de Guíxols", "Roses", "Palamós", "Banyoles", "Santa Coloma de Farners", "Castell-Platja d'Aro", "L'Escala", "Torroella de Montgrí", "Cassà de la Selva", "Ripoll", "La Bisbal d'Empordà", "Besalú", "Cadaqués"]
+                },
+                "Lleida": {
+                    "bbox": { "minLat": 40.94, "maxLat": 42.86, "minLng": 0.16, "maxLng": 1.84 },
+                    "municipios": ["Lleida", "Balaguer", "Tàrrega", "Mollerussa", "La Seu d'Urgell", "Cervera", "Alcarràs", "Almacelles", "Les Borges Blanques", "Agramunt", "Tremp", "Sort", "Solsona", "Vielha e Mijaran", "Guissona", "Juneda", "Bellpuig", "Alpicat", "Térmens", "Bellver de Cerdanya"]
+                },
+                "Tarragona": {
+                    "bbox": { "minLat": 40.52, "maxLat": 41.49, "minLng": 0.42, "maxLng": 1.60 },
+                    "municipios": ["Tarragona", "Reus", "Tortosa", "El Vendrell", "Cambrils", "Salou", "Valls", "Amposta", "Vila-seca", "Calafell", "Sant Carles de la Ràpita", "Torredembarra", "Deltebre", "Cunit", "Montblanc", "La Canonja", "El Morell", "Altafulla", "Constantí", "L'Arboç"]
+                }
+            }
+        },
+        "Ceuta": {
+            "bbox": { "minLat": 35.87, "maxLat": 35.92, "minLng": -5.35, "maxLng": -5.27 },
+            "provincias": {
+                "Ceuta": {
+                    "bbox": { "minLat": 35.87, "maxLat": 35.92, "minLng": -5.35, "maxLng": -5.27 },
+                    "municipios": ["Ceuta"]
+                }
+            }
+        },
+        "Comunidad de Madrid": {
+            "bbox": { "minLat": 39.88, "maxLat": 41.17, "minLng": -4.58, "maxLng": -3.05 },
+            "provincias": {
+                "Madrid": {
+                    "bbox": { "minLat": 39.88, "maxLat": 41.17, "minLng": -4.58, "maxLng": -3.05 },
+                    "municipios": ["Madrid", "Móstoles", "Alcalá de Henares", "Fuenlabrada", "Leganés", "Getafe", "Alcorcón", "Torrejón de Ardoz", "Parla", "Alcobendas", "Las Rozas de Madrid", "San Sebastián de los Reyes", "Pozuelo de Alarcón", "Coslada", "Rivas-Vaciamadrid", "Valdemoro", "Majadahonda", "Collado Villalba", "Aranjuez", "Arganda del Rey", "Boadilla del Monte", "Pinto", "Colmenar Viejo", "Tres Cantos", "San Fernando de Henares", "Galapagar", "Arroyomolinos", "Navalcarnero", "Ciempozuelos", "Torrelodones", "Villanueva de la Cañada", "Villaviciosa de Odón", "Mejorada del Campo", "Villanueva del Pardillo", "El Escorial", "San Martín de la Vega", "Guadarrama", "Alpedrete", "Moralzarzal", "San Agustín del Guadalix"]
+                }
+            }
+        },
+        "Comunidad Valenciana": {
+            "bbox": { "minLat": 37.84, "maxLat": 40.79, "minLng": -1.53, "maxLng": 0.53 },
+            "provincias": {
+                "Alicante": {
+                    "bbox": { "minLat": 37.84, "maxLat": 38.87, "minLng": -1.06, "maxLng": 0.22 },
+                    "municipios": ["Alicante", "Elche", "Torrevieja", "Orihuela", "Benidorm", "Alcoy", "San Vicente del Raspeig", "Elda", "Dénia", "Petrer", "Santa Pola", "Villena", "Novelda", "Jávea", "Villajoyosa", "Crevillent", "Altea", "Ibi", "Calpe", "Alfaz del Pi", "San Juan de Alicante", "Almoradí", "Mutxamel", "Aspe", "Pilar de la Horadada", "El Campello", "Guardamar del Segura", "Teulada", "Castalla", "Benissa"]
+                },
+                "Castellón": {
+                    "bbox": { "minLat": 39.72, "maxLat": 40.79, "minLng": -0.86, "maxLng": 0.53 },
+                    "municipios": ["Castellón de la Plana", "Vila-real", "Borriana", "Vall d'Uixó", "Almassora", "Vinaròs", "Onda", "Nules", "Benicàssim", "Benicarló", "L'Alcora", "Oropesa del Mar", "Segorbe", "Peníscola", "Torreblanca", "Almazora", "Les Alqueries", "Betxí", "Moncofa", "Vilafamés"]
+                },
+                "Valencia": {
+                    "bbox": { "minLat": 38.68, "maxLat": 40.16, "minLng": -1.53, "maxLng": 0.04 },
+                    "municipios": ["Valencia", "Torrent", "Gandía", "Paterna", "Sagunto", "Mislata", "Alzira", "Burjassot", "Ontinyent", "Manises", "Aldaia", "Xàtiva", "Catarroja", "Quart de Poblet", "Alaquàs", "Sueca", "Oliva", "Bétera", "Cullera", "Llíria", "Requena", "Algemesí", "Alboraya", "La Eliana", "Tavernes de la Valldigna", "Godella", "Buñol", "Moncada", "Vilamarxant", "Silla"]
+                }
+            }
+        },
+        "Extremadura": {
+            "bbox": { "minLat": 37.95, "maxLat": 40.49, "minLng": -7.54, "maxLng": -4.65 },
+            "provincias": {
+                "Badajoz": {
+                    "bbox": { "minLat": 37.95, "maxLat": 39.49, "minLng": -7.54, "maxLng": -4.84 },
+                    "municipios": ["Badajoz", "Mérida", "Don Benito", "Almendralejo", "Villanueva de la Serena", "Zafra", "Montijo", "Villafranca de los Barros", "Olivenza", "Jerez de los Caballeros", "Talavera la Real", "Puebla de la Calzada", "Azuaga", "Los Santos de Maimona", "Guareña", "La Zarza", "Calamonte", "Villar del Rey", "Llerena", "Fuente del Maestre"]
+                },
+                "Cáceres": {
+                    "bbox": { "minLat": 39.14, "maxLat": 40.49, "minLng": -7.02, "maxLng": -4.65 },
+                    "municipios": ["Cáceres", "Plasencia", "Navalmoral de la Mata", "Coria", "Trujillo", "Miajadas", "Talayuela", "Moraleja", "Montehermoso", "Arroyo de la Luz", "Jaraíz de la Vera", "Valencia de Alcántara", "Garrovillas de Alconétar", "Hervás", "Zorita", "Malpartida de Cáceres", "Casar de Cáceres", "Losar de la Vera", "Villanueva de la Vera", "Guadalupe"]
+                }
+            }
+        },
+        "Galicia": {
+            "bbox": { "minLat": 41.81, "maxLat": 43.79, "minLng": -9.30, "maxLng": -6.74 },
+            "provincias": {
+                "A Coruña": {
+                    "bbox": { "minLat": 42.56, "maxLat": 43.79, "minLng": -9.30, "maxLng": -7.66 },
+                    "municipios": ["A Coruña", "Santiago de Compostela", "Ferrol", "Narón", "Oleiros", "Arteixo", "Carballo", "Culleredo", "Cambre", "Ames", "Ribeira", "Betanzos", "Pontedeume", "Noia", "Boiro", "Fene", "Sada", "Ordes", "Cedeira", "Padrón"]
+                },
+                "Lugo": {
+                    "bbox": { "minLat": 42.41, "maxLat": 43.78, "minLng": -7.82, "maxLng": -6.74 },
+                    "municipios": ["Lugo", "Monforte de Lemos", "Viveiro", "Vilalba", "Sarria", "Ribadeo", "Foz", "Burela", "Chantada", "Guitiriz", "Mondoñedo", "O Corgo", "A Estrada", "Outeiro de Rei", "Becerreá", "Palas de Rei", "O Valadouro", "Friol", "Pol", "Cervantes"]
+                },
+                "Ourense": {
+                    "bbox": { "minLat": 41.81, "maxLat": 42.57, "minLng": -8.55, "maxLng": -6.77 },
+                    "municipios": ["Ourense", "Verín", "O Barco de Valdeorras", "Carballino", "Xinzo de Limia", "O Carballiño", "Celanova", "Ribadavia", "Allariz", "A Rúa", "Barbadás", "San Cibrao das Viñas", "Viana do Bolo", "Pereiro de Aguiar", "Maceda", "Bande", "Monterrei", "Cualedro", "Castro Caldelas", "O Irixo"]
+                },
+                "Pontevedra": {
+                    "bbox": { "minLat": 41.86, "maxLat": 42.77, "minLng": -9.05, "maxLng": -7.86 },
+                    "municipios": ["Vigo", "Pontevedra", "Vilagarcía de Arousa", "Redondela", "Cangas", "Marín", "Ponteareas", "Tui", "Nigrán", "Sanxenxo", "Lalín", "O Porriño", "Moaña", "Bueu", "A Guarda", "Poio", "O Grove", "Caldas de Reis", "Baiona", "Cambados"]
+                }
+            }
+        },
+        "Islas Baleares": {
+            "bbox": { "minLat": 38.67, "maxLat": 40.10, "minLng": 1.19, "maxLng": 4.35 },
+            "provincias": {
+                "Islas Baleares": {
+                    "bbox": { "minLat": 38.67, "maxLat": 40.10, "minLng": 1.19, "maxLng": 4.35 },
+                    "municipios": ["Palma", "Calvià", "Llucmajor", "Marratxí", "Manacor", "Ibiza", "Inca", "Santa Eulària des Riu", "Ciutadella de Menorca", "Mahón", "Sant Josep de sa Talaia", "Felanitx", "Sant Antoni de Portmany", "Sóller", "Alcúdia", "Pollença", "Santanyí", "Sa Pobla", "Campos", "Artà"]
+                }
+            }
+        },
+        "La Rioja": {
+            "bbox": { "minLat": 41.93, "maxLat": 42.65, "minLng": -3.12, "maxLng": -1.68 },
+            "provincias": {
+                "La Rioja": {
+                    "bbox": { "minLat": 41.93, "maxLat": 42.65, "minLng": -3.12, "maxLng": -1.68 },
+                    "municipios": ["Logroño", "Calahorra", "Arnedo", "Haro", "Alfaro", "Lardero", "Nájera", "Santo Domingo de la Calzada", "Villamediana de Iregua", "Rincón de Soto", "Autol", "Pradejón", "Fuenmayor", "Navarrete", "Quel", "Ezcaray", "Cenicero", "Cervera del Río Alhama", "Albelda de Iregua", "Aldeanueva de Ebro"]
+                }
+            }
+        },
+        "Melilla": {
+            "bbox": { "minLat": 35.27, "maxLat": 35.31, "minLng": -2.97, "maxLng": -2.92 },
+            "provincias": {
+                "Melilla": {
+                    "bbox": { "minLat": 35.27, "maxLat": 35.31, "minLng": -2.97, "maxLng": -2.92 },
+                    "municipios": ["Melilla"]
+                }
+            }
+        },
+        "Navarra": {
+            "bbox": { "minLat": 41.92, "maxLat": 43.31, "minLng": -2.50, "maxLng": -0.72 },
+            "provincias": {
+                "Navarra": {
+                    "bbox": { "minLat": 41.92, "maxLat": 43.31, "minLng": -2.50, "maxLng": -0.72 },
+                    "municipios": ["Pamplona", "Tudela", "Barañáin", "Burlada", "Estella-Lizarra", "Zizur Mayor", "Ansoáin", "Tafalla", "Villava", "Berriozar", "Alsasua", "Corella", "Cintruénigo", "Huarte", "Sangüesa", "Peralta", "Noáin", "Caparroso", "Olite", "Castejón"]
+                }
+            }
+        },
+        "País Vasco": {
+            "bbox": { "minLat": 42.48, "maxLat": 43.47, "minLng": -3.45, "maxLng": -1.72 },
+            "provincias": {
+                "Álava": {
+                    "bbox": { "minLat": 42.48, "maxLat": 43.05, "minLng": -3.26, "maxLng": -2.26 },
+                    "municipios": ["Vitoria-Gasteiz", "Llodio", "Amurrio", "Salvatierra", "Oyón", "Iruña de Oca", "Alegría-Dulantzi", "Agurain", "Zuia", "Artziniega", "Labastida", "Asparrena", "Ayala", "Elburgo", "Peñacerrada", "Laguardia", "Añana", "Ribera Alta", "Zigoitia", "Arrazua-Ubarrundia"]
+                },
+                "Guipúzcoa": {
+                    "bbox": { "minLat": 42.90, "maxLat": 43.40, "minLng": -2.44, "maxLng": -1.72 },
+                    "municipios": ["San Sebastián", "Irún", "Errenteria", "Eibar", "Arrasate/Mondragón", "Hernani", "Zarautz", "Tolosa", "Hondarribia", "Lasarte-Oria", "Bergara", "Oñati", "Andoain", "Azkoitia", "Pasaia", "Azpeitia", "Beasain", "Legazpi", "Zumarraga", "Ordizia"]
+                },
+                "Vizcaya": {
+                    "bbox": { "minLat": 42.90, "maxLat": 43.47, "minLng": -3.45, "maxLng": -2.41 },
+                    "municipios": ["Bilbao", "Barakaldo", "Getxo", "Portugalete", "Santurtzi", "Basauri", "Leioa", "Durango", "Sestao", "Galdakao", "Erandio", "Gernika-Lumo", "Amorebieta-Etxano", "Bermeo", "Mungia", "Arrigorriaga", "Ermua", "Sopelana", "Berango", "Ondarroa"]
+                }
+            }
+        },
+        "Región de Murcia": {
+            "bbox": { "minLat": 37.37, "maxLat": 38.76, "minLng": -2.35, "maxLng": -0.65 },
+            "provincias": {
+                "Murcia": {
+                    "bbox": { "minLat": 37.37, "maxLat": 38.76, "minLng": -2.35, "maxLng": -0.65 },
+                    "municipios": ["Murcia", "Cartagena", "Lorca", "Molina de Segura", "Alcantarilla", "Mazarrón", "Cieza", "Águilas", "Yecla", "Torre-Pacheco", "San Javier", "Totana", "Caravaca de la Cruz", "Jumilla", "San Pedro del Pinatar", "Las Torres de Cotillas", "La Unión", "Los Alcázares", "Archena", "Alhama de Murcia"]
+                }
+            }
+        }
+    }
+}

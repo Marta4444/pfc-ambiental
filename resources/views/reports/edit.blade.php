@@ -118,19 +118,35 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                         <x-input-label for="community" value="Comunidad Autónoma" />
-                        <x-text-input id="community" name="community" class="mt-1 block w-full" required value="{{ old('community', $report->community) }}" />
+                        <select id="community" name="community" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Selecciona una comunidad</option>
+                        </select>
                         @error('community') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <x-input-label for="province" value="Provincia" />
-                        <x-text-input id="province" name="province" class="mt-1 block w-full" required value="{{ old('province', $report->province) }}" />
+                        <select id="province" name="province" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required disabled>
+                            <option value="">Selecciona primero una comunidad</option>
+                        </select>
                         @error('province') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <x-input-label for="locality" value="Localidad" />
-                        <x-text-input id="locality" name="locality" class="mt-1 block w-full" required value="{{ old('locality', $report->locality) }}" />
+                        <input 
+                            type="text" 
+                            id="locality" 
+                            name="locality" 
+                            list="locality-suggestions"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" 
+                            required 
+                            disabled
+                            autocomplete="off"
+                            value="{{ old('locality', $report->locality) }}"
+                            placeholder="Escribe para buscar..."
+                        />
+                        <datalist id="locality-suggestions"></datalist>
                         @error('locality') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -145,6 +161,7 @@
                     <div>
                         <x-input-label for="coordinates" value="Coordenadas (lat,lon)" />
                         <x-text-input id="coordinates" name="coordinates" placeholder="41.12345,-1.23456" class="mt-1 block w-full" value="{{ old('coordinates', $report->coordinates) }}" />
+                        <p id="coordinates-validation" class="text-xs mt-1 hidden"></p>
                         @error('coordinates') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -233,7 +250,7 @@
                     <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
                     @if($report->pdf_report)
                         <div class="mb-2">
-                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-blue-700 hover:underline text-sm">Ver archivo actual</a>
+                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-eco-700 hover:underline text-sm">Ver archivo actual</a>
                         </div>
                     @endif
                     <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" />
@@ -243,7 +260,7 @@
             @else
                 {{-- USUARIO NORMAL: Puede editar campos limitados (excepto IP, categoría y subcategoría) --}}
                 
-                <div class="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-blue-700 rounded">
+                <div class="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-eco-700 rounded">
                     <p class="font-semibold">Camposos para usuarios:</p>
                     <ul class="list-disc list-inside text-sm mt-2">
                         <li>Número IP (Informe Pericial)</li>
@@ -292,20 +309,36 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
-                        <x-input-label for="community" value="Comunidad Autónoma" />
-                        <x-text-input id="community" name="community" class="mt-1 block w-full" required value="{{ old('community', $report->community) }}" />
+                        <x-input-label for="community_user" value="Comunidad Autónoma" />
+                        <select id="community_user" name="community" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Selecciona una comunidad</option>
+                        </select>
                         @error('community') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <x-input-label for="province" value="Provincia" />
-                        <x-text-input id="province" name="province" class="mt-1 block w-full" required value="{{ old('province', $report->province) }}" />
+                        <x-input-label for="province_user" value="Provincia" />
+                        <select id="province_user" name="province" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required disabled>
+                            <option value="">Selecciona primero una comunidad</option>
+                        </select>
                         @error('province') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <x-input-label for="locality" value="Localidad" />
-                        <x-text-input id="locality" name="locality" class="mt-1 block w-full" required value="{{ old('locality', $report->locality) }}" />
+                        <x-input-label for="locality_user" value="Localidad" />
+                        <input 
+                            type="text" 
+                            id="locality_user" 
+                            name="locality" 
+                            list="locality-suggestions-user"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" 
+                            required 
+                            disabled
+                            autocomplete="off"
+                            value="{{ old('locality', $report->locality) }}"
+                            placeholder="Escribe para buscar..."
+                        />
+                        <datalist id="locality-suggestions-user"></datalist>
                         @error('locality') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -364,7 +397,7 @@
                     <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
                     @if($report->pdf_report)
                         <div class="mb-2">
-                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-blue-700 hover:underline text-sm">Ver archivo actual</a>
+                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-eco-700 hover:underline text-sm">Ver archivo actual</a>
                         </div>
                     @endif
                     <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" {{ $isCompleted ? 'disabled' : '' }} />
@@ -383,46 +416,270 @@
         @endif {{-- fin de if canEdit --}}
     </div>
 
-    @if($isAdmin)
+    {{-- Script unificado que carga datos geográficos desde JSON --}}
     <script>
-        // Subcategory population for admin
-        const categorySelect = document.getElementById('category_id');
-        const subcategorySelect = document.getElementById('subcategory_id');
+        // ============================================
+        // DATOS GEOGRÁFICOS DE ESPAÑA (cargados desde JSON)
+        // ============================================
+        let SPAIN_GEO_DATA = null;
 
-        const subcategories = @json($subcategories->map(fn($s) => [
-            'id' => $s->id,
-            'name' => $s->name,
-            'category_id' => $s->category_id
-        ]));
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('{{ asset("data/spain-geo.json") }}');
+                if (!response.ok) throw new Error('Error cargando datos geográficos: ' + response.status);
+                SPAIN_GEO_DATA = await response.json();
+                console.log('Datos geográficos cargados:', Object.keys(SPAIN_GEO_DATA.comunidades).length + ' comunidades');
+                initGeoSelectors();
+            } catch (error) {
+                console.error('Error cargando datos geográficos:', error);
+                alert('Error cargando datos geográficos. Por favor, recarga la página.');
+            }
+        });
 
-        function populateSubcategories(categoryId, selectedId = null) {
-            if (!subcategorySelect) return;
-            subcategorySelect.innerHTML = '<option value="">Selecciona una subcategoría</option>';
-            if (!categoryId) return;
-            subcategories.filter(s => s.category_id === parseInt(categoryId))
-                .forEach(s => {
-                    const option = document.createElement('option');
-                    option.value = s.id;
-                    option.textContent = s.name;
-                    if (selectedId && parseInt(selectedId) === s.id) option.selected = true;
-                    subcategorySelect.appendChild(option);
-                });
+        // ============================================
+        // FUNCIONES DE VALIDACIÓN GEOGRÁFICA
+        // ============================================
+        function getComunidades() {
+            if (!SPAIN_GEO_DATA) return [];
+            return Object.keys(SPAIN_GEO_DATA.comunidades).sort();
         }
 
-        if (categorySelect) {
-            categorySelect.addEventListener('change', function() {
-                populateSubcategories(this.value);
+        function getProvincias(comunidad) {
+            if (!SPAIN_GEO_DATA) return [];
+            const data = SPAIN_GEO_DATA.comunidades[comunidad];
+            return data ? Object.keys(data.provincias).sort() : [];
+        }
+
+        function getMunicipios(comunidad, provincia) {
+            if (!SPAIN_GEO_DATA) return [];
+            const data = SPAIN_GEO_DATA.comunidades[comunidad];
+            if (!data || !data.provincias[provincia]) return [];
+            return data.provincias[provincia].municipios.sort();
+        }
+
+        function getComunidadBbox(comunidad) {
+            if (!SPAIN_GEO_DATA) return null;
+            const data = SPAIN_GEO_DATA.comunidades[comunidad];
+            return data ? data.bbox : null;
+        }
+
+        function validateCoordinates(lat, lng, comunidad) {
+            const bbox = getComunidadBbox(comunidad);
+            if (!bbox) return { valid: false, message: 'Comunidad no encontrada' };
+            
+            const inside = lat >= bbox.minLat && lat <= bbox.maxLat &&
+                           lng >= bbox.minLng && lng <= bbox.maxLng;
+            
+            return {
+                valid: inside,
+                message: inside 
+                    ? 'Coordenadas válidas para ' + comunidad
+                    : 'Las coordenadas NO corresponden a ' + comunidad
+            };
+        }
+
+        function parseCoordinates(coordStr) {
+            if (!coordStr) return null;
+            const cleanStr = coordStr.replace(/\s/g, '');
+            const parts = cleanStr.split(',');
+            if (parts.length !== 2) return null;
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+            if (isNaN(lat) || isNaN(lng)) return null;
+            if (lat < 27 || lat > 44 || lng < -19 || lng > 5) return null;
+            return { lat, lng };
+        }
+
+        function searchMunicipios(comunidad, provincia, searchTerm) {
+            const municipios = getMunicipios(comunidad, provincia);
+            if (!searchTerm || searchTerm.length < 2) return municipios.slice(0, 15);
+            
+            const term = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return municipios.filter(m => {
+                const normalized = m.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                return normalized.includes(term);
+            });
+        }
+
+        // ============================================
+        // INICIALIZACIÓN DE SELECTORES GEOGRÁFICOS
+        // ============================================
+        function initGeoSelectors() {
+            // Intentar inicializar selectores de admin
+            const adminSelectors = initGeoSelectorSet('community', 'province', 'locality', 'coordinates');
+            
+            // Intentar inicializar selectores de usuario
+            const userSelectors = initGeoSelectorSet('community_user', 'province_user', 'locality_user', 'coordinates_user');
+        }
+
+        function initGeoSelectorSet(communityId, provinceId, localityId, coordinatesId) {
+            const communitySelect = document.getElementById(communityId);
+            const provinceSelect = document.getElementById(provinceId);
+            const localityInput = document.getElementById(localityId);
+            const localitySuggestions = document.getElementById(localityId + '-suggestions');
+            const localityHint = document.getElementById(localityId + '-hint');
+            const coordinatesInput = document.getElementById(coordinatesId);
+            const coordinatesValidation = document.getElementById(coordinatesId + '-validation');
+
+            if (!communitySelect || !provinceSelect) return false;
+
+            // Guardar valor actual
+            const currentCommunity = communitySelect.value;
+            const currentProvince = provinceSelect.value;
+            const currentLocality = localityInput ? localityInput.value : '';
+
+            // Poblar comunidades
+            const existingOptions = communitySelect.querySelectorAll('option:not([value=""])');
+            if (existingOptions.length === 0) {
+                getComunidades().forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c;
+                    option.textContent = c;
+                    communitySelect.appendChild(option);
+                });
+            }
+
+            // Evento: cambio de comunidad
+            communitySelect.addEventListener('change', function() {
+                const comunidad = this.value;
+                provinceSelect.innerHTML = '<option value="">Selecciona una provincia</option>';
+                if (localityInput) localityInput.value = '';
+                if (localitySuggestions) localitySuggestions.innerHTML = '';
+                
+                if (comunidad) {
+                    getProvincias(comunidad).forEach(p => {
+                        const option = document.createElement('option');
+                        option.value = p;
+                        option.textContent = p;
+                        provinceSelect.appendChild(option);
+                    });
+                    provinceSelect.disabled = false;
+                } else {
+                    provinceSelect.disabled = true;
+                }
+                if (localityInput) localityInput.disabled = true;
+                
+                validateCoordinatesField();
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const initialCategory = "{{ old('category_id', $report->category_id) }}";
-                const initialSubcategory = "{{ old('subcategory_id', $report->subcategory_id) }}";
-                if (initialCategory) {
-                    categorySelect.value = initialCategory;
-                    populateSubcategories(initialCategory, initialSubcategory ? parseInt(initialSubcategory) : null);
+            // Evento: cambio de provincia
+            provinceSelect.addEventListener('change', function() {
+                const provincia = this.value;
+                if (localityInput) localityInput.value = '';
+                if (localitySuggestions) localitySuggestions.innerHTML = '';
+                
+                if (provincia && localityInput) {
+                    localityInput.disabled = false;
+                    if (localityHint) localityHint.classList.remove('hidden');
+                    updateLocalitySuggestions('');
+                } else if (localityInput) {
+                    localityInput.disabled = true;
+                    if (localityHint) localityHint.classList.add('hidden');
                 }
             });
+
+            // Evento: escritura en localidad
+            if (localityInput) {
+                localityInput.addEventListener('input', function() {
+                    updateLocalitySuggestions(this.value);
+                });
+            }
+
+            function updateLocalitySuggestions(searchTerm) {
+                if (!localitySuggestions) return;
+                const comunidad = communitySelect.value;
+                const provincia = provinceSelect.value;
+                localitySuggestions.innerHTML = '';
+                
+                if (comunidad && provincia) {
+                    const matches = searchMunicipios(comunidad, provincia, searchTerm);
+                    matches.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m;
+                        localitySuggestions.appendChild(option);
+                    });
+                }
+            }
+
+            // Eventos: validación de coordenadas
+            if (coordinatesInput) {
+                coordinatesInput.addEventListener('input', validateCoordinatesField);
+                coordinatesInput.addEventListener('blur', validateCoordinatesField);
+            }
+
+            function validateCoordinatesField() {
+                if (!coordinatesInput || !coordinatesValidation) return;
+                
+                const coordStr = coordinatesInput.value.trim();
+                const comunidad = communitySelect.value;
+                
+                if (!coordStr) {
+                    coordinatesValidation.classList.add('hidden');
+                    coordinatesInput.classList.remove('border-red-500', 'border-green-500');
+                    return;
+                }
+
+                coordinatesValidation.classList.remove('hidden');
+                
+                const coords = parseCoordinates(coordStr);
+                if (!coords) {
+                    coordinatesValidation.textContent = 'Formato inválido. Use: lat,lon (ej: 40.4168,-3.7038)';
+                    coordinatesValidation.className = 'text-xs mt-1 text-red-600';
+                    coordinatesInput.classList.add('border-red-500');
+                    coordinatesInput.classList.remove('border-green-500');
+                    return;
+                }
+
+                if (!comunidad) {
+                    coordinatesValidation.textContent = 'Selecciona una comunidad para validar';
+                    coordinatesValidation.className = 'text-xs mt-1 text-yellow-600';
+                    coordinatesInput.classList.remove('border-red-500', 'border-green-500');
+                    return;
+                }
+
+                const result = validateCoordinates(coords.lat, coords.lng, comunidad);
+                if (result.valid) {
+                    coordinatesValidation.textContent = '✓ ' + result.message;
+                    coordinatesValidation.className = 'text-xs mt-1 text-green-600';
+                    coordinatesInput.classList.add('border-green-500');
+                    coordinatesInput.classList.remove('border-red-500');
+                } else {
+                    coordinatesValidation.textContent = '✗ ' + result.message;
+                    coordinatesValidation.className = 'text-xs mt-1 text-red-600';
+                    coordinatesInput.classList.add('border-red-500');
+                    coordinatesInput.classList.remove('border-green-500');
+                }
+            }
+
+            // Restaurar valores existentes
+            const oldCommunity = currentCommunity || "{{ old('community', $report->community) }}";
+            const oldProvince = currentProvince || "{{ old('province', $report->province) }}";
+            const oldLocality = currentLocality || "{{ old('locality', $report->locality) }}";
+
+            if (oldCommunity) {
+                communitySelect.value = oldCommunity;
+                communitySelect.dispatchEvent(new Event('change'));
+                
+                setTimeout(() => {
+                    if (oldProvince) {
+                        provinceSelect.value = oldProvince;
+                        provinceSelect.dispatchEvent(new Event('change'));
+                        
+                        setTimeout(() => {
+                            if (oldLocality && localityInput) {
+                                localityInput.value = oldLocality;
+                            }
+                        }, 50);
+                    }
+                }, 50);
+            }
+
+            // Validar coordenadas si existen
+            if (coordinatesInput && coordinatesInput.value) {
+                setTimeout(validateCoordinatesField, 200);
+            }
+
+            return true;
         }
     </script>
-    @endif
 </x-app-layout>

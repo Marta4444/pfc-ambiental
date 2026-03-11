@@ -27,7 +27,7 @@
                     <p class="text-xs text-gray-500">Sin Sincronizar</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-blue-600">{{ $species->whereNotNull('last_synced_at')->count() }}</p>
+                    <p class="text-2xl font-bold text-eco-600">{{ $species->whereNotNull('last_synced_at')->count() }}</p>
                     <p class="text-xs text-gray-500">Con Historial</p>
                 </div>
             </div>
@@ -125,7 +125,7 @@
                                     @foreach($recent as $sp)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3">
-                                            <a href="{{ route('admin.species.edit', $sp) }}" class="font-medium italic text-blue-600 hover:underline">
+                                            <a href="{{ route('admin.species.edit', $sp) }}" class="font-medium italic text-eco-600 hover:underline">
                                                 {{ $sp->scientific_name }}
                                             </a>
                                             @if($sp->common_name)
@@ -153,7 +153,7 @@
                                         <td class="px-4 py-3 text-sm text-gray-500">
                                             <div class="flex flex-wrap gap-1">
                                                 @if($sp->gbif_key)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-eco-700">
                                                         GBIF: {{ Str::limit($sp->gbif_key, 10) }}
                                                     </span>
                                                 @endif

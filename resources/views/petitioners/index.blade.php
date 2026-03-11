@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Gestión de Peticionarios') }}
             </h2>
-            <a href="{{ route('petitioners.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <a href="{{ route('petitioners.create') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 focus:bg-eco-700 active:bg-eco-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 {{ __('Crear Peticionario') }}
             </a>
         </div>
@@ -57,7 +57,7 @@
                                                 {{ $petitioner->order }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <a href="{{ route('petitioners.show', $petitioner) }}" class="text-sm font-medium text-blue-600 hover:text-blue-900 hover:underline">
+                                                <a href="{{ route('petitioners.show', $petitioner) }}" class="text-sm font-medium text-eco-600 hover:text-blue-900 hover:underline">
                                                     {{ $petitioner->name }}
                                                 </a>
                                             </td>
@@ -71,7 +71,7 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 @if($petitioner->reports()->count() > 0)
-                                                    <a href="{{ route('petitioners.show', $petitioner) }}" class="text-blue-600 hover:text-blue-900 hover:underline">
+                                                    <a href="{{ route('petitioners.show', $petitioner) }}" class="text-eco-600 hover:text-blue-900 hover:underline">
                                                         {{ $petitioner->reports()->count() }} casos
                                                     </a>
                                                 @else
@@ -79,7 +79,7 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                                <a href="{{ route('petitioners.show', $petitioner) }}" class="text-blue-600 hover:text-blue-900">Ver</a>
+                                                <a href="{{ route('petitioners.show', $petitioner) }}" class="text-eco-600 hover:text-blue-900">Ver</a>
                                                 <a href="{{ route('petitioners.edit', $petitioner) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
                                                 
                                                 @if($petitioner->reports()->count() == 0)

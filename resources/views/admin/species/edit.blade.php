@@ -19,25 +19,25 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     @if($species->sync_source)
                         <div>
-                            <span class="text-blue-600">Fuente:</span>
+                            <span class="text-eco-600">Fuente:</span>
                             <span class="font-medium">{{ strtoupper($species->sync_source) }}</span>
                         </div>
                     @endif
                     @if($species->gbif_key)
                         <div>
-                            <span class="text-blue-600">GBIF Key:</span>
+                            <span class="text-eco-600">GBIF Key:</span>
                             <a href="https://www.gbif.org/species/{{ $species->gbif_key }}" target="_blank" class="font-medium hover:underline">{{ $species->gbif_key }}</a>
                         </div>
                     @endif
                     @if($species->iucn_taxon_id)
                         <div>
-                            <span class="text-blue-600">IUCN ID:</span>
+                            <span class="text-eco-600">IUCN ID:</span>
                             <span class="font-medium">{{ $species->iucn_taxon_id }}</span>
                         </div>
                     @endif
                     @if($species->last_synced_at)
                         <div>
-                            <span class="text-blue-600">Última sync:</span>
+                            <span class="text-eco-600">Última sync:</span>
                             <span class="font-medium">{{ $species->last_synced_at->format('d/m/Y H:i') }}</span>
                         </div>
                     @endif
@@ -64,7 +64,7 @@
                                 </label>
                                 <input type="text" name="scientific_name" id="scientific_name" 
                                     value="{{ old('scientific_name', $species->scientific_name) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 italic"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 italic"
                                     required>
                                 @error('scientific_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -78,7 +78,7 @@
                                 </label>
                                 <input type="text" name="common_name" id="common_name" 
                                     value="{{ old('common_name', $species->common_name) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 @error('common_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -90,7 +90,7 @@
                                     Grupo Taxonómico
                                 </label>
                                 <select name="taxon_group" id="taxon_group" 
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Seleccionar...</option>
                                     @foreach($taxonGroups as $group)
                                         <option value="{{ $group }}" {{ old('taxon_group', $species->taxon_group) == $group ? 'selected' : '' }}>{{ $group }}</option>
@@ -102,37 +102,37 @@
                             <div>
                                 <label for="kingdom" class="block text-sm font-medium text-gray-700 mb-1">Reino</label>
                                 <input type="text" name="kingdom" id="kingdom" value="{{ old('kingdom', $species->kingdom) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="phylum" class="block text-sm font-medium text-gray-700 mb-1">Filo</label>
                                 <input type="text" name="phylum" id="phylum" value="{{ old('phylum', $species->phylum) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="class" class="block text-sm font-medium text-gray-700 mb-1">Clase</label>
                                 <input type="text" name="class" id="class" value="{{ old('class', $species->class) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="order" class="block text-sm font-medium text-gray-700 mb-1">Orden</label>
                                 <input type="text" name="order" id="order" value="{{ old('order', $species->order) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="family" class="block text-sm font-medium text-gray-700 mb-1">Familia</label>
                                 <input type="text" name="family" id="family" value="{{ old('family', $species->family) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="genus" class="block text-sm font-medium text-gray-700 mb-1">Género</label>
                                 <input type="text" name="genus" id="genus" value="{{ old('genus', $species->genus) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             {{-- Protección --}}
@@ -141,7 +141,7 @@
                                 <div class="flex items-center">
                                     <input type="checkbox" name="is_protected" id="is_protected" value="1"
                                         {{ old('is_protected', $species->is_protected) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        class="rounded border-gray-300 text-eco-600 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <label for="is_protected" class="ml-2 text-sm text-gray-700">Especie Protegida</label>
                                 </div>
                             </div>
@@ -152,7 +152,7 @@
                                     Categoría IUCN
                                 </label>
                                 <select name="iucn_category" id="iucn_category"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Sin categoría</option>
                                     @foreach($iucnCategories as $code => $label)
                                         <option value="{{ $code }}" {{ old('iucn_category', $species->iucn_category) == $code ? 'selected' : '' }}>{{ $code }} - {{ $label }}</option>
@@ -166,7 +166,7 @@
                                     Estado BOE/LESPRE
                                 </label>
                                 <select name="boe_status" id="boe_status"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Sin categoría BOE</option>
                                     @foreach($boeStatuses as $key => $label)
                                         <option value="{{ $key }}" {{ old('boe_status', $species->boe_status) == $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -180,7 +180,7 @@
                                     Estado CCAA
                                 </label>
                                 <select name="ccaa_status" id="ccaa_status"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Sin protección autonómica</option>
                                     @foreach($ccaaStatuses as $key => $label)
                                         <option value="{{ $key }}" {{ old('ccaa_status', $species->ccaa_status) == $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -194,7 +194,7 @@
                                     Apéndice CITES
                                 </label>
                                 <select name="cites_appendix" id="cites_appendix"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">No incluida</option>
                                     @foreach($citesAppendices as $code => $label)
                                         <option value="{{ $code }}" {{ old('cites_appendix', $species->cites_appendix) == $code ? 'selected' : '' }}>{{ $label }}</option>
@@ -209,7 +209,7 @@
                                 </label>
                                 <input type="number" name="base_value" id="base_value" 
                                     value="{{ old('base_value', $species->base_value) }}" step="0.01" min="0"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
                         </div>
 
@@ -231,7 +231,7 @@
                                     Cancelar
                                 </a>
                                 <button type="submit" 
-                                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                                    class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                                     Guardar Cambios
                                 </button>
                             </div>

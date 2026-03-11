@@ -16,7 +16,7 @@
                         <p class="text-sm text-gray-500 mt-1">
                             {{ $subcategory->category ? __('Categoría:') . ' ' : '' }}
                             @if($subcategory->category)
-                            <a href="{{ route('categories.show', $subcategory->category) }}" class="text-blue-600 hover:underline">
+                            <a href="{{ route('categories.show', $subcategory->category) }}" class="text-eco-600 hover:underline">
                                 {{ $subcategory->category->name }}
                             </a>
                             @endif
@@ -60,7 +60,7 @@
                         <h4 class="text-sm font-medium text-gray-600">Categoría</h4>
                         <p class="mt-1 text-gray-800">
                             @if($subcategory->category)
-                            <a href="{{ route('categories.show', $subcategory->category) }}" class="text-blue-600 hover:underline">
+                            <a href="{{ route('categories.show', $subcategory->category) }}" class="text-eco-600 hover:underline">
                                 {{ $subcategory->category->name }}
                             </a>
                             @else

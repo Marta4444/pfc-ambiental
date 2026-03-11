@@ -25,7 +25,7 @@
                                 </label>
                                 <input type="text" name="scientific_name" id="scientific_name" 
                                     value="{{ old('scientific_name') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 italic"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 italic"
                                     placeholder="Ej: Lynx pardinus" required>
                                 @error('scientific_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -39,7 +39,7 @@
                                 </label>
                                 <input type="text" name="common_name" id="common_name" 
                                     value="{{ old('common_name') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500"
                                     placeholder="Ej: Lince ibérico">
                                 @error('common_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -52,7 +52,7 @@
                                     Grupo Taxonómico
                                 </label>
                                 <select name="taxon_group" id="taxon_group" 
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Seleccionar...</option>
                                     <option value="Mamíferos" {{ old('taxon_group') == 'Mamíferos' ? 'selected' : '' }}>Mamíferos</option>
                                     <option value="Aves" {{ old('taxon_group') == 'Aves' ? 'selected' : '' }}>Aves</option>
@@ -72,37 +72,37 @@
                             <div>
                                 <label for="kingdom" class="block text-sm font-medium text-gray-700 mb-1">Reino</label>
                                 <input type="text" name="kingdom" id="kingdom" value="{{ old('kingdom', 'Animalia') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="phylum" class="block text-sm font-medium text-gray-700 mb-1">Filo</label>
                                 <input type="text" name="phylum" id="phylum" value="{{ old('phylum') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="class" class="block text-sm font-medium text-gray-700 mb-1">Clase</label>
                                 <input type="text" name="class" id="class" value="{{ old('class') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="order" class="block text-sm font-medium text-gray-700 mb-1">Orden</label>
                                 <input type="text" name="order" id="order" value="{{ old('order') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="family" class="block text-sm font-medium text-gray-700 mb-1">Familia</label>
                                 <input type="text" name="family" id="family" value="{{ old('family') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             <div>
                                 <label for="genus" class="block text-sm font-medium text-gray-700 mb-1">Género</label>
                                 <input type="text" name="genus" id="genus" value="{{ old('genus') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
 
                             {{-- Protección --}}
@@ -112,7 +112,7 @@
                                     <div class="flex items-center">
                                         <input type="checkbox" name="is_protected" id="is_protected" value="1"
                                             {{ old('is_protected') ? 'checked' : '' }}
-                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            class="rounded border-gray-300 text-eco-600 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                         <label for="is_protected" class="ml-2 text-sm text-gray-700">Especie Protegida</label>
                                     </div>
                                 </div>
@@ -124,7 +124,7 @@
                                     Categoría IUCN
                                 </label>
                                 <select name="iucn_category" id="iucn_category"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Sin categoría</option>
                                     <option value="EX" {{ old('iucn_category') == 'EX' ? 'selected' : '' }}>EX - Extinto</option>
                                     <option value="EW" {{ old('iucn_category') == 'EW' ? 'selected' : '' }}>EW - Extinto en Estado Silvestre</option>
@@ -144,7 +144,7 @@
                                     Estado BOE/LESPRE
                                 </label>
                                 <select name="boe_status" id="boe_status"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Sin categoría BOE</option>
                                     <option value="LESRPE" {{ old('boe_status') == 'LESRPE' ? 'selected' : '' }}>LESRPE - Listado Especies Silvestres</option>
                                     <option value="EN" {{ old('boe_status') == 'EN' ? 'selected' : '' }}>EN - En Peligro de Extinción</option>
@@ -158,7 +158,7 @@
                                     Apéndice CITES
                                 </label>
                                 <select name="cites_appendix" id="cites_appendix"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">No incluida</option>
                                     <option value="I" {{ old('cites_appendix') == 'I' ? 'selected' : '' }}>Apéndice I</option>
                                     <option value="II" {{ old('cites_appendix') == 'II' ? 'selected' : '' }}>Apéndice II</option>
@@ -173,7 +173,7 @@
                                 </label>
                                 <input type="number" name="base_value" id="base_value" 
                                     value="{{ old('base_value', '0') }}" step="0.01" min="0"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                             </div>
                         </div>
 
@@ -183,7 +183,7 @@
                                 Cancelar
                             </a>
                             <button type="submit" 
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                                class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                                 Crear Especie
                             </button>
                         </div>

@@ -32,11 +32,11 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
                             <input type="text" name="search" value="{{ request('search') }}" 
                                 placeholder="Nombre científico o común..."
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Grupo Taxonómico</label>
-                            <select name="taxon_group" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <select name="taxon_group" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 <option value="">Todos</option>
                                 @foreach($taxonGroups as $group)
                                     <option value="{{ $group }}" {{ request('taxon_group') == $group ? 'selected' : '' }}>
@@ -47,7 +47,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Protección</label>
-                            <select name="is_protected" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <select name="is_protected" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 <option value="">Todas</option>
                                 <option value="true" {{ request('is_protected') == 'true' ? 'selected' : '' }}>Protegidas</option>
                                 <option value="false" {{ request('is_protected') == 'false' ? 'selected' : '' }}>No protegidas</option>
@@ -55,14 +55,14 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Datos BOE</label>
-                            <select name="has_boe" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <select name="has_boe" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 <option value="">Todas</option>
                                 <option value="true" {{ request('has_boe') == 'true' ? 'selected' : '' }}>Con datos BOE</option>
                                 <option value="false" {{ request('has_boe') == 'false' ? 'selected' : '' }}>Sin datos BOE</option>
                             </select>
                         </div>
                         <div class="md:col-span-4 flex gap-2">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
@@ -87,7 +87,7 @@
                     <p class="text-xs text-gray-500">Protegidas</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-blue-600">{{ \App\Models\Species::whereNotNull('boe_status')->where('boe_status', '!=', '')->count() }}</p>
+                    <p class="text-2xl font-bold text-eco-600">{{ \App\Models\Species::whereNotNull('boe_status')->where('boe_status', '!=', '')->count() }}</p>
                     <p class="text-xs text-gray-500">Con datos BOE</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
@@ -179,7 +179,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end gap-2">
-                                            <a href="{{ route('species.admin.show', $sp) }}" class="text-blue-600 hover:text-blue-900" title="Ver detalles">
+                                            <a href="{{ route('species.admin.show', $sp) }}" class="text-eco-600 hover:text-blue-900" title="Ver detalles">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>

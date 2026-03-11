@@ -15,17 +15,17 @@
                         <div>
                             <label for="date_from" class="block text-xs font-medium text-gray-700 mb-1">Desde</label>
                             <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
                         </div>
                         <div>
                             <label for="date_to" class="block text-xs font-medium text-gray-700 mb-1">Hasta</label>
                             <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
                         </div>
                         <div>
                             <label for="category_id" class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
                             <select name="category_id" id="category_id"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
                                 <option value="">Todas</option>
                                 @foreach($categories as $cat)
                                     <option value="{{ $cat->id }}" {{ $categoryId == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -35,7 +35,7 @@
                         <div>
                             <label for="status" class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
                             <select name="status" id="status"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
                                 <option value="">Todos</option>
                                 @foreach($statuses as $s)
                                     <option value="{{ $s }}" {{ $status == $s ? 'selected' : '' }}>{{ $statusLabels[$s] }}</option>
@@ -45,7 +45,7 @@
                         <div>
                             <label for="urgency" class="block text-xs font-medium text-gray-700 mb-1">Urgencia</label>
                             <select name="urgency" id="urgency"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
                                 <option value="">Todas</option>
                                 @foreach($urgencies as $u)
                                     <option value="{{ $u }}" {{ $urgency == $u ? 'selected' : '' }}>{{ $urgencyLabels[$u] }}</option>
@@ -57,7 +57,7 @@
                         <div>
                             <label for="community" class="block text-xs font-medium text-gray-700 mb-1">Comunidad</label>
                             <select name="community" id="community"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
                                 <option value="">Todas</option>
                                 @foreach($communities as $comm)
                                     <option value="{{ $comm }}" {{ $community == $comm ? 'selected' : '' }}>{{ $comm }}</option>
@@ -67,7 +67,7 @@
                         <div>
                             <label for="assigned_to" class="block text-xs font-medium text-gray-700 mb-1">Asignado a</label>
                             <select name="assigned_to" id="assigned_to"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
                                 <option value="">Todos</option>
                                 @foreach($users as $user)
                                     <option value="{{ $user->id }}" {{ $assignedTo == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
@@ -77,14 +77,14 @@
                         <div>
                             <label for="assignment_status" class="block text-xs font-medium text-gray-700 mb-1">Asignación</label>
                             <select name="assignment_status" id="assignment_status"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
                                 <option value="">Todos</option>
                                 <option value="assigned" {{ $assignmentStatus == 'assigned' ? 'selected' : '' }}>Asignados</option>
                                 <option value="unassigned" {{ $assignmentStatus == 'unassigned' ? 'selected' : '' }}>Sin asignar</option>
                             </select>
                         </div>
                         <div style="grid-column: span 2; display: flex; gap: 8px; justify-content: flex-end;">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 rounded-md text-sm text-white font-medium hover:bg-blue-700">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-eco-600 rounded-md text-sm text-white font-medium hover:bg-eco-700">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                 </svg>
@@ -104,10 +104,10 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-500">Total Casos</p>
-                            <p class="text-3xl font-bold text-blue-600">{{ number_format($totalReports) }}</p>
+                            <p class="text-3xl font-bold text-eco-600">{{ number_format($totalReports) }}</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-full">
-                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-8 h-8 text-eco-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
@@ -227,8 +227,8 @@
                     <p class="text-2xl font-bold text-indigo-700">{{ $adminData['totalCategories'] }}</p>
                 </div>
                 <div class="bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm sm:rounded-lg p-4 border-l-4 border-blue-500">
-                    <p class="text-xs text-blue-600 font-medium">Subcategorías</p>
-                    <p class="text-2xl font-bold text-blue-700">{{ $adminData['totalSubcategories'] }}</p>
+                    <p class="text-xs text-eco-600 font-medium">Subcategorías</p>
+                    <p class="text-2xl font-bold text-eco-700">{{ $adminData['totalSubcategories'] }}</p>
                 </div>
                 <div class="bg-gradient-to-br from-green-50 to-green-100 shadow-sm sm:rounded-lg p-4 border-l-4 border-green-500">
                     <p class="text-xs text-green-600 font-medium">Especies</p>
@@ -369,7 +369,7 @@
                 {{-- Top Subcategorías --}}
                 <div class="bg-white shadow-sm sm:rounded-lg p-3">
                     <h3 class="text-sm font-semibold text-gray-800 mb-2 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 mr-2 text-eco-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                         Subcategorías Más Utilizadas

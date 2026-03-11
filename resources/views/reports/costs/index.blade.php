@@ -5,7 +5,7 @@
                 Costes del Caso - {{ $report->ip }}
             </h2>
             <div class="flex gap-2">
-                <a href="{{ route('reports.show', $report) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition ease-in-out duration-150">
+                <a href="{{ route('reports.show', $report) }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
@@ -50,7 +50,7 @@
                     <div class="flex flex-wrap gap-4">
                         {{-- VR Total --}}
                         <div class="flex-1 min-w-[140px] bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                            <p class="text-xs font-medium text-blue-600 uppercase">VR</p>
+                            <p class="text-xs font-medium text-eco-600 uppercase">VR</p>
                             <p class="text-xl font-bold text-blue-900 mt-1">{{ number_format($totals['VR'], 2, ',', '.') }} €</p>
                         </div>
 
@@ -253,11 +253,11 @@
                         {{-- VR --}}
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
-                                <span class="text-blue-700 font-medium">Valor de Reposición (VR)</span>
+                                <span class="text-eco-700 font-medium">Valor de Reposición (VR)</span>
                                 <span class="text-gray-600">{{ $vrPercent }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-4">
-                                <div class="bg-blue-600 h-4 rounded-full" style="width: {{ $vrPercent }}%"></div>
+                                <div class="bg-eco-600 h-4 rounded-full" style="width: {{ $vrPercent }}%"></div>
                             </div>
                             <p class="text-right text-sm font-semibold text-blue-800">{{ number_format($totals['VR'], 2, ',', '.') }} €</p>
                         </div>
@@ -381,7 +381,7 @@
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div class="p-3 bg-blue-50 rounded-lg">
-                            <p class="text-xs text-blue-600 font-medium">CB (Coste Base)</p>
+                            <p class="text-xs text-eco-600 font-medium">CB (Coste Base)</p>
                             <p class="text-lg font-bold text-blue-800">${formatMoney(coef.CB || 300)} €</p>
                         </div>
                         

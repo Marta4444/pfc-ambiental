@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Petitioner;
 use App\Models\ProtectedArea;
 use App\Http\Controllers\Controller;
+use App\Helpers\SpainGeoHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -177,6 +178,19 @@ class ReportController extends Controller
         if ($petitioner && $petitioner->name === 'Otro' && empty($validated['petitioner_other'])) {
             return back()
                 ->withErrors(['petitioner_other' => 'Debe especificar la unidad peticionaria cuando selecciona "Otro".'])
+                ->withInput();
+        }
+
+        // Validación geográfica
+        $geoValidation = SpainGeoHelper::validateGeoData(
+            $validated['community'],
+            $validated['province'],
+            $validated['coordinates'] ?? null
+        );
+        
+        if (!$geoValidation['valid']) {
+            return back()
+                ->withErrors($geoValidation['errors'])
                 ->withInput();
         }
 
@@ -380,6 +394,19 @@ class ReportController extends Controller
                 ->withInput();
         }
 
+        // Validación geográfica (admin)
+        $geoValidation = SpainGeoHelper::validateGeoData(
+            $validated['community'],
+            $validated['province'],
+            $validated['coordinates'] ?? null
+        );
+        
+        if (!$geoValidation['valid']) {
+            return back()
+                ->withErrors($geoValidation['errors'])
+                ->withInput();
+        }
+
         if ($request->hasFile('pdf_report')) {
             if ($report->pdf_report) {
                 Storage::disk('public')->delete($report->pdf_report);
@@ -420,6 +447,19 @@ class ReportController extends Controller
         if ($report->petitioner && $report->petitioner->name === 'Otro' && empty($validated['petitioner_other'])) {
             return back()
                 ->withErrors(['petitioner_other' => 'Debe especificar la unidad peticionaria.'])
+                ->withInput();
+        }
+
+        // Validación geográfica (usuario normal)
+        $geoValidation = SpainGeoHelper::validateGeoData(
+            $validated['community'],
+            $validated['province'],
+            $validated['coordinates'] ?? null
+        );
+        
+        if (!$geoValidation['valid']) {
+            return back()
+                ->withErrors($geoValidation['errors'])
                 ->withInput();
         }
 

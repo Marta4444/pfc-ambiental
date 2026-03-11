@@ -34,7 +34,7 @@
                                 </label>
                                 <input type="text" name="scientific_name" id="scientific_name" 
                                     value="{{ old('scientific_name', $species->scientific_name) }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 italic"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 italic"
                                     required>
                                 @error('scientific_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -47,7 +47,7 @@
                                 </label>
                                 <input type="text" name="common_name" id="common_name" 
                                     value="{{ old('common_name', $species->common_name) }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 @error('common_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -58,7 +58,7 @@
                                     Grupo Taxonómico
                                 </label>
                                 <select name="taxon_group" id="taxon_group" 
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Seleccione...</option>
                                     @foreach($taxonGroups as $group)
                                         <option value="{{ $group }}" {{ old('taxon_group', $species->taxon_group) == $group ? 'selected' : '' }}>
@@ -90,7 +90,7 @@
                                     Estado de Protección BOE
                                 </label>
                                 <select name="boe_status" id="boe_status" 
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">Sin protección</option>
                                     @foreach($boeStatuses as $status)
                                         <option value="{{ $status }}" {{ old('boe_status', $species->boe_status) == $status ? 'selected' : '' }}>
@@ -110,7 +110,7 @@
                                 <input type="text" name="boe_law_ref" id="boe_law_ref" 
                                     value="{{ old('boe_law_ref', $species->boe_law_ref) }}"
                                     placeholder="Ej: Real Decreto 139/2011"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 @error('boe_law_ref')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -123,7 +123,7 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 mr-2 text-eco-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                             </svg>
                             Protección Autonómica
@@ -134,7 +134,7 @@
                                 Estado en Comunidades Autónomas
                             </label>
                             <select name="ccaa_status" id="ccaa_status" 
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 <option value="">Sin protección autonómica</option>
                                 @foreach($ccaaStatuses as $key => $label)
                                     <option value="{{ $key }}" {{ old('ccaa_status', $species->ccaa_status) == $key ? 'selected' : '' }}>
@@ -161,7 +161,7 @@
                                     Categoría IUCN
                                 </label>
                                 <select name="iucn_category" id="iucn_category" 
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">No evaluada</option>
                                     @foreach($iucnCategories as $code => $label)
                                         <option value="{{ $code }}" {{ old('iucn_category', $species->iucn_category) == $code ? 'selected' : '' }}>
@@ -179,7 +179,7 @@
                                     Apéndice CITES
                                 </label>
                                 <select name="cites_appendix" id="cites_appendix" 
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                     <option value="">No incluida</option>
                                     @foreach($citesAppendices as $appendix)
                                         <option value="{{ $appendix }}" {{ old('cites_appendix', $species->cites_appendix) == $appendix ? 'selected' : '' }}>
@@ -200,7 +200,7 @@
                     <a href="{{ route('species.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-200">
                         Cancelar
                     </a>
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>

@@ -47,7 +47,7 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="bg-blue-50 rounded-lg p-4">
-                                <p class="text-sm font-medium text-blue-600">Total de Casos</p>
+                                <p class="text-sm font-medium text-eco-600">Total de Casos</p>
                                 <p class="text-2xl font-bold text-blue-800">{{ $petitioner->reports()->count() }}</p>
                             </div>
                             <div class="bg-gray-50 rounded-lg p-4">
@@ -95,7 +95,7 @@
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                                    <a href="{{ route('reports.show', $report) }}" class="text-blue-600 hover:text-blue-900">Ver</a>
+                                                    <a href="{{ route('reports.show', $report) }}" class="text-eco-600 hover:text-blue-900">Ver</a>
                                                 </td>
                                             </tr>
                                         @endforeach

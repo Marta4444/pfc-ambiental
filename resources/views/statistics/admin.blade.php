@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Panel de Administración') }}
             </h2>
-            <a href="{{ route('statistics.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition ease-in-out duration-150">
+            <a href="{{ route('statistics.index') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                 </svg>
@@ -49,7 +49,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white shadow-sm sm:rounded-lg p-4 border-t-4 border-blue-500">
                     <p class="text-sm text-gray-500">Total Casos</p>
-                    <p class="text-2xl font-bold text-blue-600">{{ number_format($totalReports) }}</p>
+                    <p class="text-2xl font-bold text-eco-600">{{ number_format($totalReports) }}</p>
                 </div>
                 <div class="bg-white shadow-sm sm:rounded-lg p-4 border-t-4 border-green-500">
                     <p class="text-sm text-gray-500">Completados</p>
@@ -255,7 +255,7 @@
                 {{-- Distribución por Comunidad --}}
                 <div class="bg-white shadow-sm sm:rounded-lg p-4">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-2 text-eco-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -286,8 +286,8 @@
                         <p class="text-xl font-bold text-gray-800">{{ number_format($totalCost, 2) }} €</p>
                     </div>
                     <div class="text-center p-3 bg-blue-50 rounded-lg">
-                        <p class="text-xs text-blue-600 uppercase tracking-wide">VR Total</p>
-                        <p class="text-xl font-bold text-blue-700">{{ number_format($vrTotal, 2) }} €</p>
+                        <p class="text-xs text-eco-600 uppercase tracking-wide">VR Total</p>
+                        <p class="text-xl font-bold text-eco-700">{{ number_format($vrTotal, 2) }} €</p>
                     </div>
                     <div class="text-center p-3 bg-green-50 rounded-lg">
                         <p class="text-xs text-green-600 uppercase tracking-wide">VE Total</p>
@@ -440,7 +440,7 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ $report->id }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    <a href="{{ route('reports.show', $report) }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                    <a href="{{ route('reports.show', $report) }}" class="text-sm font-medium text-eco-600 hover:text-blue-800">
                                         {{ Str::limit($report->title, 40) }}
                                     </a>
                                 </td>

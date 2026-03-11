@@ -83,25 +83,43 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <x-input-label for="community" value="Comunidad Autónoma *" />
-                        <x-text-input id="community" name="community" class="mt-1 block w-full" required value="{{ old('community') }}" />
+                        <select id="community" name="community" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Selecciona una comunidad</option>
+                        </select>
                         @error('community')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <x-input-label for="province" value="Provincia *" />
-                        <x-text-input id="province" name="province" class="mt-1 block w-full" required value="{{ old('province') }}" />
+                        <select id="province" name="province" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required disabled>
+                            <option value="">Selecciona primero una comunidad</option>
+                        </select>
                         @error('province')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <x-input-label for="locality" value="Localidad *" />
-                        <x-text-input id="locality" name="locality" class="mt-1 block w-full" required value="{{ old('locality') }}" />
+                        <input 
+                            type="text" 
+                            id="locality" 
+                            name="locality" 
+                            list="locality-suggestions"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" 
+                            required 
+                            disabled
+                            autocomplete="off"
+                            value="{{ old('locality') }}"
+                            placeholder="Escribe para buscar..."
+                        />
+                        <datalist id="locality-suggestions"></datalist>
+                        <p id="locality-hint" class="text-xs text-gray-500 mt-1 hidden">Escribe al menos 2 caracteres para ver sugerencias</p>
                         @error('locality')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <x-input-label for="coordinates" value="Coordenadas (lat,lon)" />
                         <x-text-input id="coordinates" name="coordinates" placeholder="41.12345,-1.23456" class="mt-1 block w-full" value="{{ old('coordinates') }}" />
+                        <p id="coordinates-validation" class="text-xs mt-1 hidden"></p>
                         @error('coordinates')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -206,7 +224,7 @@
 
                     <div>
                         <x-input-label for="pdf_report" value="Adjuntar PDF" />
-                        <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept=".pdf" />
+                        <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-eco-700 hover:file:bg-blue-100" accept=".pdf" />
                         @error('pdf_report')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -224,70 +242,316 @@
 
     {{-- Scripts --}}
     <script>
-        // Manejo de subcategorías dinámicas
-        const categorySelect = document.getElementById('category_id');
-        const subcategorySelect = document.getElementById('subcategory_id');
+        // ============================================
+        // DATOS GEOGRÁFICOS DE ESPAÑA (cargados desde JSON)
+        // ============================================
+        let SPAIN_GEO_DATA = null;
+
+        // Cargar datos geográficos al inicio
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('{{ asset("data/spain-geo.json") }}');
+                if (!response.ok) throw new Error('Error cargando datos geográficos: ' + response.status);
+                SPAIN_GEO_DATA = await response.json();
+                console.log('Datos geográficos cargados:', Object.keys(SPAIN_GEO_DATA.comunidades).length + ' comunidades');
+                initGeoSelectors();
+            } catch (error) {
+                console.error('Error cargando datos geográficos:', error);
+                alert('Error cargando datos geográficos. Por favor, recarga la página.');
+            }
+            
+            // Inicializar categorías y peticionario
+            initCategories();
+            initPetitioner();
+        });
+
+        // ============================================
+        // FUNCIONES DE VALIDACIÓN GEOGRÁFICA
+        // ============================================
+        function getComunidades() {
+            if (!SPAIN_GEO_DATA) return [];
+            return Object.keys(SPAIN_GEO_DATA.comunidades).sort();
+        }
+
+        function getProvincias(comunidad) {
+            if (!SPAIN_GEO_DATA) return [];
+            const data = SPAIN_GEO_DATA.comunidades[comunidad];
+            return data ? Object.keys(data.provincias).sort() : [];
+        }
+
+        function getMunicipios(comunidad, provincia) {
+            if (!SPAIN_GEO_DATA) return [];
+            const data = SPAIN_GEO_DATA.comunidades[comunidad];
+            if (!data || !data.provincias[provincia]) return [];
+            return data.provincias[provincia].municipios.sort();
+        }
+
+        function getComunidadBbox(comunidad) {
+            if (!SPAIN_GEO_DATA) return null;
+            const data = SPAIN_GEO_DATA.comunidades[comunidad];
+            return data ? data.bbox : null;
+        }
+
+        function validateCoordinates(lat, lng, comunidad) {
+            const bbox = getComunidadBbox(comunidad);
+            if (!bbox) return { valid: false, message: 'Comunidad no encontrada' };
+            
+            const inside = lat >= bbox.minLat && lat <= bbox.maxLat &&
+                           lng >= bbox.minLng && lng <= bbox.maxLng;
+            
+            return {
+                valid: inside,
+                message: inside 
+                    ? 'Coordenadas válidas para ' + comunidad
+                    : 'Las coordenadas NO corresponden a ' + comunidad
+            };
+        }
+
+        function parseCoordinates(coordStr) {
+            if (!coordStr) return null;
+            const cleanStr = coordStr.replace(/\s/g, '');
+            const parts = cleanStr.split(',');
+            if (parts.length !== 2) return null;
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+            if (isNaN(lat) || isNaN(lng)) return null;
+            if (lat < 27 || lat > 44 || lng < -19 || lng > 5) return null;
+            return { lat, lng };
+        }
+
+        function searchMunicipios(comunidad, provincia, searchTerm) {
+            const municipios = getMunicipios(comunidad, provincia);
+            if (!searchTerm || searchTerm.length < 2) return municipios.slice(0, 15);
+            
+            const term = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return municipios.filter(m => {
+                const normalized = m.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                return normalized.includes(term);
+            });
+        }
+
+        // ============================================
+        // INICIALIZACIÓN DE SELECTORES GEOGRÁFICOS
+        // ============================================
+        function initGeoSelectors() {
+            const communitySelect = document.getElementById('community');
+            const provinceSelect = document.getElementById('province');
+            const localityInput = document.getElementById('locality');
+            const localitySuggestions = document.getElementById('locality-suggestions');
+            const localityHint = document.getElementById('locality-hint');
+            const coordinatesInput = document.getElementById('coordinates');
+            const coordinatesValidation = document.getElementById('coordinates-validation');
+
+            // Poblar comunidades
+            getComunidades().forEach(c => {
+                const option = document.createElement('option');
+                option.value = c;
+                option.textContent = c;
+                communitySelect.appendChild(option);
+            });
+
+            // Evento: cambio de comunidad
+            communitySelect.addEventListener('change', function() {
+                const comunidad = this.value;
+                provinceSelect.innerHTML = '<option value="">Selecciona una provincia</option>';
+                localityInput.value = '';
+                localitySuggestions.innerHTML = '';
+                
+                if (comunidad) {
+                    getProvincias(comunidad).forEach(p => {
+                        const option = document.createElement('option');
+                        option.value = p;
+                        option.textContent = p;
+                        provinceSelect.appendChild(option);
+                    });
+                    provinceSelect.disabled = false;
+                } else {
+                    provinceSelect.disabled = true;
+                }
+                localityInput.disabled = true;
+                
+                validateCoordinatesField();
+            });
+
+            // Evento: cambio de provincia
+            provinceSelect.addEventListener('change', function() {
+                const provincia = this.value;
+                localityInput.value = '';
+                localitySuggestions.innerHTML = '';
+                
+                if (provincia) {
+                    localityInput.disabled = false;
+                    localityHint.classList.remove('hidden');
+                    updateLocalitySuggestions('');
+                } else {
+                    localityInput.disabled = true;
+                    localityHint.classList.add('hidden');
+                }
+            });
+
+            // Evento: escritura en localidad
+            localityInput.addEventListener('input', function() {
+                updateLocalitySuggestions(this.value);
+            });
+
+            function updateLocalitySuggestions(searchTerm) {
+                const comunidad = communitySelect.value;
+                const provincia = provinceSelect.value;
+                localitySuggestions.innerHTML = '';
+                
+                if (comunidad && provincia) {
+                    const matches = searchMunicipios(comunidad, provincia, searchTerm);
+                    matches.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m;
+                        localitySuggestions.appendChild(option);
+                    });
+                }
+            }
+
+            // Eventos: validación de coordenadas
+            coordinatesInput.addEventListener('input', validateCoordinatesField);
+            coordinatesInput.addEventListener('blur', validateCoordinatesField);
+
+            function validateCoordinatesField() {
+                const coordStr = coordinatesInput.value.trim();
+                const comunidad = communitySelect.value;
+                
+                if (!coordStr) {
+                    coordinatesValidation.classList.add('hidden');
+                    coordinatesInput.classList.remove('border-red-500', 'border-green-500');
+                    return;
+                }
+
+                coordinatesValidation.classList.remove('hidden');
+                
+                const coords = parseCoordinates(coordStr);
+                if (!coords) {
+                    coordinatesValidation.textContent = 'Formato inválido. Use: lat,lon (ej: 40.4168,-3.7038)';
+                    coordinatesValidation.className = 'text-xs mt-1 text-red-600';
+                    coordinatesInput.classList.add('border-red-500');
+                    coordinatesInput.classList.remove('border-green-500');
+                    return;
+                }
+
+                if (!comunidad) {
+                    coordinatesValidation.textContent = 'Selecciona una comunidad para validar las coordenadas';
+                    coordinatesValidation.className = 'text-xs mt-1 text-yellow-600';
+                    coordinatesInput.classList.remove('border-red-500', 'border-green-500');
+                    return;
+                }
+
+                const result = validateCoordinates(coords.lat, coords.lng, comunidad);
+                if (result.valid) {
+                    coordinatesValidation.textContent = '✓ ' + result.message;
+                    coordinatesValidation.className = 'text-xs mt-1 text-green-600';
+                    coordinatesInput.classList.add('border-green-500');
+                    coordinatesInput.classList.remove('border-red-500');
+                } else {
+                    coordinatesValidation.textContent = '✗ ' + result.message;
+                    coordinatesValidation.className = 'text-xs mt-1 text-red-600';
+                    coordinatesInput.classList.add('border-red-500');
+                    coordinatesInput.classList.remove('border-green-500');
+                }
+            }
+
+            // Restaurar valores old() si existen
+            const oldCommunity = "{{ old('community') }}";
+            const oldProvince = "{{ old('province') }}";
+            const oldLocality = "{{ old('locality') }}";
+            
+            if (oldCommunity) {
+                communitySelect.value = oldCommunity;
+                communitySelect.dispatchEvent(new Event('change'));
+                
+                setTimeout(() => {
+                    if (oldProvince) {
+                        provinceSelect.value = oldProvince;
+                        provinceSelect.dispatchEvent(new Event('change'));
+                        
+                        setTimeout(() => {
+                            if (oldLocality) {
+                                localityInput.value = oldLocality;
+                            }
+                        }, 50);
+                    }
+                }, 50);
+            }
+
+            // Validar coordenadas si existen
+            if (coordinatesInput.value) {
+                setTimeout(validateCoordinatesField, 200);
+            }
+        }
+
+        // ============================================
+        // MANEJO DE CATEGORÍAS/SUBCATEGORÍAS
+        // ============================================
         const subcategories = @json($subcategories->map(fn($s) => [
             'id' => $s->id,
             'name' => $s->name,
             'category_id' => $s->category_id
         ]));
 
-        function populateSubcategories(categoryId, selectedId = null) {
-            subcategorySelect.innerHTML = '<option value="">Selecciona una subcategoría</option>';
-            if (!categoryId) return;
-            
-            subcategories
-                .filter(s => s.category_id === parseInt(categoryId))
-                .forEach(s => {
-                    const option = document.createElement('option');
-                    option.value = s.id;
-                    option.textContent = s.name;
-                    if (selectedId && parseInt(selectedId) === s.id) option.selected = true;
-                    subcategorySelect.appendChild(option);
-                });
-        }
+        function initCategories() {
+            const categorySelect = document.getElementById('category_id');
+            const subcategorySelect = document.getElementById('subcategory_id');
 
-        categorySelect.addEventListener('change', function() {
-            populateSubcategories(this.value);
-        });
+            function populateSubcategories(categoryId, selectedId = null) {
+                subcategorySelect.innerHTML = '<option value="">Selecciona una subcategoría</option>';
+                if (!categoryId) return;
+                
+                subcategories
+                    .filter(s => s.category_id === parseInt(categoryId))
+                    .forEach(s => {
+                        const option = document.createElement('option');
+                        option.value = s.id;
+                        option.textContent = s.name;
+                        if (selectedId && parseInt(selectedId) === s.id) option.selected = true;
+                        subcategorySelect.appendChild(option);
+                    });
+            }
 
-        // Restaurar valores en caso de error de validación
-        document.addEventListener('DOMContentLoaded', function() {
+            categorySelect.addEventListener('change', function() {
+                populateSubcategories(this.value);
+            });
+
+            // Restaurar valores
             const oldCategory = "{{ old('category_id') }}";
             const oldSubcategory = "{{ old('subcategory_id') }}";
             if (oldCategory) {
                 categorySelect.value = oldCategory;
                 populateSubcategories(oldCategory, oldSubcategory);
             }
-        });
+        }
 
-        // Manejo del campo "Otro" en peticionario - CAMBIO
-        const petitionerSelect = document.getElementById('petitioner_id');
-        const petitionerOtherWrapper = document.getElementById('petitioner_other_wrapper');
-        const petitionerOtherInput = document.getElementById('petitioner_other');
-
-        // Obtener los datos de petitioners con sus IDs
+        // ============================================
+        // MANEJO DEL CAMPO "OTRO" EN PETICIONARIO
+        // ============================================
         const petitioners = @json($petitioners->map(fn($p) => [
             'id' => $p->id,
             'name' => $p->name
         ]));
 
-        petitionerSelect.addEventListener('change', function() {
-            const selectedPetitioner = petitioners.find(p => p.id === parseInt(this.value));
-            
-            if (selectedPetitioner && selectedPetitioner.name === 'Otro') {
-                petitionerOtherWrapper.style.display = 'block';
-                petitionerOtherInput.required = true;
-            } else {
-                petitionerOtherWrapper.style.display = 'none';
-                petitionerOtherInput.required = false;
-                petitionerOtherInput.value = '';
-            }
-        });
+        function initPetitioner() {
+            const petitionerSelect = document.getElementById('petitioner_id');
+            const petitionerOtherWrapper = document.getElementById('petitioner_other_wrapper');
+            const petitionerOtherInput = document.getElementById('petitioner_other');
 
-        // Verificar al cargar la página (por si hay old values)
-        document.addEventListener('DOMContentLoaded', function() {
+            petitionerSelect.addEventListener('change', function() {
+                const selectedPetitioner = petitioners.find(p => p.id === parseInt(this.value));
+                
+                if (selectedPetitioner && selectedPetitioner.name === 'Otro') {
+                    petitionerOtherWrapper.style.display = 'block';
+                    petitionerOtherInput.required = true;
+                } else {
+                    petitionerOtherWrapper.style.display = 'none';
+                    petitionerOtherInput.required = false;
+                    petitionerOtherInput.value = '';
+                }
+            });
+
+            // Restaurar valores
             const oldPetitionerId = "{{ old('petitioner_id') }}";
             if (oldPetitionerId) {
                 const selectedPetitioner = petitioners.find(p => p.id === parseInt(oldPetitionerId));
@@ -296,6 +560,6 @@
                     petitionerOtherInput.required = true;
                 }
             }
-        });
+        }
     </script>
 </x-app-layout>

@@ -221,14 +221,14 @@
 
                         {{-- Botones --}}
                         <div class="mt-6 pt-6 border-t border-gray-200 flex justify-between">
-                            <a href="{{ route('report-details.index', $report) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-blue-700">
+                            <a href="{{ route('report-details.index', $report) }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-eco-700">
                                 Cancelar
                             </a>
                             <div class="flex gap-2">
-                                <button type="submit" name="add_another" value="1" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                                <button type="submit" name="add_another" value="1" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                                     Guardar y Añadir Otro
                                 </button>
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                                     Guardar Detalles
                                 </button>
                             </div>

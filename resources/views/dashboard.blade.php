@@ -7,13 +7,13 @@
 
             {{-- Botones de acción rápida --}}
             <div class="flex gap-2">
-                <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition ease-in-out duration-150">
+                <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Ver Casos
                 </a>
-                <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition ease-in-out duration-150">
+                <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -47,7 +47,7 @@
                     </div>
                     <div class="flex flex-wrap gap-4 md:gap-6">
                         <div class="text-center px-3 md:px-4 md:border-r border-gray-200">
-                            <p class="text-2xl font-bold text-blue-600">{{ $totalCasos }}</p>
+                            <p class="text-2xl font-bold text-eco-600">{{ $totalCasos }}</p>
                             <p class="text-xs text-gray-500">Total Casos</p>
                         </div>
                         <div class="text-center px-3 md:px-4 md:border-r border-gray-200">
@@ -75,23 +75,23 @@
                     {{-- Gestión de Casos --}}
                     <div class="bg-white shadow-sm sm:rounded-lg p-4">
                         <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 flex items-center">
-                            <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 mr-2 text-eco-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             Gestión de Casos
                         </h4>
                         <div class="flex gap-2">
-                            <a href="{{ route('reports.index') }}" class="flex-1 flex items-center justify-center p-2 bg-gray-50 rounded hover:bg-blue-50 transition group">
-                                <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <a href="{{ route('reports.index') }}" class="flex-1 flex items-center justify-center p-2 bg-gray-50 rounded hover:bg-eco-50 transition group">
+                                <svg class="w-4 h-4 text-eco-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                                 </svg>
-                                <span class="text-sm text-gray-700 group-hover:text-blue-700">Ver todos</span>
+                                <span class="text-sm text-gray-700 group-hover:text-eco-700">Ver todos</span>
                             </a>
-                            <a href="{{ route('reports.create') }}" class="flex-1 flex items-center justify-center p-2 bg-gray-50 rounded hover:bg-blue-50 transition group">
-                                <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <a href="{{ route('reports.create') }}" class="flex-1 flex items-center justify-center p-2 bg-gray-50 rounded hover:bg-eco-50 transition group">
+                                <svg class="w-4 h-4 text-eco-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                <span class="text-sm text-gray-700 group-hover:text-blue-700">Crear nuevo</span>
+                                <span class="text-sm text-gray-700 group-hover:text-eco-700">Crear nuevo</span>
                             </a>
                         </div>
                     </div>
@@ -198,20 +198,20 @@
                     <div class="bg-white shadow-sm sm:rounded-lg p-4 border-l-4 border-blue-500">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
-                                <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 mr-2 text-eco-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 Áreas Protegidas
                             </h4>
-                            <span class="text-sm"><span class="font-bold text-blue-600">{{ $totalAreas }}</span> <span class="text-gray-500">activas</span></span>
+                            <span class="text-sm"><span class="font-bold text-eco-600">{{ $totalAreas }}</span> <span class="text-gray-500">activas</span></span>
                         </div>
                         <div class="flex gap-2">
                             <a href="{{ route('protected-areas.index') }}" class="flex-1 flex items-center justify-center p-2 bg-blue-50 rounded hover:bg-blue-100 transition group">
-                                <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-eco-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                                 </svg>
-                                <span class="text-sm text-gray-700 group-hover:text-blue-700">Ver todas</span>
+                                <span class="text-sm text-gray-700 group-hover:text-eco-700">Ver todas</span>
                             </a>
                             <a href="{{ route('protected-areas.check') }}" class="flex-1 flex items-center justify-center p-2 bg-teal-50 rounded hover:bg-teal-100 transition group">
                                 <svg class="w-4 h-4 text-teal-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,10 +220,10 @@
                                 <span class="text-sm text-gray-700 group-hover:text-teal-700">Mapa</span>
                             </a>
                             <a href="{{ route('protected-areas.create') }}" class="flex-1 flex items-center justify-center p-2 bg-blue-50 rounded hover:bg-blue-100 transition group">
-                                <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-eco-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                <span class="text-sm text-gray-700 group-hover:text-blue-700">Nueva</span>
+                                <span class="text-sm text-gray-700 group-hover:text-eco-700">Nueva</span>
                             </a>
                         </div>
                     </div>
@@ -319,12 +319,12 @@
                         <div class="p-4 border-b border-gray-200">
                             <div class="flex justify-between items-center">
                                 <h4 class="text-lg font-semibold text-gray-800 flex items-center">
-                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 mr-2 text-eco-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
                                     Mis Casos Pendientes
                                 </h4>
-                                <a href="{{ route('reports.index', ['assigned_to' => $userId]) }}" class="text-sm text-blue-600 hover:text-blue-800">Ver todos →</a>
+                                <a href="{{ route('reports.index', ['assigned_to' => $userId]) }}" class="text-sm text-eco-600 hover:text-blue-800">Ver todos →</a>
                             </div>
                         </div>
                         <div class="p-4">
@@ -434,8 +434,8 @@
                                     <p class="text-xs text-emerald-500 mt-1">{{ $casosConCostes }} casos valorados</p>
                                 </div>
                                 <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center">
-                                    <p class="text-xs text-blue-600 font-medium uppercase">VR Total</p>
-                                    <p class="text-lg font-bold text-blue-700">{{ number_format($vrTotalGlobal, 2, ',', '.') }} €</p>
+                                    <p class="text-xs text-eco-600 font-medium uppercase">VR Total</p>
+                                    <p class="text-lg font-bold text-eco-700">{{ number_format($vrTotalGlobal, 2, ',', '.') }} €</p>
                                     <p class="text-xs text-blue-500 mt-1">Valor Reposición</p>
                                 </div>
                                 <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 text-center">
@@ -508,7 +508,7 @@
                                             @foreach($topCasosCoste as $index => $caso)
                                             <tr class="hover:bg-gray-50">
                                                 <td class="px-3 py-2">
-                                                    <a href="{{ route('reports.show', $caso) }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                                    <a href="{{ route('reports.show', $caso) }}" class="text-sm font-medium text-eco-600 hover:text-blue-800">
                                                         {{ $caso->ip }}
                                                     </a>
                                                     <p class="text-xs text-gray-500 truncate max-w-xs">{{ $caso->title }}</p>

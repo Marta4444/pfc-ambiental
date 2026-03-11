@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Gestión de Casos') }}
             </h2>
-            <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 focus:bg-eco-700 active:bg-eco-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -32,7 +32,7 @@
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">Filtros de Búsqueda</h3>
-                        <button type="button" id="toggleFilters" class="text-sm text-blue-600 hover:text-blue-800">
+                        <button type="button" id="toggleFilters" class="text-sm text-eco-600 hover:text-blue-800">
                             Mostrar/Ocultar filtros avanzados
                         </button>
                     </div>
@@ -206,7 +206,7 @@
 
             {{-- Información de resultados --}}
             @if(request()->hasAny(['search', 'status', 'category_id', 'urgency', 'user_id', 'assigned_to', 'petitioner_id', 'community', 'province', 'date_from', 'date_to', 'subcategory_id']))
-                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
+                <div class="bg-blue-50 border border-blue-200 text-eco-700 px-4 py-3 rounded mb-4">
                     <div class="flex items-center justify-between">
                         <span class="font-medium">
                             Mostrando {{ $reports->total() }} resultado(s) de búsqueda
@@ -240,7 +240,7 @@
                                         Ver todos los casos
                                     </a>
                                 @endif
-                                <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <a href="{{ route('reports.create') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 focus:bg-eco-700 active:bg-eco-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     Crear Primer Caso
                                 </a>
                             </div>
@@ -266,7 +266,7 @@
                                     @foreach($reports as $report)
                                         <tr class="hover:bg-gray-50 transition-colors duration-150">
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <a href="{{ route('reports.show', $report) }}" class="text-sm font-medium text-blue-600 hover:text-blue-900 hover:underline">
+                                                <a href="{{ route('reports.show', $report) }}" class="text-sm font-medium text-eco-600 hover:text-blue-900 hover:underline">
                                                     {{ $report->ip }}
                                                 </a>
                                             </td>
@@ -318,7 +318,7 @@
                                                 <div class="text-xs text-gray-400">{{ $report->created_at->format('H:i') }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                                <a href="{{ route('reports.show', $report) }}" class="text-blue-600 hover:text-blue-900" title="Ver detalles">Ver</a>
+                                                <a href="{{ route('reports.show', $report) }}" class="text-eco-600 hover:text-blue-900" title="Ver detalles">Ver</a>
                                                 
                                                 @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id())
                                                     <a href="{{ route('reports.edit', $report) }}" class="text-indigo-600 hover:text-indigo-900" title="Editar caso">Editar</a>
@@ -350,7 +350,7 @@
                                     <p class="text-xs text-gray-500 uppercase">Total casos</p>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-bold text-blue-600">{{ \App\Models\Report::where('status', 'nuevo')->count() }}</p>
+                                    <p class="text-2xl font-bold text-eco-600">{{ \App\Models\Report::where('status', 'nuevo')->count() }}</p>
                                     <p class="text-xs text-gray-500 uppercase">Nuevos</p>
                                 </div>
                                 <div>

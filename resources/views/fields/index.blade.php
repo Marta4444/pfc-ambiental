@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Gestión de Campos Dinámicos') }}
             </h2>
-            <a href="{{ route('fields.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+            <a href="{{ route('fields.create') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -37,7 +37,7 @@
                             <h3 class="mt-2 text-sm font-medium text-gray-900">No hay campos creados</h3>
                             <p class="mt-1 text-sm text-gray-500">Comienza creando un nuevo campo dinámico.</p>
                             <div class="mt-6">
-                                <a href="{{ route('fields.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                                <a href="{{ route('fields.create') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                                     Crear Primer Campo
                                 </a>
                             </div>
@@ -61,7 +61,7 @@
                                             <td class="px-6 py-4">
                                                 <div class="flex items-start">
                                                     <div>
-                                                        <a href="{{ route('fields.show', $field) }}" class="text-sm font-medium text-blue-600 hover:text-blue-900 hover:underline">
+                                                        <a href="{{ route('fields.show', $field) }}" class="text-sm font-medium text-eco-600 hover:text-blue-900 hover:underline">
                                                             {{ $field->label }}
                                                         </a>
                                                         <p class="text-xs text-gray-500 mt-1">
@@ -102,7 +102,7 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                                <a href="{{ route('fields.show', $field) }}" class="text-blue-600 hover:text-blue-900">Ver</a>
+                                                <a href="{{ route('fields.show', $field) }}" class="text-eco-600 hover:text-blue-900">Ver</a>
                                                 <a href="{{ route('fields.edit', $field) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
                                                 
                                                 <form action="{{ route('fields.toggleActive', $field) }}" method="POST" class="inline">

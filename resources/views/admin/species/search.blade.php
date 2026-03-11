@@ -39,11 +39,11 @@
                             <div class="flex-1">
                                 <input type="text" name="q" value="{{ request('q') }}"
                                     placeholder="Nombre científico o común (ej: Lynx pardinus, lince ibérico)"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500"
                                     required minlength="3">
                             </div>
                             <button type="submit" 
-                                class="inline-flex items-center px-6 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-blue-700">
+                                class="inline-flex items-center px-6 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-sm text-white uppercase tracking-widest hover:bg-eco-700">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
@@ -157,18 +157,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
                         <h4 class="font-semibold text-blue-900">GBIF</h4>
-                        <p class="text-blue-700">Base de datos global de biodiversidad. Proporciona datos taxonómicos, ocurrencias y distribución.</p>
-                        <a href="https://www.gbif.org" target="_blank" class="text-blue-600 hover:underline text-xs">www.gbif.org</a>
+                        <p class="text-eco-700">Base de datos global de biodiversidad. Proporciona datos taxonómicos, ocurrencias y distribución.</p>
+                        <a href="https://www.gbif.org" target="_blank" class="text-eco-600 hover:underline text-xs">www.gbif.org</a>
                     </div>
                     <div>
                         <h4 class="font-semibold text-blue-900">IUCN Red List</h4>
-                        <p class="text-blue-700">Lista Roja de especies amenazadas. Proporciona categorías de conservación (CR, EN, VU, etc.).</p>
-                        <a href="https://www.iucnredlist.org" target="_blank" class="text-blue-600 hover:underline text-xs">www.iucnredlist.org</a>
+                        <p class="text-eco-700">Lista Roja de especies amenazadas. Proporciona categorías de conservación (CR, EN, VU, etc.).</p>
+                        <a href="https://www.iucnredlist.org" target="_blank" class="text-eco-600 hover:underline text-xs">www.iucnredlist.org</a>
                     </div>
                     <div>
                         <h4 class="font-semibold text-blue-900">CITES Species+</h4>
-                        <p class="text-blue-700">Convención sobre comercio de especies amenazadas. Proporciona apéndices de protección.</p>
-                        <a href="https://speciesplus.net" target="_blank" class="text-blue-600 hover:underline text-xs">speciesplus.net</a>
+                        <p class="text-eco-700">Convención sobre comercio de especies amenazadas. Proporciona apéndices de protección.</p>
+                        <a href="https://speciesplus.net" target="_blank" class="text-eco-600 hover:underline text-xs">speciesplus.net</a>
                     </div>
                 </div>
             </div>

@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ================================
+   TEMA MEDIOAMBIENTAL - PFC Ambiental
+   ================================ */
+
+@layer components {
+    /* Botones primarios verdes */
+    .btn-eco {
+        @apply inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 focus:bg-eco-700 active:bg-eco-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:ring-offset-2 transition ease-in-out duration-150;
+    }
+
+    .btn-eco-secondary {
+        @apply inline-flex items-center px-4 py-2 bg-white border border-eco-300 rounded-md font-semibold text-xs text-eco-700 uppercase tracking-widest shadow-sm hover:bg-eco-50 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:ring-offset-2 transition ease-in-out duration-150;
+    }
+
+    /* Cards con borde verde sutil */
+    .card-eco {
+        @apply bg-white overflow-hidden shadow-sm rounded-lg border-l-4 border-eco-500;
+    }
+
+    /* Badge eco */
+    .badge-eco {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-eco-100 text-eco-800;
+    }
+
+    /* Input focus verde */
+    .input-eco:focus {
+        @apply border-eco-500 ring-eco-500;
+    }
+}
+
+@layer utilities {
+    /* Gradiente sutil para headers */
+    .eco-gradient {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    }
+
+    /* Sombra verde sutil */
+    .shadow-eco {
+        box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.1), 0 2px 4px -1px rgba(22, 163, 74, 0.06);
+    }
+}

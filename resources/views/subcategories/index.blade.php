@@ -28,7 +28,7 @@
                 </div>
 
                 @if(request('active') !== null)
-                    <a href="{{ route('subcategories.index') }}" class="text-sm text-blue-600 hover:underline">Limpiar filtros</a>
+                    <a href="{{ route('subcategories.index') }}" class="text-sm text-eco-600 hover:underline">Limpiar filtros</a>
                 @endif
             </div>
         </form>
@@ -51,7 +51,7 @@
 
                                 @if($items->first()->category)
                                     <a href="{{ route('categories.show', $items->first()->category) }}"
-                                       class="ml-2 inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded text-sm hover:bg-blue-100 transition">
+                                       class="ml-2 inline-flex items-center px-3 py-1 bg-blue-50 text-eco-700 border border-blue-200 rounded text-sm hover:bg-blue-100 transition">
                                         Ver categoría
                                     </a>
                                 @endif
@@ -77,7 +77,7 @@
 
                                     <div class="mt-4 flex flex-wrap items-center gap-2">
                                         <a href="{{ route('subcategories.show', $subcategory) }}"
-                                           class="inline-flex items-center px-3 py-1 bg-white text-blue-700 border border-blue-200 rounded text-sm hover:bg-blue-50 transition">
+                                           class="inline-flex items-center px-3 py-1 bg-white text-eco-700 border border-blue-200 rounded text-sm hover:bg-eco-50 transition">
                                             Ver
                                         </a>
 

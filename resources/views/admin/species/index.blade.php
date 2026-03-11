@@ -17,7 +17,7 @@
                     </svg>
                     Exportar CSV
                 </a>
-                <a href="{{ route('admin.species.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                <a href="{{ route('admin.species.create') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -115,7 +115,7 @@
                     <p class="text-xs text-gray-500">Protegidas</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-blue-600">{{ $stats['synced'] }}</p>
+                    <p class="text-2xl font-bold text-eco-600">{{ $stats['synced'] }}</p>
                     <p class="text-xs text-gray-500">Sincronizadas</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
@@ -140,11 +140,11 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
                             <input type="text" name="search" value="{{ request('search') }}" 
                                 placeholder="Nombre científico o común..."
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Estado Sync</label>
-                            <select name="sync_status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <select name="sync_status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 <option value="">Todos</option>
                                 <option value="synced" {{ request('sync_status') == 'synced' ? 'selected' : '' }}>Sincronizados</option>
                                 <option value="pending" {{ request('sync_status') == 'pending' ? 'selected' : '' }}>Pendientes</option>
@@ -153,7 +153,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fuente</label>
-                            <select name="sync_source" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <select name="sync_source" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 <option value="">Todas</option>
                                 <option value="gbif" {{ request('sync_source') == 'gbif' ? 'selected' : '' }}>GBIF</option>
                                 <option value="iucn" {{ request('sync_source') == 'iucn' ? 'selected' : '' }}>IUCN</option>
@@ -163,14 +163,14 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Protección</label>
-                            <select name="is_protected" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <select name="is_protected" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
                                 <option value="">Todas</option>
                                 <option value="1" {{ request('is_protected') == '1' ? 'selected' : '' }}>Protegidas</option>
                                 <option value="0" {{ request('is_protected') == '0' ? 'selected' : '' }}>No protegidas</option>
                             </select>
                         </div>
                         <div class="flex items-end gap-2">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700">
                                 Filtrar
                             </button>
                             <a href="{{ route('admin.species.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-200">
@@ -274,7 +274,7 @@
                                                 </svg>
                                             </button>
                                         </form>
-                                        <a href="{{ route('admin.species.edit', $sp) }}" class="text-blue-600 hover:text-blue-900" title="Editar">
+                                        <a href="{{ route('admin.species.edit', $sp) }}" class="text-eco-600 hover:text-blue-900" title="Editar">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>

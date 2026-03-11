@@ -28,7 +28,7 @@
                 </div>
 
                 @if(request('active') !== null)
-                    <a href="{{ route('categories.index') }}" class="text-sm text-blue-600 hover:underline">Limpiar filtros</a>
+                    <a href="{{ route('categories.index') }}" class="text-sm text-eco-600 hover:underline">Limpiar filtros</a>
                 @endif
             </div>
         </form>
@@ -60,7 +60,7 @@
                                 <td class="px-4 py-2 border">{{ optional($category->created_at)->format('d/m/Y') }}</td>
                                 <td class="px-4 py-2 border">
                                     <div class="flex items-center space-x-2">
-                                        <a href="{{ route('categories.show', $category) }}" class="text-blue-600 hover:underline text-sm">Ver</a>
+                                        <a href="{{ route('categories.show', $category) }}" class="text-eco-600 hover:underline text-sm">Ver</a>
 
                                         @if($isAdmin)
                                             <a href="{{ route('categories.edit', $category) }}" class="text-yellow-600 hover:underline text-sm">Editar</a>
