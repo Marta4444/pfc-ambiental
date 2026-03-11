@@ -5,6 +5,47 @@
         </h2>
     </x-slot>
 
+    @php
+        // Opciones válidas para campos de protección (según normativa oficial)
+        $protectionFieldOptions = [
+            'iucn_category' => [
+                '' => 'Seleccionar categoría IUCN...',
+                'EX' => 'EX - Extinto',
+                'EW' => 'EW - Extinto en Estado Silvestre',
+                'CR' => 'CR - En Peligro Crítico',
+                'EN' => 'EN - En Peligro',
+                'VU' => 'VU - Vulnerable',
+                'NT' => 'NT - Casi Amenazado',
+                'LC' => 'LC - Preocupación Menor',
+                'DD' => 'DD - Datos Insuficientes',
+                'NE' => 'NE - No Evaluado',
+            ],
+            'boe_status' => [
+                '' => 'Seleccionar protección BOE/LESPRE...',
+                'En peligro de extinción' => 'En peligro de extinción',
+                'Vulnerable' => 'Vulnerable',
+                'En régimen de protección especial' => 'En régimen de protección especial',
+                'No incluido' => 'No incluido en catálogo nacional',
+            ],
+            'ccaa_status' => [
+                '' => 'Seleccionar protección autonómica...',
+                'En peligro de extinción' => 'En peligro de extinción',
+                'Vulnerable' => 'Vulnerable',
+                'Sensible a la alteración de su hábitat' => 'Sensible a la alteración de su hábitat',
+                'De interés especial' => 'De interés especial',
+                'No catalogada' => 'No catalogada en CCAA',
+            ],
+            'cites_appendix' => [
+                '' => 'Seleccionar apéndice CITES...',
+                'I' => 'Apéndice I - Comercio prohibido',
+                'II' => 'Apéndice II - Comercio regulado',
+                'III' => 'Apéndice III - Listado por países',
+                'No incluido' => 'No incluido en CITES',
+            ],
+        ];
+        $protectionFieldKeys = array_keys($protectionFieldOptions);
+    @endphp
+
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             @if (session('success'))
@@ -197,19 +238,36 @@
                                             @break
 
                                         @default
-                                            <input 
-                                                type="text" 
-                                                name="fields[{{ $field->key_name }}]" 
-                                                id="field_{{ $field->key_name }}"
-                                                value="{{ old("fields.{$field->key_name}", $field->pivot->default_value) }}"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                placeholder="{{ $field->placeholder }}"
-                                                {{ $field->pivot->is_required ? 'required' : '' }}
-                                                @if($field->key_name === 'especie')
-                                                    list="species-list"
-                                                    autocomplete="off"
-                                                @endif
-                                            >
+                                            @if(in_array($field->key_name, $protectionFieldKeys))
+                                                {{-- Campo de protección: usar SELECT con opciones válidas --}}
+                                                <select 
+                                                    name="fields[{{ $field->key_name }}]" 
+                                                    id="field_{{ $field->key_name }}"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
+                                                    {{ $field->pivot->is_required ? 'required' : '' }}
+                                                >
+                                                    @foreach($protectionFieldOptions[$field->key_name] as $value => $label)
+                                                        <option value="{{ $value }}" {{ old("fields.{$field->key_name}", $field->pivot->default_value) == $value ? 'selected' : '' }}>
+                                                            {{ $label }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            @else
+                                                {{-- Campo normal: usar INPUT --}}
+                                                <input 
+                                                    type="text" 
+                                                    name="fields[{{ $field->key_name }}]" 
+                                                    id="field_{{ $field->key_name }}"
+                                                    value="{{ old("fields.{$field->key_name}", $field->pivot->default_value) }}"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                    placeholder="{{ $field->placeholder }}"
+                                                    {{ $field->pivot->is_required ? 'required' : '' }}
+                                                    @if($field->key_name === 'especie')
+                                                        list="species-list"
+                                                        autocomplete="off"
+                                                    @endif
+                                                >
+                                            @endif
                                     @endswitch
 
                                     @error("fields.{$field->key_name}")
@@ -335,43 +393,62 @@
             let hasEditableFields = false;
 
             Object.entries(protectionFields).forEach(([fieldKey, data]) => {
-                const input = document.getElementById(`field_${fieldKey}`);
-                if (!input) return;
+                const element = document.getElementById(`field_${fieldKey}`);
+                if (!element) return;
+
+                const isSelect = element.tagName === 'SELECT';
 
                 // Resetear estilos
-                input.classList.remove('bg-green-50', 'border-green-300', 'bg-yellow-50', 'border-yellow-300', 'bg-gray-100', 'cursor-not-allowed');
-                input.readOnly = false;
-                input.title = '';
+                element.classList.remove('bg-green-50', 'border-green-300', 'bg-yellow-50', 'border-yellow-300', 'bg-gray-100', 'cursor-not-allowed', 'opacity-60');
+                element.disabled = false;
+                element.title = '';
+                
+                // Eliminar campo hidden previo si existe
+                const hiddenField = document.getElementById(`field_${fieldKey}_hidden`);
+                if (hiddenField) hiddenField.remove();
 
                 if (data.hasData && data.value) {
-                    // TIENE DATOS: Autorellenar y hacer readonly
-                    if (input.tagName === 'SELECT') {
-                        const options = Array.from(input.options);
-                        const match = options.find(opt => 
-                            opt.value.toLowerCase() === String(data.value).toLowerCase() ||
-                            opt.textContent.toLowerCase().includes(String(data.value).toLowerCase())
-                        );
-                        if (match) input.value = match.value;
+                    // TIENE DATOS: Autorellenar y hacer readonly/disabled
+                    if (isSelect) {
+                        // Buscar la opción que coincida
+                        const options = Array.from(element.options);
+                        const match = options.find(opt => {
+                            const optValue = opt.value.toLowerCase();
+                            const dataValue = String(data.value).toLowerCase();
+                            return optValue === dataValue || 
+                                   optValue.includes(dataValue) ||
+                                   opt.textContent.toLowerCase().includes(dataValue);
+                        });
+                        if (match) {
+                            element.value = match.value;
+                        }
+                        
+                        // Deshabilitar SELECT y crear hidden para enviar valor
+                        element.disabled = true;
+                        const hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = element.name;
+                        hidden.id = `field_${fieldKey}_hidden`;
+                        hidden.value = element.value;
+                        element.parentNode.appendChild(hidden);
                     } else {
-                        input.value = data.value;
+                        element.value = data.value;
+                        element.readOnly = true;
                     }
                     
-                    // Hacer readonly - Ya tiene datos de la BD
-                    input.readOnly = true;
-                    input.classList.add('bg-gray-100', 'cursor-not-allowed');
-                    input.title = 'Este campo ya tiene datos registrados en el sistema.';
+                    element.classList.add('bg-gray-100', 'cursor-not-allowed', 'opacity-60');
+                    element.title = 'Este campo ya tiene datos registrados en el sistema. No es editable.';
                     
                     // Indicador visual temporal de autorellenado
-                    input.classList.add('bg-green-50', 'border-green-300');
+                    element.classList.add('bg-green-50', 'border-green-300');
                     setTimeout(() => {
-                        input.classList.remove('bg-green-50', 'border-green-300');
-                        input.classList.add('bg-gray-100');
+                        element.classList.remove('bg-green-50', 'border-green-300');
+                        element.classList.add('bg-gray-100');
                     }, 1500);
                 } else {
                     // NO TIENE DATOS: Dejar editable para que el usuario lo complete
-                    input.value = '';
-                    input.classList.add('bg-yellow-50', 'border-yellow-300');
-                    input.placeholder = 'Introduce el valor (se guardará para futuras consultas)';
+                    element.value = '';
+                    element.classList.add('bg-yellow-50', 'border-yellow-300');
                     hasEditableFields = true;
                 }
             });
@@ -391,14 +468,20 @@
             const protectionFieldKeys = ['boe_status', 'ccaa_status', 'iucn_category', 'cites_appendix'];
             
             protectionFieldKeys.forEach(fieldKey => {
-                const input = document.getElementById(`field_${fieldKey}`);
-                if (!input) return;
+                const element = document.getElementById(`field_${fieldKey}`);
+                if (!element) return;
                 
-                input.value = '';
-                input.readOnly = false;
-                input.classList.remove('bg-green-50', 'border-green-300', 'bg-yellow-50', 'border-yellow-300', 'bg-gray-100', 'cursor-not-allowed');
-                input.title = '';
-                input.placeholder = '';
+                const isSelect = element.tagName === 'SELECT';
+                
+                element.value = '';
+                element.disabled = false;
+                if (!isSelect) element.readOnly = false;
+                element.classList.remove('bg-green-50', 'border-green-300', 'bg-yellow-50', 'border-yellow-300', 'bg-gray-100', 'cursor-not-allowed', 'opacity-60');
+                element.title = '';
+                
+                // Eliminar campo hidden si existe
+                const hiddenField = document.getElementById(`field_${fieldKey}_hidden`);
+                if (hiddenField) hiddenField.remove();
             });
 
             const editableNotice = document.getElementById('editable-fields-notice');

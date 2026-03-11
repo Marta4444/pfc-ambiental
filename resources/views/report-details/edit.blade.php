@@ -5,6 +5,47 @@
         </h2>
     </x-slot>
 
+    @php
+        // Opciones válidas para campos de protección (según normativa oficial)
+        $protectionFieldOptions = [
+            'iucn_category' => [
+                '' => 'Seleccionar categoría IUCN...',
+                'EX' => 'EX - Extinto',
+                'EW' => 'EW - Extinto en Estado Silvestre',
+                'CR' => 'CR - En Peligro Crítico',
+                'EN' => 'EN - En Peligro',
+                'VU' => 'VU - Vulnerable',
+                'NT' => 'NT - Casi Amenazado',
+                'LC' => 'LC - Preocupación Menor',
+                'DD' => 'DD - Datos Insuficientes',
+                'NE' => 'NE - No Evaluado',
+            ],
+            'boe_status' => [
+                '' => 'Seleccionar protección BOE/LESPRE...',
+                'En peligro de extinción' => 'En peligro de extinción',
+                'Vulnerable' => 'Vulnerable',
+                'En régimen de protección especial' => 'En régimen de protección especial',
+                'No incluido' => 'No incluido en catálogo nacional',
+            ],
+            'ccaa_status' => [
+                '' => 'Seleccionar protección autonómica...',
+                'En peligro de extinción' => 'En peligro de extinción',
+                'Vulnerable' => 'Vulnerable',
+                'Sensible a la alteración de su hábitat' => 'Sensible a la alteración de su hábitat',
+                'De interés especial' => 'De interés especial',
+                'No catalogada' => 'No catalogada en CCAA',
+            ],
+            'cites_appendix' => [
+                '' => 'Seleccionar apéndice CITES...',
+                'I' => 'Apéndice I - Comercio prohibido',
+                'II' => 'Apéndice II - Comercio regulado',
+                'III' => 'Apéndice III - Listado por países',
+                'No incluido' => 'No incluido en CITES',
+            ],
+        ];
+        $protectionFieldKeys = array_keys($protectionFieldOptions);
+    @endphp
+
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             @if (session('success'))
@@ -196,19 +237,36 @@
                                                 @break
 
                                             @default
-                                                <input 
-                                                    type="text" 
-                                                    name="fields[{{ $field->key_name }}]" 
-                                                    id="field_{{ $field->key_name }}"
-                                                    value="{{ old("fields.{$field->key_name}", $currentValue) }}"
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                    placeholder="{{ $field->placeholder }}"
-                                                    {{ $field->pivot->is_required ? 'required' : '' }}
-                                                    @if($field->key_name === 'especie')
-                                                        list="species-list"
-                                                        autocomplete="off"
-                                                    @endif
-                                                >
+                                                @if(in_array($field->key_name, $protectionFieldKeys))
+                                                    {{-- Campo de protección: usar SELECT con opciones válidas --}}
+                                                    <select 
+                                                        name="fields[{{ $field->key_name }}]" 
+                                                        id="field_{{ $field->key_name }}"
+                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
+                                                        {{ $field->pivot->is_required ? 'required' : '' }}
+                                                    >
+                                                        @foreach($protectionFieldOptions[$field->key_name] as $value => $label)
+                                                            <option value="{{ $value }}" {{ old("fields.{$field->key_name}", $currentValue) == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                @else
+                                                    {{-- Campo normal: usar INPUT --}}
+                                                    <input 
+                                                        type="text" 
+                                                        name="fields[{{ $field->key_name }}]" 
+                                                        id="field_{{ $field->key_name }}"
+                                                        value="{{ old("fields.{$field->key_name}", $currentValue) }}"
+                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                        placeholder="{{ $field->placeholder }}"
+                                                        {{ $field->pivot->is_required ? 'required' : '' }}
+                                                        @if($field->key_name === 'especie')
+                                                            list="species-list"
+                                                            autocomplete="off"
+                                                        @endif
+                                                    >
+                                                @endif
                                         @endswitch
                                     @endif
 
