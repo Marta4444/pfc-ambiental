@@ -87,6 +87,16 @@
                         </h3>
 
                         <div class="flex gap-2">
+                            @if($groupedCosts->count() > 0)
+                                {{-- Botón Exportar Excel (solo visible si hay costes) --}}
+                                <button type="button" onclick="exportToExcel()" class="inline-flex items-center px-3 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Exportar Excel
+                                </button>
+                            @endif
+
                             {{-- Botón Recalcular (oculto si está finalizado) --}}
                             @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
                                 <form action="{{ route('report-costs.calculate', $report) }}" method="POST" class="inline">
@@ -536,5 +546,148 @@
                 closeCostDetail();
             }
         });
+    </script>
+
+    {{-- SheetJS para exportación a Excel --}}
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <script>
+        // Datos para exportación (inyectados desde PHP)
+        const exportData = {
+            report: {
+                ip: @json($report->ip),
+                title: @json($report->title ?? ''),
+                date: @json($report->created_at->format('d/m/Y')),
+            },
+            totals: {
+                VR: {{ $totals['VR'] }},
+                VE: {{ $totals['VE'] }},
+                VS: {{ $totals['VS'] }},
+                total: {{ $totals['total'] }}
+            },
+            @php
+                $costsForExport = $groupedCosts->flatten()->map(function($item) {
+                    return [
+                        'group_key' => $item->group_key,
+                        'concept_name' => $item->concept_name,
+                        'cost_type' => $item->cost_type,
+                        'base_value' => $item->base_value,
+                        'cr_value' => $item->cr_value,
+                        'gi_value' => $item->gi_value,
+                        'total_cost' => $item->total_cost,
+                        'coef_info' => $item->coef_info_json ?? [],
+                    ];
+                })->values();
+            @endphp
+            costs: @json($costsForExport)
+        };
+
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            // ==========================================
+            // HOJA 1: RESUMEN
+            // ==========================================
+            const summaryData = [
+                ['INFORME DE COSTES - VALORACIÓN DE DAÑO AMBIENTAL'],
+                [],
+                ['Caso:', exportData.report.ip],
+                ['Título:', exportData.report.title],
+                ['Fecha exportación:', new Date().toLocaleDateString('es-ES')],
+                [],
+                ['RESUMEN DE TOTALES'],
+                [],
+                ['Tipo de Valoración', 'Importe (€)'],
+                ['VR - Valor de Reposición', exportData.totals.VR],
+                ['VE - Valor de Extracción', exportData.totals.VE],
+                ['VS - Valor de Servicio (Socioeconómico)', exportData.totals.VS],
+                [],
+                ['TOTAL GENERAL', exportData.totals.total]
+            ];
+            
+            const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+            
+            // Aplicar anchos de columna
+            ws1['!cols'] = [{ wch: 45 }, { wch: 20 }];
+            
+            XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
+            
+            // ==========================================
+            // HOJA 2: DESGLOSE POR CONCEPTO
+            // ==========================================
+            const detailHeaders = [
+                'Grupo', 'Concepto', 'Tipo', 'Valor Base (€)', 'CR', 'GI', 'Coste Total (€)'
+            ];
+            
+            const detailRows = exportData.costs.map(item => [
+                item.group_key,
+                item.concept_name,
+                item.cost_type,
+                item.base_value,
+                item.cr_value || '',
+                item.gi_value || '',
+                item.total_cost
+            ]);
+            
+            const ws2 = XLSX.utils.aoa_to_sheet([detailHeaders, ...detailRows]);
+            ws2['!cols'] = [
+                { wch: 25 }, { wch: 35 }, { wch: 8 }, 
+                { wch: 15 }, { wch: 10 }, { wch: 10 }, { wch: 18 }
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws2, 'Desglose');
+            
+            // ==========================================
+            // HOJA 3: DETALLE DE CÁLCULOS (datos expandibles)
+            // ==========================================
+            const calcHeaders = [
+                'Concepto', 'Tipo', 'Fórmula', 
+                'CB (Coste Base)', 'L (IUCN)', 'N (CITES)', 'B (Madurez)', 
+                'q (Cantidad)', 'CR (Coste Repos.)', 'IG (Gravedad)',
+                'Ubicación', 'Nivel Trófico', 'Reprod. Cautiverio', 'Estado Vital',
+                'Total (€)'
+            ];
+            
+            const calcRows = exportData.costs.map(item => {
+                const coef = item.coef_info || {};
+                const ig = coef.IG_components || {};
+                
+                return [
+                    item.concept_name,
+                    item.cost_type,
+                    coef.formula || '',
+                    coef.CB || '',
+                    coef.L ? `${coef.L} (${coef.L_source || ''})` : '',
+                    coef.N ? `${coef.N} (${coef.N_source || ''})` : '',
+                    coef.B ? `${coef.B} (${coef.B_source || ''})` : '',
+                    coef.q || '',
+                    coef.CR || '',
+                    item.gi_value || coef.IG || '',
+                    ig.ubicacion ? `${ig.ubicacion.valor} (${ig.ubicacion.puntuacion} pts)` : '',
+                    ig.nivel_trofico ? `${ig.nivel_trofico.valor} (${ig.nivel_trofico.puntuacion} pts)` : '',
+                    ig.reproduccion_cautiverio ? `${ig.reproduccion_cautiverio.valor} (${ig.reproduccion_cautiverio.puntuacion} pts)` : '',
+                    ig.estado_vital ? `${ig.estado_vital.valor} (${ig.estado_vital.puntuacion} pts)` : '',
+                    item.total_cost
+                ];
+            });
+            
+            const ws3 = XLSX.utils.aoa_to_sheet([calcHeaders, ...calcRows]);
+            ws3['!cols'] = [
+                { wch: 30 }, { wch: 6 }, { wch: 40 },
+                { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 },
+                { wch: 10 }, { wch: 15 }, { wch: 12 },
+                { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 },
+                { wch: 15 }
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws3, 'Detalle Cálculos');
+            
+            // ==========================================
+            // GENERAR Y DESCARGAR
+            // ==========================================
+            const fileName = `Costes_${exportData.report.ip.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            
+            XLSX.writeFile(wb, fileName);
+        }
     </script>
 </x-app-layout>

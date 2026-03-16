@@ -113,6 +113,9 @@ Para la sincronización automática se crea un cron, que se crea mediante el com
 - Los niveles de protección, al editar los detalles de un caso, sólo los puede editar un Administrador.
 - Todos los usuarios pueden crear casos, y añadir detalles en el momento de la creación. Pero una vez creado el caso, sólo se pueden añadir detalles en los casos que el usuario tiene autoasignados o en los que es el autor.
 - Los detalles de los casos los pueden editar sólo los usuarios asignados a ese caso y el administrador.
+- Validación de Localización (ubicaciones correctas).
+  - Para esto se crea el Helper SpainGeoHelper.php, que valida que la provincia pertenezca a la comunidad seleccionada, y que las coordenadas estén dentro de los límites de esa comunidad.
+  - Se ha creado además el archivo spain-geo.json (public > data) con los datos de las ccaa y localidades. Tanto el helper, como las visttas de create y edit de report (usando el método fetch()) leen de este archivo.
 
 
 ## Audit log -> registro de cambios
@@ -295,3 +298,11 @@ php artisan species:sync --source=all --limit=10
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>, que lo carga desde internet, y con JS se crean los gráficos.
   Esto requiere conexión a internet. 
   - Otra opción sería instalar chart.js localmente con npm.
+
+## Exportar a excela tabla de costes
+- Para poder exportar los cálculos (y los datos ocultos en modales) se ha usado la biblioteca SheetJS cargada desde CDN, para generar el excel en el navegador.
+- El excel generado contiene 3 pestañas:
+  - Resumen: Información sobre el caso, título, fechas y costes totales VR, VE, VS y total.
+  - Desglose: Tabla principal de la vista de costes, con grupo, concepto, tipo, valores y coste total.
+  - Detalle cálculos: contiene todos los datos expandibles de los modales.
+- El excel generado obtiene un nombre con el formato Costes_CodigoCaso_fecha.xlsx
