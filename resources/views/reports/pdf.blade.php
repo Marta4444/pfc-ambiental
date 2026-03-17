@@ -612,6 +612,31 @@
 
         {{-- Costes --}}
         @if($costItems && $costItems->count() > 0)
+        @php
+            // Detectar categoría para columnas dinámicas
+            $categoryName = $report->category->name ?? 'Biodiversidad';
+            $subcategoryName = $report->subcategory->name ?? '';
+            $isExtraccionAguas = $categoryName === 'Infraestructuras' && 
+                                 (str_contains($subcategoryName, 'Extracciones') || str_contains($subcategoryName, 'Extracción'));
+            $isVertidoAguas = $categoryName === 'Vertidos' && 
+                              (str_contains($subcategoryName, 'Vertido de aguas') || str_contains($subcategoryName, 'Vertidos de aguas'));
+            
+            // Definir headers según categoría
+            if ($isExtraccionAguas) {
+                $col4Header = 'Vol./Valor';
+                $col5Header = 'P.U./T';
+                $col6Header = 'Origen';
+            } elseif ($isVertidoAguas) {
+                $col4Header = 'Volumen';
+                $col5Header = 'Coste Limp.';
+                $col6Header = '-';
+            } else {
+                // Biodiversidad (default)
+                $col4Header = 'Base';
+                $col5Header = 'CR';
+                $col6Header = 'IG';
+            }
+        @endphp
         <div class="section">
             <div class="section-title">💰 Valoración Económica</div>
             <div class="section-content">
@@ -644,9 +669,9 @@
                             <th style="width: 20%;">Grupo</th>
                             <th style="width: 15%;">Tipo</th>
                             <th style="width: 25%;">Concepto</th>
-                            <th style="width: 12%;" class="text-right">Base</th>
-                            <th style="width: 8%;" class="text-right">CR</th>
-                            <th style="width: 8%;" class="text-right">IG</th>
+                            <th style="width: 12%;" class="text-right">{{ $col4Header }}</th>
+                            <th style="width: 8%;" class="text-right">{{ $col5Header }}</th>
+                            <th style="width: 8%;" class="text-right">{{ $col6Header }}</th>
                             <th style="width: 12%;" class="text-right">Total</th>
                         </tr>
                     </thead>
@@ -654,6 +679,47 @@
                         @foreach($costItems->groupBy('group_key') as $groupKey => $items)
                             @php $isFirstInGroup = true; @endphp
                             @foreach($items as $item)
+                            @php
+                                $coef = $item->coef_info_json ?? [];
+                                
+                                // Calcular valores de columnas según categoría y tipo de coste
+                                if ($isExtraccionAguas) {
+                                    // Extracciones de aguas
+                                    if ($item->cost_type === 'VE') {
+                                        $col4Value = isset($coef['volumen']) ? number_format($coef['volumen'], 2, ',', '.') . ' m³' : '-';
+                                        $col5Value = isset($coef['precio_unitario']) ? number_format($coef['precio_unitario'], 2, ',', '.') . ' €' : '-';
+                                        $col6Value = $coef['origen_agua'] ?? '-';
+                                    } elseif ($item->cost_type === 'VR') {
+                                        $col4Value = number_format($item->total_cost, 2, ',', '.') . ' €';
+                                        $col5Value = '-';
+                                        $col6Value = $coef['origen_agua'] ?? '-';
+                                    } else { // VS
+                                        $col4Value = isset($coef['vs_base']) ? number_format($coef['vs_base'], 2, ',', '.') . ' €' : '-';
+                                        $col5Value = $coef['T'] ?? '-';
+                                        $col6Value = $coef['origen_agua'] ?? '-';
+                                    }
+                                } elseif ($isVertidoAguas) {
+                                    // Vertido de aguas
+                                    if ($item->cost_type === 'VE') {
+                                        $col4Value = isset($coef['volumen']) ? number_format($coef['volumen'], 2, ',', '.') . ' m³' : '-';
+                                        $col5Value = isset($coef['coste_limpieza']) ? number_format($coef['coste_limpieza'], 2, ',', '.') . ' €/m³' : '-';
+                                        $col6Value = '-';
+                                    } elseif ($item->cost_type === 'VR') {
+                                        $col4Value = number_format($item->total_cost, 2, ',', '.') . ' €';
+                                        $col5Value = '-';
+                                        $col6Value = '-';
+                                    } else { // VS
+                                        $col4Value = number_format($item->total_cost, 2, ',', '.') . ' €';
+                                        $col5Value = '-';
+                                        $col6Value = '-';
+                                    }
+                                } else {
+                                    // Biodiversidad (default)
+                                    $col4Value = number_format($item->base_value, 2, ',', '.');
+                                    $col5Value = $item->cr_value ? number_format($item->cr_value, 4) : '-';
+                                    $col6Value = $item->gi_value ? number_format($item->gi_value, 4) : '-';
+                                }
+                            @endphp
                             <tr>
                                 @if($isFirstInGroup)
                                 <td rowspan="{{ $items->count() }}" style="vertical-align: middle; font-weight: bold; background: #f9fafb;">
@@ -667,9 +733,9 @@
                                     </span>
                                 </td>
                                 <td>{{ $item->concept_name }}</td>
-                                <td class="text-right">{{ number_format($item->base_value, 2, ',', '.') }} €</td>
-                                <td class="text-right">{{ number_format($item->cr_value, 4) }}</td>
-                                <td class="text-right">{{ number_format($item->gi_value, 4) }}</td>
+                                <td class="text-right">{{ $col4Value }}</td>
+                                <td class="text-right">{{ $col5Value }}</td>
+                                <td class="text-right">{{ $col6Value }}</td>
                                 <td class="text-right"><strong>{{ number_format($item->total_cost, 2, ',', '.') }} €</strong></td>
                             </tr>
                             @endforeach
@@ -682,6 +748,18 @@
                         </tr>
                     </tfoot>
                 </table>
+
+                {{-- Leyenda de fórmulas --}}
+                <div style="margin-top: 15px; padding: 10px; background: #f9fafb; border-radius: 6px; font-size: 9px;">
+                    <strong>Fórmulas aplicadas:</strong><br>
+                    @if($isExtraccionAguas)
+                        VE = Volumen × Precio Unitario | VR = Valor manual | VS = VS_base × T (Coef. Origen: Superficial=1.8, Subterránea=1.6, Pozo=1.5, Manantial=2.0, Red pública=1.2)
+                    @elseif($isVertidoAguas)
+                        VE = Volumen × Coste Limpieza | VR = Valor manual | VS = Valor manual
+                    @else
+                        VR = [(CB × L × N × B × S) × q] + CR | VE = Valor manual | VS = VR × IG (Índice de Gravedad)
+                    @endif
+                </div>
             </div>
         </div>
         @elseif($report->total_cost)

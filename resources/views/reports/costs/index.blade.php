@@ -138,12 +138,28 @@
                                         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Valor Base
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            CR
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            IG
-                                        </th>
+                                        @if($categoryName === 'Infraestructuras' && $subcategoryName === 'Extracciones de aguas')
+                                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                P.U. / -
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                T
+                                            </th>
+                                        @elseif($categoryName === 'Vertidos' && $subcategoryName === 'Vertido de aguas')
+                                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                CL
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                -
+                                            </th>
+                                        @else
+                                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                CR
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                IG
+                                            </th>
+                                        @endif
                                         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Coste Total
                                         </th>
@@ -214,21 +230,38 @@
 
                         {{-- Información adicional --}}
                         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h4 class="text-sm font-semibold text-gray-700 mb-2">Leyenda de Coeficientes</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
-                                <div>
-                                    <strong>CR (Coste de Reposición):</strong> 
-                                    Factor que ajusta el valor según la posibilidad de recuperación del recurso dañado.
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">Leyenda de Coeficientes - {{ $categoryName }} @if($subcategoryName) ({{ $subcategoryName }}) @endif</h4>
+                            @if($categoryName === 'Infraestructuras' && $subcategoryName === 'Extracciones de aguas')
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
+                                    <div>
+                                        <strong>P.U. (Precio Unitario):</strong> 
+                                        Precio por metro cúbico de agua extraída (€/m³).
+                                    </div>
+                                    <div>
+                                        <strong>T (Coef. Origen del Agua):</strong> 
+                                        Factor ecosistémico según procedencia (Manantial=2.0, Superficial=1.8, Subterránea=1.6, Pozo=1.5, Otros=1.4, Red pública=1.2).
+                                    </div>
+                                    <div>
+                                        <strong>Fórmulas:</strong> 
+                                        VE = Volumen × P.U. | VR = Manual | VS = VS_base × T
+                                    </div>
                                 </div>
-                                <div>
-                                    <strong>IG (Índice de Gravedad):</strong> 
-                                    Multiplicador basado en el estado del recurso afectado.
+                            @else
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
+                                    <div>
+                                        <strong>CR (Coste de Reposición):</strong> 
+                                        Factor que ajusta el valor según la posibilidad de recuperación del recurso dañado.
+                                    </div>
+                                    <div>
+                                        <strong>IG (Índice de Gravedad):</strong> 
+                                        Multiplicador basado en el estado del recurso afectado.
+                                    </div>
+                                    <div>
+                                        <strong>S (Subcategoría):</strong> 
+                                        Factor según tipo de hecho ilícito (Comercio=1, Caza/Cinegéticas/Endemismos=2, EEI=1.5).
+                                    </div>
                                 </div>
-                                <div>
-                                    <strong>S (Subcategoría):</strong> 
-                                    Factor según tipo de hecho ilícito (Comercio=1, Caza/Cinegéticas/Endemismos=2, EEI=1.5).
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     @else
                         <div class="text-center py-12">
@@ -389,6 +422,36 @@
         }
         
         function renderVRDetail(coef, item) {
+            // Detectar si es categoría Infraestructuras > Extracciones de aguas
+            const isExtraccionAguas = coef.categoria === 'Infraestructuras' && 
+                                      (coef.subcategoria === 'Extracciones de aguas' || coef.subcategoria === 'Extracción de aguas');
+            
+            // Detectar si es categoría Vertidos > Vertido de aguas
+            const isVertidoAguas = coef.categoria === 'Vertidos' && 
+                                   (coef.subcategoria === 'Vertido de aguas' || coef.subcategoria === 'Vertidos de aguas');
+            
+            if (isExtraccionAguas || isVertidoAguas) {
+                const tipoAgua = isExtraccionAguas ? 'extracciones de aguas' : 'vertidos de aguas';
+                return `
+                    <div class="space-y-3">
+                        <h4 class="font-semibold text-gray-700 mb-2">Valor de Reposición (introducido manualmente):</h4>
+                        
+                        <div class="p-4 bg-blue-50 rounded-lg">
+                            <p class="text-xs text-blue-600 font-medium">VR Manual</p>
+                            <p class="text-2xl font-bold text-blue-800">${formatMoney(coef.valor_manual || item.total_cost)} €</p>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-blue-500">
+                            <p class="text-sm text-gray-600">
+                                <strong>Nota:</strong> El Valor de Reposición para ${tipoAgua} se introduce 
+                                directamente por el usuario basándose en el coste estimado de restauración del recurso hídrico.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Renderizado estándar para Biodiversidad
             return `
                 <div class="space-y-3">
                     <h4 class="font-semibold text-gray-700 mb-2">Componentes del cálculo:</h4>
@@ -454,6 +517,73 @@
         }
         
         function renderVEDetail(coef, item) {
+            // Detectar si es categoría Infraestructuras > Extracciones de aguas
+            const isExtraccionAguas = coef.categoria === 'Infraestructuras' && 
+                                      (coef.subcategoria === 'Extracciones de aguas' || coef.subcategoria === 'Extracción de aguas');
+            
+            // Detectar si es categoría Vertidos > Vertido de aguas
+            const isVertidoAguas = coef.categoria === 'Vertidos' && 
+                                   (coef.subcategoria === 'Vertido de aguas' || coef.subcategoria === 'Vertidos de aguas');
+            
+            if (isExtraccionAguas) {
+                return `
+                    <div class="space-y-3">
+                        <h4 class="font-semibold text-gray-700 mb-2">Componentes del cálculo:</h4>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-blue-50 rounded-lg">
+                                <p class="text-xs text-blue-600 font-medium">Volumen extraído</p>
+                                <p class="text-lg font-bold text-blue-800">${formatMoney(coef.volumen || 0)} m³</p>
+                            </div>
+                            
+                            <div class="p-3 bg-green-50 rounded-lg">
+                                <p class="text-xs text-green-600 font-medium">Precio unitario</p>
+                                <p class="text-lg font-bold text-green-800">${formatMoney(coef.precio_unitario || 0)} €/m³</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-sm text-gray-600">
+                                <strong>Cálculo:</strong> Volumen × Precio unitario = ${formatMoney(coef.volumen || 0)} m³ × ${formatMoney(coef.precio_unitario || 0)} €/m³
+                            </p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                = <strong>${formatMoney(item.total_cost)} €</strong>
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (isVertidoAguas) {
+                return `
+                    <div class="space-y-3">
+                        <h4 class="font-semibold text-gray-700 mb-2">Componentes del cálculo:</h4>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-red-50 rounded-lg">
+                                <p class="text-xs text-red-600 font-medium">Volumen vertido</p>
+                                <p class="text-lg font-bold text-red-800">${formatMoney(coef.volumen || 0)} m³</p>
+                            </div>
+                            
+                            <div class="p-3 bg-orange-50 rounded-lg">
+                                <p class="text-xs text-orange-600 font-medium">Coste de limpieza</p>
+                                <p class="text-lg font-bold text-orange-800">${formatMoney(coef.coste_limpieza || 0)} €/m³</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-orange-500">
+                            <p class="text-sm text-gray-600">
+                                <strong>Cálculo:</strong> Volumen × Coste limpieza = ${formatMoney(coef.volumen || 0)} m³ × ${formatMoney(coef.coste_limpieza || 0)} €/m³
+                            </p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                = <strong>${formatMoney(item.total_cost)} €</strong>
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Renderizado estándar (valor manual)
             return `
                 <div class="space-y-3">
                     <div class="p-4 bg-green-50 rounded-lg">
@@ -468,6 +598,74 @@
         }
         
         function renderVSDetail(coef, item) {
+            // Detectar si es categoría Infraestructuras > Extracciones de aguas
+            const isExtraccionAguas = coef.categoria === 'Infraestructuras' && 
+                                      (coef.subcategoria === 'Extracciones de aguas' || coef.subcategoria === 'Extracción de aguas');
+            
+            // Detectar si es categoría Vertidos > Vertido de aguas
+            const isVertidoAguas = coef.categoria === 'Vertidos' && 
+                                   (coef.subcategoria === 'Vertido de aguas' || coef.subcategoria === 'Vertidos de aguas');
+            
+            if (isExtraccionAguas) {
+                return `
+                    <div class="space-y-3">
+                        <h4 class="font-semibold text-gray-700 mb-2">Componentes del cálculo:</h4>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-yellow-50 rounded-lg">
+                                <p class="text-xs text-yellow-600 font-medium">VS Base (introducido)</p>
+                                <p class="text-lg font-bold text-yellow-800">${formatMoney(coef.vs_base || 0)} €</p>
+                            </div>
+                            
+                            <div class="p-3 bg-cyan-50 rounded-lg">
+                                <p class="text-xs text-cyan-600 font-medium">T (Coef. Origen Agua)</p>
+                                <p class="text-lg font-bold text-cyan-800">×${coef.T || 1}</p>
+                                <p class="text-xs text-cyan-500">${coef.T_source || ''}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-sm text-cyan-700">
+                                <strong>Coeficiente T (Origen del agua):</strong> ${coef.T_explicacion || 'Ajusta el valor según el origen del recurso hídrico.'}
+                            </p>
+                            <p class="text-xs text-cyan-600 mt-1">
+                                Superficial: 1.8 | Subterránea: 1.6 | Pozo: 1.5 | Manantial: 2.0 | Red pública: 1.2 | Otros: 1.4
+                            </p>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-yellow-500">
+                            <p class="text-sm text-gray-600">
+                                <strong>Cálculo:</strong> VS Base × T = ${formatMoney(coef.vs_base || 0)} € × ${coef.T || 1}
+                            </p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                = <strong>${formatMoney(item.total_cost)} €</strong>
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (isVertidoAguas) {
+                return `
+                    <div class="space-y-3">
+                        <h4 class="font-semibold text-gray-700 mb-2">Valor Ecosistémico (introducido manualmente):</h4>
+                        
+                        <div class="p-4 bg-yellow-50 rounded-lg">
+                            <p class="text-xs text-yellow-600 font-medium">VS Manual</p>
+                            <p class="text-2xl font-bold text-yellow-800">${formatMoney(coef.valor_manual || item.total_cost)} €</p>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-yellow-500">
+                            <p class="text-sm text-gray-600">
+                                <strong>Nota:</strong> El Valor Ecosistémico (VS) para vertidos de aguas se introduce 
+                                directamente por el usuario basándose en el impacto ambiental estimado sobre el ecosistema acuático.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Renderizado estándar para Biodiversidad (con IG)
             const igComponents = coef.IG_components || {};
             
             let componentsHtml = '';
@@ -575,6 +773,8 @@
                 ip: @json($report->ip),
                 title: @json($report->title ?? ''),
                 date: @json($report->created_at->format('d/m/Y')),
+                category: @json($categoryName),
+                subcategory: @json($subcategoryName),
             },
             totals: {
                 VR: {{ $totals['VR'] }},
@@ -599,8 +799,132 @@
             costs: @json($costsForExport)
         };
 
+        // ==========================================
+        // CONFIGURACIÓN DINÁMICA DE COLUMNAS POR CATEGORÍA
+        // ==========================================
+        const FORMULA_CONFIG = {
+            // Configuración por defecto (Biodiversidad)
+            default: {
+                VR: {
+                    columns: ['CB', 'L', 'N', 'B', 'S', 'q', 'CR'],
+                    headers: ['CB (Base)', 'L (IUCN)', 'N (CITES)', 'B (Madurez)', 'S (Subcategoría)', 'q (Cantidad)', 'CR (Reposición)'],
+                    getValue: (coef, item) => ({
+                        CB: coef.CB || '',
+                        L: coef.L ? `${coef.L} (${coef.L_source || ''})` : '',
+                        N: coef.N ? `${coef.N} (${coef.N_source || ''})` : '',
+                        B: coef.B ? `${coef.B} (${coef.B_source || ''})` : '',
+                        S: coef.S ? `${coef.S} (${coef.S_source || ''})` : '',
+                        q: coef.q || '',
+                        CR: coef.CR || ''
+                    }),
+                    formula: 'VR = [(CB × L × N × B × S) × q] + CR'
+                },
+                VE: {
+                    columns: ['valor_manual'],
+                    headers: ['Valor Manual (€)'],
+                    getValue: (coef, item) => ({
+                        valor_manual: coef.valor_manual || item.total_cost
+                    }),
+                    formula: 'VE = Valor introducido manualmente'
+                },
+                VS: {
+                    columns: ['VR', 'IG', 'ubicacion', 'nivel_trofico', 'reproduccion', 'estado_vital'],
+                    headers: ['VR Base', 'IG', 'Ubicación', 'Nivel Trófico', 'Reprod. Cautiverio', 'Estado Vital'],
+                    getValue: (coef, item) => {
+                        const ig = coef.IG_components || {};
+                        return {
+                            VR: coef.VR || item.base_value,
+                            IG: item.gi_value || coef.IG || '',
+                            ubicacion: ig.ubicacion ? `${ig.ubicacion.valor} (${ig.ubicacion.puntuacion} pts)` : '',
+                            nivel_trofico: ig.nivel_trofico ? `${ig.nivel_trofico.valor} (${ig.nivel_trofico.puntuacion} pts)` : '',
+                            reproduccion: ig.reproduccion_cautiverio ? `${ig.reproduccion_cautiverio.valor} (${ig.reproduccion_cautiverio.puntuacion} pts)` : '',
+                            estado_vital: ig.estado_vital ? `${ig.estado_vital.valor} (${ig.estado_vital.puntuacion} pts)` : ''
+                        };
+                    },
+                    formula: 'VS = VR × IG'
+                }
+            },
+            // Infraestructuras > Extracciones de aguas
+            'Infraestructuras|Extracciones de aguas': {
+                VR: {
+                    columns: ['valor_manual', 'origen_agua'],
+                    headers: ['Valor Manual (€)', 'Origen del Agua'],
+                    getValue: (coef, item) => ({
+                        valor_manual: coef.valor_manual || item.total_cost,
+                        origen_agua: coef.origen_agua || ''
+                    }),
+                    formula: 'VR = Valor introducido manualmente'
+                },
+                VE: {
+                    columns: ['volumen', 'precio_unitario'],
+                    headers: ['Volumen (m³)', 'Precio Unit. (€/m³)'],
+                    getValue: (coef, item) => ({
+                        volumen: coef.volumen || '',
+                        precio_unitario: coef.precio_unitario || ''
+                    }),
+                    formula: 'VE = Volumen × Precio Unitario'
+                },
+                VS: {
+                    columns: ['vs_base', 'T', 'T_source'],
+                    headers: ['VS Base (€)', 'T (Coef. Origen)', 'Descripción T'],
+                    getValue: (coef, item) => ({
+                        vs_base: coef.vs_base || '',
+                        T: coef.T || '',
+                        T_source: coef.T_source || ''
+                    }),
+                    formula: 'VS = VS_base × T'
+                }
+            },
+            // Vertidos > Vertido de aguas
+            'Vertidos|Vertido de aguas': {
+                VR: {
+                    columns: ['valor_manual'],
+                    headers: ['Valor Manual (€)'],
+                    getValue: (coef, item) => ({
+                        valor_manual: coef.valor_manual || item.total_cost
+                    }),
+                    formula: 'VR = Valor introducido manualmente'
+                },
+                VE: {
+                    columns: ['volumen', 'coste_limpieza'],
+                    headers: ['Volumen (m³)', 'Coste Limpieza (€/m³)'],
+                    getValue: (coef, item) => ({
+                        volumen: coef.volumen || '',
+                        coste_limpieza: coef.coste_limpieza || ''
+                    }),
+                    formula: 'VE = Volumen × Coste Limpieza'
+                },
+                VS: {
+                    columns: ['valor_manual'],
+                    headers: ['Valor Manual (€)'],
+                    getValue: (coef, item) => ({
+                        valor_manual: coef.valor_manual || item.total_cost
+                    }),
+                    formula: 'VS = Valor introducido manualmente'
+                }
+            }
+        };
+
+        // Obtener configuración según categoría/subcategoría
+        function getFormulaConfig(category, subcategory) {
+            const key = `${category}|${subcategory}`;
+            return FORMULA_CONFIG[key] || FORMULA_CONFIG.default;
+        }
+
+        // Detectar categoría del primer item de costes
+        function detectCategory() {
+            if (exportData.costs.length === 0) return { category: 'default', subcategory: '' };
+            const firstCoef = exportData.costs[0].coef_info || {};
+            return {
+                category: firstCoef.categoria || exportData.report.category || 'Biodiversidad',
+                subcategory: firstCoef.subcategoria || exportData.report.subcategory || ''
+            };
+        }
+
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
+            const { category, subcategory } = detectCategory();
+            const config = getFormulaConfig(category, subcategory);
             
             // ==========================================
             // HOJA 1: RESUMEN
@@ -610,6 +934,8 @@
                 [],
                 ['Caso:', exportData.report.ip],
                 ['Título:', exportData.report.title],
+                ['Categoría:', category],
+                ['Subcategoría:', subcategory],
                 ['Fecha exportación:', new Date().toLocaleDateString('es-ES')],
                 [],
                 ['RESUMEN DE TOTALES'],
@@ -619,92 +945,78 @@
                 ['VE - Valor de Extracción', exportData.totals.VE],
                 ['VS - Valor de Servicio (Socioeconómico)', exportData.totals.VS],
                 [],
-                ['TOTAL GENERAL', exportData.totals.total]
+                ['TOTAL GENERAL', exportData.totals.total],
+                [],
+                ['FÓRMULAS UTILIZADAS'],
+                ['VR:', config.VR.formula],
+                ['VE:', config.VE.formula],
+                ['VS:', config.VS.formula]
             ];
             
             const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
-            
-            // Aplicar anchos de columna
-            ws1['!cols'] = [{ wch: 45 }, { wch: 20 }];
-            
+            ws1['!cols'] = [{ wch: 45 }, { wch: 50 }];
             XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
             
             // ==========================================
-            // HOJA 2: DESGLOSE POR CONCEPTO
+            // HOJA 2: DESGLOSE GENERAL
             // ==========================================
-            const detailHeaders = [
-                'Grupo', 'Concepto', 'Tipo', 'Valor Base (€)', 'CR', 'IG', 'Coste Total (€)'
-            ];
-            
+            const detailHeaders = ['Grupo', 'Concepto', 'Tipo', 'Coste Total (€)'];
             const detailRows = exportData.costs.map(item => [
                 item.group_key,
                 item.concept_name,
                 item.cost_type,
-                item.base_value,
-                item.cr_value || '',
-                item.gi_value || '',
                 item.total_cost
             ]);
             
             const ws2 = XLSX.utils.aoa_to_sheet([detailHeaders, ...detailRows]);
-            ws2['!cols'] = [
-                { wch: 25 }, { wch: 35 }, { wch: 8 }, 
-                { wch: 15 }, { wch: 10 }, { wch: 10 }, { wch: 18 }
-            ];
-            
+            ws2['!cols'] = [{ wch: 25 }, { wch: 40 }, { wch: 8 }, { wch: 18 }];
             XLSX.utils.book_append_sheet(wb, ws2, 'Desglose');
             
             // ==========================================
-            // HOJA 3: DETALLE DE CÁLCULOS (datos expandibles)
+            // HOJAS 3-5: DETALLE POR TIPO (VR, VE, VS)
             // ==========================================
-            const calcHeaders = [
-                'Concepto', 'Tipo', 'Fórmula', 
-                'CB (Coste Base)', 'L (IUCN)', 'N (CITES)', 'B (Madurez)', 'S (Subcategoría)',
-                'q (Cantidad)', 'CR (Coste Repos.)', 'IG (Gravedad)',
-                'Ubicación', 'Nivel Trófico', 'Reprod. Cautiverio', 'Estado Vital',
-                'Total (€)'
-            ];
-            
-            const calcRows = exportData.costs.map(item => {
-                const coef = item.coef_info || {};
-                const ig = coef.IG_components || {};
+            ['VR', 'VE', 'VS'].forEach(costType => {
+                const typeConfig = config[costType];
+                const typeItems = exportData.costs.filter(item => item.cost_type === costType);
                 
-                return [
-                    item.concept_name,
-                    item.cost_type,
-                    coef.formula || '',
-                    coef.CB || '',
-                    coef.L ? `${coef.L} (${coef.L_source || ''})` : '',
-                    coef.N ? `${coef.N} (${coef.N_source || ''})` : '',
-                    coef.B ? `${coef.B} (${coef.B_source || ''})` : '',
-                    coef.S ? `${coef.S} (${coef.S_source || ''})` : '',
-                    coef.q || '',
-                    coef.CR || '',
-                    item.gi_value || coef.IG || '',
-                    ig.ubicacion ? `${ig.ubicacion.valor} (${ig.ubicacion.puntuacion} pts)` : '',
-                    ig.nivel_trofico ? `${ig.nivel_trofico.valor} (${ig.nivel_trofico.puntuacion} pts)` : '',
-                    ig.reproduccion_cautiverio ? `${ig.reproduccion_cautiverio.valor} (${ig.reproduccion_cautiverio.puntuacion} pts)` : '',
-                    ig.estado_vital ? `${ig.estado_vital.valor} (${ig.estado_vital.puntuacion} pts)` : '',
-                    item.total_cost
-                ];
+                if (typeItems.length === 0) return;
+                
+                // Construir headers dinámicos
+                const headers = ['Concepto', ...typeConfig.headers, 'Total (€)'];
+                
+                // Construir filas con valores dinámicos
+                const rows = typeItems.map(item => {
+                    const coef = item.coef_info || {};
+                    const values = typeConfig.getValue(coef, item);
+                    const rowData = [item.concept_name];
+                    
+                    typeConfig.columns.forEach(col => {
+                        rowData.push(values[col] ?? '');
+                    });
+                    
+                    rowData.push(item.total_cost);
+                    return rowData;
+                });
+                
+                // Añadir fila de fórmula al final
+                rows.push([]);
+                rows.push(['Fórmula:', typeConfig.formula]);
+                
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+                
+                // Calcular anchos de columna dinámicamente
+                const colWidths = [{ wch: 35 }];
+                typeConfig.columns.forEach(() => colWidths.push({ wch: 20 }));
+                colWidths.push({ wch: 15 });
+                ws['!cols'] = colWidths;
+                
+                XLSX.utils.book_append_sheet(wb, ws, `Detalle ${costType}`);
             });
-            
-            const ws3 = XLSX.utils.aoa_to_sheet([calcHeaders, ...calcRows]);
-            ws3['!cols'] = [
-                { wch: 30 }, { wch: 6 }, { wch: 40 },
-                { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 25 },
-                { wch: 10 }, { wch: 15 }, { wch: 12 },
-                { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 },
-                { wch: 15 }
-            ];
-            
-            XLSX.utils.book_append_sheet(wb, ws3, 'Detalle Cálculos');
             
             // ==========================================
             // GENERAR Y DESCARGAR
             // ==========================================
             const fileName = `Costes_${exportData.report.ip.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
-            
             XLSX.writeFile(wb, fileName);
         }
     </script>

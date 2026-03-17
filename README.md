@@ -345,3 +345,16 @@ php artisan species:sync --source=all --limit=10
   - q: cantidad de individuos
   - CR: coste de reposicion
   - IG: indice de gravedad, calculado con distintos valores aplicados según la clasificación de la ubicación, el nivel trofico, el tipo de reproducción en cautiverio y el estado vital.
+- Los distintos valores aplicados en cada caso se pueden calcular en el servicio de calculo de costes
+  
+### Infraestructuras - Extraccion de aguas
+- Se necesitan 3 coeficientes:
+  - VE: volumen + precio unitario
+  - VS: introducido manualmente por el usuario, y se le multiplica un coeficiente según el origen del agua extraida.
+  - VR: introducido manualmente por el usuario
+
+### Vertidos - Vertidos de aguas
+- Se necesitan 3 coeficientes:
+  - VE: volumen * coste de limpieza del agua.
+  - VS: introducido manualmente por el usuario.
+  - VR: introducido manualmente por el usuario.

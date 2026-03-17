@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             FieldSeeder::class,       
             SubcategoryFieldSeeder::class,
             PetitionerSeeder::class,
-            SpeciesSeeder::class,           
+            //SpeciesSeeder::class, -> Inactivado para hacer importacion de datos desde API.           
             ProtectedAreaSeeder::class,     
             ReportSeeder::class,
             ReportDetailSeeder::class,   

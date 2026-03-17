@@ -34,10 +34,12 @@ class ReportCostItemController extends Controller
         // Totales por tipo
         $totals = ReportCostItem::getTotalsByType($report->id);
 
-        // Obtener info de las fórmulas para la categoría
-        $formulaInfo = CostCalculationService::getFormulaInfo($report->category->name ?? '');
+        // Obtener info de las fórmulas para la categoría y subcategoría
+        $categoryName = $report->category->name ?? '';
+        $subcategoryName = $report->subcategory->name ?? '';
+        $formulaInfo = CostCalculationService::getFormulaInfo($categoryName, $subcategoryName);
 
-        return view('reports.costs.index', compact('report', 'groupedCosts', 'totals', 'formulaInfo'));
+        return view('reports.costs.index', compact('report', 'groupedCosts', 'totals', 'formulaInfo', 'categoryName', 'subcategoryName'));
     }
 
     /**

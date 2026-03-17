@@ -72,6 +72,19 @@ class CostCalculationService
     ];
 
     /**
+     * Multiplicadores de Origen del Agua (T)
+     * Factor ecosistémico según la procedencia del agua extraída
+     */
+    private const ORIGEN_AGUA_MULTIPLIERS = [
+        'Superficial'  => 1.8,  // Alto impacto - ríos, lagos visibles
+        'Subterránea'  => 1.6,  // Impacto moderado-alto - acuíferos
+        'Pozo'         => 1.5,  // Similar a subterránea pero localizado
+        'Manantial'    => 2.0,  // Muy sensible - nacimientos naturales
+        'Red pública'  => 1.2,  // Menor impacto ecosistémico directo
+        'Otros'        => 1.4,  // Valor intermedio por defecto
+    ];
+
+    /**
      * Valores estándar para Índice de Gravedad (IG)
      * Cada dimensión pondera 25% del total
      */
@@ -423,29 +436,410 @@ class CostCalculationService
 
     /**
      * Calcular costes para categoría INFRAESTRUCTURAS
-     * TODO: Implementar fórmulas específicas
+     * 
+     * Subcategorías soportadas:
+     * - Extracciones de aguas: VE = volumen * precio_unitario, VR = manual, VS = VS_manual * T
+     * - Parques eólicos: fórmula genérica (pendiente de implementar)
      */
     public function calculateInfraestructuras(Report $report): array
     {
-        // Por ahora, usar fórmula genérica
-        // En el futuro, implementar fórmulas específicas para:
-        // - Extracciones de aguas
-        // - Parques eólicos
-        return $this->calculateGeneric($report);
+        $subcategoryName = $report->subcategory->name ?? '';
+
+        return match ($subcategoryName) {
+            'Extracciones de aguas' => $this->calculateExtraccionAguas($report),
+            default => $this->calculateGeneric($report),
+        };
+    }
+
+    /**
+     * Calcular costes para Extracción de Aguas
+     * 
+     * Fórmulas:
+     * - VE = Volumen × Precio Unitario
+     * - VR = Valor introducido manualmente
+     * - VS = VS_manual × T (donde T depende del origen del agua)
+     */
+    protected function calculateExtraccionAguas(Report $report): array
+    {
+        $results = [
+            'items' => [],
+            'totals' => [
+                'VR' => 0,
+                'VE' => 0,
+                'VS' => 0,
+                'total' => 0,
+            ],
+            'errors' => [],
+        ];
+
+        // Eliminar costes anteriores
+        $report->costItems()->delete();
+
+        // Obtener grupos de detalles (agua_1, agua_2, etc.)
+        $groups = $report->details()
+            ->select('group_key')
+            ->distinct()
+            ->pluck('group_key');
+
+        foreach ($groups as $groupKey) {
+            try {
+                $groupResult = $this->calculateExtraccionAguasGroup($report, $groupKey);
+                $results['items'][$groupKey] = $groupResult;
+                
+                $results['totals']['VR'] += $groupResult['VR']['total_cost'] ?? 0;
+                $results['totals']['VE'] += $groupResult['VE']['total_cost'] ?? 0;
+                $results['totals']['VS'] += $groupResult['VS']['total_cost'] ?? 0;
+            } catch (\Exception $e) {
+                $results['errors'][] = "Error en grupo {$groupKey}: " . $e->getMessage();
+                Log::error("Error calculando costes de agua para grupo {$groupKey}", [
+                    'report_id' => $report->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        $results['totals']['total'] = $results['totals']['VR'] + $results['totals']['VE'] + $results['totals']['VS'];
+
+        // Actualizar totales en el report
+        $report->update([
+            'vr_total' => $results['totals']['VR'],
+            've_total' => $results['totals']['VE'],
+            'vs_total' => $results['totals']['VS'],
+            'total_cost' => $results['totals']['total'],
+        ]);
+
+        return $results;
+    }
+
+    /**
+     * Calcular costes para un grupo específico de Extracción de Aguas
+     */
+    protected function calculateExtraccionAguasGroup(Report $report, string $groupKey): array
+    {
+        // Obtener todos los detalles del grupo
+        $details = $report->details()
+            ->where('group_key', $groupKey)
+            ->get()
+            ->keyBy('field_key');
+
+        // Extraer valores de los campos
+        $volumen = (float) ($details->get('volumen')?->value ?? 0);
+        $origenAgua = $details->get('origen_agua')?->value ?? 'Otros';
+        $caudal = (float) ($details->get('caudal')?->value ?? 0);
+        $precioUnitario = (float) ($details->get('precio_unitario')?->value ?? 0);
+        $vrManual = (float) ($details->get('vr_manual')?->value ?? 0);
+        $vsManual = (float) ($details->get('vs_manual')?->value ?? 0);
+
+        // Obtener el multiplicador T según origen del agua
+        $T = self::ORIGEN_AGUA_MULTIPLIERS[$origenAgua] ?? 1.4;
+
+        // Concepto para mostrar
+        $conceptName = "Agua ({$origenAgua}) - {$volumen} m³";
+
+        // Log para debug
+        Log::debug("Calculando costes de extracción de agua para {$groupKey}", [
+            'volumen' => $volumen,
+            'origen' => $origenAgua,
+            'precio_unitario' => $precioUnitario,
+            'vr_manual' => $vrManual,
+            'vs_manual' => $vsManual,
+            'T' => $T,
+        ]);
+
+        // Calcular VE = Volumen × Precio Unitario
+        $veTotal = $volumen * $precioUnitario;
+
+        // VR = Valor introducido manualmente
+        $vrTotal = $vrManual;
+
+        // VS = VS_manual × T
+        $vsTotal = $vsManual * $T;
+
+        // Crear items de coste en la base de datos
+        $veItem = ReportCostItem::create([
+            'report_id' => $report->id,
+            'group_key' => $groupKey,
+            'cost_type' => 'VE',
+            'concept_name' => $conceptName,
+            'base_value' => $volumen,
+            'cr_value' => $precioUnitario,
+            'gi_value' => null,
+            'total_cost' => $veTotal,
+            'coef_info_json' => [
+                'formula' => 'VE = Volumen × Precio Unitario',
+                'categoria' => 'Infraestructuras',
+                'subcategoria' => 'Extracciones de aguas',
+                'volumen' => $volumen,
+                'volumen_unidad' => 'm³',
+                'precio_unitario' => $precioUnitario,
+                'precio_unitario_unidad' => '€/m³',
+                'origen_agua' => $origenAgua,
+            ],
+        ]);
+
+        $vrItem = ReportCostItem::create([
+            'report_id' => $report->id,
+            'group_key' => $groupKey,
+            'cost_type' => 'VR',
+            'concept_name' => $conceptName,
+            'base_value' => $vrManual,
+            'cr_value' => null,
+            'gi_value' => null,
+            'total_cost' => $vrTotal,
+            'coef_info_json' => [
+                'formula' => 'VR = Valor introducido manualmente',
+                'categoria' => 'Infraestructuras',
+                'subcategoria' => 'Extracciones de aguas',
+                'valor_manual' => $vrManual,
+                'origen_agua' => $origenAgua,
+            ],
+        ]);
+
+        $vsItem = ReportCostItem::create([
+            'report_id' => $report->id,
+            'group_key' => $groupKey,
+            'cost_type' => 'VS',
+            'concept_name' => $conceptName,
+            'base_value' => $vsManual,
+            'cr_value' => null,
+            'gi_value' => $T,
+            'total_cost' => $vsTotal,
+            'coef_info_json' => [
+                'formula' => 'VS = VS_base × T',
+                'categoria' => 'Infraestructuras',
+                'subcategoria' => 'Extracciones de aguas',
+                'vs_base' => $vsManual,
+                'T' => $T,
+                'T_source' => "Origen del agua: {$origenAgua}",
+                'origen_agua' => $origenAgua,
+                'T_explicacion' => $this->getExplicacionCoeficienteT($origenAgua),
+            ],
+        ]);
+
+        return [
+            'VE' => [
+                'base_value' => $volumen,
+                'total_cost' => $veTotal,
+                'item' => $veItem,
+            ],
+            'VR' => [
+                'base_value' => $vrManual,
+                'total_cost' => $vrTotal,
+                'item' => $vrItem,
+            ],
+            'VS' => [
+                'base_value' => $vsManual,
+                'total_cost' => $vsTotal,
+                'item' => $vsItem,
+            ],
+            'T' => $T,
+            'volumen' => $volumen,
+            'origen_agua' => $origenAgua,
+        ];
+    }
+
+    /**
+     * Obtener explicación del coeficiente T según origen del agua
+     */
+    protected function getExplicacionCoeficienteT(string $origenAgua): string
+    {
+        return match ($origenAgua) {
+            'Superficial' => 'Agua de ríos o lagos. Alto impacto ambiental por afectación directa a ecosistemas acuáticos.',
+            'Subterránea' => 'Agua de acuíferos. Impacto moderado-alto por afectación a reservas hídricas subterráneas.',
+            'Pozo' => 'Extracción de pozo. Similar a subterránea pero con impacto más localizado.',
+            'Manantial' => 'Agua de manantial o nacimiento. Muy sensible por afectación a ecosistemas de nacimiento.',
+            'Red pública' => 'Agua de red pública. Menor impacto ecosistémico directo.',
+            default => 'Origen no especificado. Se aplica valor intermedio.',
+        };
     }
 
     /**
      * Calcular costes para categoría VERTIDOS
-     * TODO: Implementar fórmulas específicas
+     * 
+     * Subcategorías soportadas:
+     * - Vertido de aguas: VE = volumen * coste_limpieza_agua, VR = manual, VS = manual
+     * - Vertido de residuos: fórmula genérica (pendiente)
+     * - Vertido de suelos: fórmula genérica (pendiente)
+     * - Emisiones atmosféricas: fórmula genérica (pendiente)
      */
     public function calculateVertidos(Report $report): array
     {
-        // Por ahora, usar fórmula genérica
-        // En el futuro, implementar fórmulas específicas para:
-        // - Vertido de residuos
-        // - Vertido de aguas residuales
-        // - Emisiones atmosféricas
-        return $this->calculateGeneric($report);
+        $subcategoryName = $report->subcategory->name ?? '';
+
+        return match ($subcategoryName) {
+            'Vertido de aguas' => $this->calculateVertidoAguas($report),
+            default => $this->calculateGeneric($report),
+        };
+    }
+
+    /**
+     * Calcular costes para Vertido de Aguas
+     * 
+     * Fórmulas:
+     * - VE = Volumen × Coste de Limpieza del Agua (€/m³)
+     * - VR = Valor introducido manualmente
+     * - VS = Valor introducido manualmente
+     * - Total = VE + VR + VS
+     */
+    protected function calculateVertidoAguas(Report $report): array
+    {
+        $results = [
+            'items' => [],
+            'totals' => [
+                'VR' => 0,
+                'VE' => 0,
+                'VS' => 0,
+                'total' => 0,
+            ],
+            'errors' => [],
+        ];
+
+        // Eliminar costes anteriores
+        $report->costItems()->delete();
+
+        // Obtener grupos de detalles (vertido_1, vertido_2, etc.)
+        $groups = $report->details()
+            ->select('group_key')
+            ->distinct()
+            ->pluck('group_key');
+
+        foreach ($groups as $groupKey) {
+            try {
+                $groupResult = $this->calculateVertidoAguasGroup($report, $groupKey);
+                $results['items'][$groupKey] = $groupResult;
+                
+                $results['totals']['VR'] += $groupResult['VR']['total_cost'] ?? 0;
+                $results['totals']['VE'] += $groupResult['VE']['total_cost'] ?? 0;
+                $results['totals']['VS'] += $groupResult['VS']['total_cost'] ?? 0;
+            } catch (\Exception $e) {
+                $results['errors'][] = "Error en grupo {$groupKey}: " . $e->getMessage();
+                Log::error("Error calculando costes de vertido para grupo {$groupKey}", [
+                    'report_id' => $report->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        $results['totals']['total'] = $results['totals']['VR'] + $results['totals']['VE'] + $results['totals']['VS'];
+
+        // Actualizar totales en el report
+        $report->update([
+            'vr_total' => $results['totals']['VR'],
+            've_total' => $results['totals']['VE'],
+            'vs_total' => $results['totals']['VS'],
+            'total_cost' => $results['totals']['total'],
+        ]);
+
+        return $results;
+    }
+
+    /**
+     * Calcular costes para un grupo específico de Vertido de Aguas
+     */
+    protected function calculateVertidoAguasGroup(Report $report, string $groupKey): array
+    {
+        // Obtener todos los detalles del grupo
+        $details = $report->details()
+            ->where('group_key', $groupKey)
+            ->get()
+            ->keyBy('field_key');
+
+        // Extraer valores de los campos
+        $volumen = (float) ($details->get('volumen')?->value ?? 0);
+        $costeLimpieza = (float) ($details->get('coste_limpieza_agua')?->value ?? 0);
+        $vrManual = (float) ($details->get('vr_manual')?->value ?? 0);
+        $vsManual = (float) ($details->get('vs_manual')?->value ?? 0);
+
+        // Concepto para mostrar
+        $conceptName = "Vertido de agua - {$volumen} m³";
+
+        // Log para debug
+        Log::debug("Calculando costes de vertido de agua para {$groupKey}", [
+            'volumen' => $volumen,
+            'coste_limpieza' => $costeLimpieza,
+            'vr_manual' => $vrManual,
+            'vs_manual' => $vsManual,
+        ]);
+
+        // Calcular VE = Volumen × Coste de Limpieza
+        $veTotal = $volumen * $costeLimpieza;
+
+        // VR = Valor introducido manualmente
+        $vrTotal = $vrManual;
+
+        // VS = Valor introducido manualmente
+        $vsTotal = $vsManual;
+
+        // Crear items de coste en la base de datos
+        $veItem = ReportCostItem::create([
+            'report_id' => $report->id,
+            'group_key' => $groupKey,
+            'cost_type' => 'VE',
+            'concept_name' => $conceptName,
+            'base_value' => $volumen,
+            'cr_value' => $costeLimpieza,
+            'gi_value' => null,
+            'total_cost' => $veTotal,
+            'coef_info_json' => [
+                'formula' => 'VE = Volumen × Coste Limpieza',
+                'categoria' => 'Vertidos',
+                'subcategoria' => 'Vertido de aguas',
+                'volumen' => $volumen,
+                'volumen_unidad' => 'm³',
+                'coste_limpieza' => $costeLimpieza,
+                'coste_limpieza_unidad' => '€/m³',
+            ],
+        ]);
+
+        $vrItem = ReportCostItem::create([
+            'report_id' => $report->id,
+            'group_key' => $groupKey,
+            'cost_type' => 'VR',
+            'concept_name' => $conceptName,
+            'base_value' => $vrManual,
+            'cr_value' => null,
+            'gi_value' => null,
+            'total_cost' => $vrTotal,
+            'coef_info_json' => [
+                'formula' => 'VR = Valor introducido manualmente',
+                'categoria' => 'Vertidos',
+                'subcategoria' => 'Vertido de aguas',
+                'valor_manual' => $vrManual,
+            ],
+        ]);
+
+        $vsItem = ReportCostItem::create([
+            'report_id' => $report->id,
+            'group_key' => $groupKey,
+            'cost_type' => 'VS',
+            'concept_name' => $conceptName,
+            'base_value' => $vsManual,
+            'cr_value' => null,
+            'gi_value' => null,
+            'total_cost' => $vsTotal,
+            'coef_info_json' => [
+                'formula' => 'VS = Valor introducido manualmente',
+                'categoria' => 'Vertidos',
+                'subcategoria' => 'Vertido de aguas',
+                'valor_manual' => $vsManual,
+            ],
+        ]);
+
+        return [
+            'VE' => [
+                'item' => $veItem,
+                'total_cost' => $veTotal,
+            ],
+            'VR' => [
+                'item' => $vrItem,
+                'total_cost' => $vrTotal,
+            ],
+            'VS' => [
+                'item' => $vsItem,
+                'total_cost' => $vsTotal,
+            ],
+            'group_total' => $veTotal + $vrTotal + $vsTotal,
+        ];
     }
 
     /**
@@ -547,8 +941,56 @@ class CostCalculationService
     /**
      * Obtener información de las fórmulas para mostrar al usuario
      */
-    public static function getFormulaInfo(string $category): array
+    public static function getFormulaInfo(string $category, ?string $subcategory = null): array
     {
+        // Fórmulas específicas por subcategoría
+        if ($category === 'Infraestructuras' && $subcategory === 'Extracciones de aguas') {
+            return [
+                'VE' => [
+                    'formula' => 'VE = Volumen × Precio Unitario',
+                    'descripcion' => 'Valor del recurso extraído',
+                    'variables' => [
+                        'Volumen' => 'Cantidad de agua extraída en m³',
+                        'Precio Unitario' => 'Coste por m³ de agua',
+                    ],
+                ],
+                'VR' => [
+                    'formula' => 'VR = Valor introducido manualmente',
+                    'descripcion' => 'Valor de Reposición',
+                ],
+                'VS' => [
+                    'formula' => 'VS = VS_base × T',
+                    'descripcion' => 'Valor ecosistémico',
+                    'variables' => [
+                        'VS_base' => 'Valor ecosistémico base introducido',
+                        'T' => 'Coeficiente según origen del agua (Manantial=2.0, Superficial=1.8, Subterránea=1.6, Pozo=1.5, Otros=1.4, Red pública=1.2)',
+                    ],
+                ],
+            ];
+        }
+
+        // Fórmulas para Vertido de aguas
+        if ($category === 'Vertidos' && $subcategory === 'Vertido de aguas') {
+            return [
+                'VE' => [
+                    'formula' => 'VE = Volumen × Coste Limpieza',
+                    'descripcion' => 'Valor del daño por vertido',
+                    'variables' => [
+                        'Volumen' => 'Cantidad de agua vertida en m³',
+                        'Coste Limpieza' => 'Coste de limpieza/tratamiento por m³',
+                    ],
+                ],
+                'VR' => [
+                    'formula' => 'VR = Valor introducido manualmente',
+                    'descripcion' => 'Valor de Reposición',
+                ],
+                'VS' => [
+                    'formula' => 'VS = Valor introducido manualmente',
+                    'descripcion' => 'Valor ecosistémico',
+                ],
+            ];
+        }
+
         return match ($category) {
             'Biodiversidad' => [
                 'VR' => [
@@ -585,6 +1027,34 @@ class CostCalculationService
                         'Reproducción' => 'Comercial=50, Cautiverio=75, No reproducida=100',
                         'Estado Vital' => 'Sano=50, Herido=75, Muerto=100',
                     ],
+                ],
+            ],
+            'Infraestructuras' => [
+                'VE' => [
+                    'formula' => 'VE = Volumen × Precio Unitario',
+                    'descripcion' => 'Valor del recurso extraído',
+                ],
+                'VR' => [
+                    'formula' => 'VR = Valor manual',
+                    'descripcion' => 'Valor de Reposición',
+                ],
+                'VS' => [
+                    'formula' => 'VS = VS_base × T',
+                    'descripcion' => 'Valor ecosistémico',
+                ],
+            ],
+            'Vertidos' => [
+                'VE' => [
+                    'formula' => 'VE = Volumen × Coste Limpieza',
+                    'descripcion' => 'Valor del daño por vertido',
+                ],
+                'VR' => [
+                    'formula' => 'VR = Valor manual',
+                    'descripcion' => 'Valor de Reposición',
+                ],
+                'VS' => [
+                    'formula' => 'VS = Valor manual',
+                    'descripcion' => 'Valor ecosistémico',
                 ],
             ],
             default => [
