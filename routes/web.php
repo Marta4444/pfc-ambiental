@@ -34,10 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
-    Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+    Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show')->whereNumber('category');
 
     Route::get('subcategories', [SubcategoryController::class, 'index'])->name('subcategories.index');
-    Route::get('subcategories/{subcategory}', [SubcategoryController::class, 'show'])->name('subcategories.show');
+    Route::get('subcategories/{subcategory}', [SubcategoryController::class, 'show'])->name('subcategories.show')->whereNumber('subcategory');
 
     // Rutas de asignación de reportes
     Route::post('reports/{report}/self-assign', [ReportController::class, 'selfAssign'])->name('reports.selfAssign');
@@ -47,6 +47,9 @@ Route::middleware('auth')->group(function () {
     // Rutas para finalizar y reabrir reportes
     Route::post('reports/{report}/finalize', [ReportController::class, 'finalize'])->name('reports.finalize');
     Route::post('reports/{report}/reopen', [ReportController::class, 'reopen'])->name('reports.reopen');
+    
+    // Ruta para exportar a PDF
+    Route::get('reports/{report}/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
 
     Route::resource('reports', ReportController::class);
 

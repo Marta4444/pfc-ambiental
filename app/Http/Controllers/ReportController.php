@@ -13,6 +13,7 @@ use App\Helpers\SpainGeoHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -629,5 +630,54 @@ class ReportController extends Controller
         ]);
 
         return redirect()->route('reports.show', $report)->with('success', 'El caso ha sido reabierto y ahora puede ser editado.');
+    }
+
+    /**
+     * Export a report to PDF.
+     */
+    public function exportPdf(Report $report)
+    {
+        // Cargar relaciones necesarias
+        $report->load(['user', 'category', 'subcategory', 'petitioner', 'assignedTo', 'costItems']);
+        
+        // Obtener detalles agrupados
+        $groupedDetails = $report->details()
+            ->with(['species', 'protectedArea'])
+            ->orderBy('group_key')
+            ->orderBy('order_index')
+            ->get()
+            ->groupBy('group_key');
+        
+        // Obtener items de coste
+        $costItems = $report->costItems()
+            ->orderBy('cost_type')
+            ->orderBy('group_key')
+            ->get();
+        
+        // Verificar áreas protegidas por coordenadas
+        $protectedAreas = collect();
+        if ($report->coordinates) {
+            $coords = $this->parseCoordinates($report->coordinates);
+            if ($coords) {
+                $protectedAreas = ProtectedArea::findAreasContainingPoint($coords['lat'], $coords['long']);
+            }
+        }
+        
+        // Generar PDF
+        $pdf = Pdf::loadView('reports.pdf', [
+            'report' => $report,
+            'groupedDetails' => $groupedDetails,
+            'costItems' => $costItems,
+            'protectedAreas' => $protectedAreas,
+        ]);
+        
+        // Configurar opciones del PDF
+        $pdf->setPaper('A4', 'portrait');
+        
+        // Nombre del archivo
+        $filename = 'caso_' . $report->ip . '_' . now()->format('Ymd_His') . '.pdf';
+        
+        // Descargar el PDF
+        return $pdf->download($filename);
     }
 }

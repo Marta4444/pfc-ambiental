@@ -306,3 +306,25 @@ php artisan species:sync --source=all --limit=10
   - Desglose: Tabla principal de la vista de costes, con grupo, concepto, tipo, valores y coste total.
   - Detalle cálculos: contiene todos los datos expandibles de los modales.
 - El excel generado obtiene un nombre con el formato Costes_CodigoCaso_fecha.xlsx
+
+### Biblioteca SheetJS
+- Para añadir esta biblioteca, en la vista de Costes (index) se añade al final esto: <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+- Este comando hace que se descarge el script desde cdn.sheetjs.com.
+- La función exportToExcel() usa el objeto global XLSX que proporciona la biblioteca.
+- Se podría instalar con npm, pero para este proyecto, el CDN es la solución más simple y funcional. Esta siempre actualizado y no ocupa espacio en servidor, aunque requiere conexión a internet, es una dependencia externa y puede ser más lento la priemra vez.
+- Web de documentación oficial, para bibliografia: https://docs.sheetjs.com/
+
+## Eportar como PDF
+- Se usa DomPDF:
+  - Se installa con "composer require barryvdh/laravel-dompdf --with-all-dependencies"
+  - Usa vistas blade directamente como plantilla y no neesita dependencias externas del sstema.
+  - Se crea la vista reports/pdf.blade.php, con el diseño del pdf a exportar, usando tablas HTML y CSS básico.
+  - Se añade un método en ReportController (exportPDF) para cargar la vista y convertirlo en pdf y exportarlo.
+  - El botón de Exportar PDF se añade en la vista de los Reports (reports/show).
+  - Se crea la ruta para exportar el pdf, en web.php. Se incluye en el grupo de rutas de usuarios autenticados. Cualquiera puede exportar los casos en pdf.
+  - El archivo pdf que se genera se guarda con nombre "caso_IP_fecha.pdf".
+  - Bibliografia:
+    - Repositorio oficial de Laravel DomPDF: Barry vd. Heuvel. (2024). barryvdh/laravel-dompdf: A DOMPDF Wrapper for Laravel. GitHub. https://github.com/barryvdh/laravel-dompdf
+    - Documentación de DomPDF: Dompdf Community. (2024). Dompdf - HTML to PDF converter for PHP. GitHub. https://github.com/dompdf/dompdf
+    - Información del paquete de Packagist: Packagist. (2024). barryvdh/laravel-dompdf. https://packagist.org/packages/barryvdh/laravel-dompdf
+  - Durante la instalación se encontró un 0roblema de conflicto de versiones de laravel. Al usar la flag "--with-all-dependencies" en el comando de instalación, se actualizan las dependencias relacionadas y esto ha actualizado Laravel y ha resuelto el problema de compatibilidad.
