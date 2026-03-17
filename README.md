@@ -328,3 +328,20 @@ php artisan species:sync --source=all --limit=10
     - Documentación de DomPDF: Dompdf Community. (2024). Dompdf - HTML to PDF converter for PHP. GitHub. https://github.com/dompdf/dompdf
     - Información del paquete de Packagist: Packagist. (2024). barryvdh/laravel-dompdf. https://packagist.org/packages/barryvdh/laravel-dompdf
   - Durante la instalación se encontró un 0roblema de conflicto de versiones de laravel. Al usar la flag "--with-all-dependencies" en el comando de instalación, se actualizan las dependencias relacionadas y esto ha actualizado Laravel y ha resuelto el problema de compatibilidad.
+
+## Calculos
+### Biodiversidad
+- Se aplica una fórmula estándard para el cálculo del daño económico.
+- Segun la subcategoría, se aplica un coeficiente distinto.
+- Los componentes de las fórmulas son:
+  - VE: valor del recurso extraido
+  - VS: valor ecosistemico
+  - VR: valor de recuperación
+  - CB: Coste base (estandarizado a 300 siempre)
+  - L: situacion legal. Valor variable según clasificacion del IUCN
+  - N: valor variable según clasificacion en CITES
+  - B: estado de madurez.
+  - S: coeficiente variable según la subcategoría.
+  - q: cantidad de individuos
+  - CR: coste de reposicion
+  - IG: indice de gravedad, calculado con distintos valores aplicados según la clasificación de la ubicación, el nivel trofico, el tipo de reproducción en cautiverio y el estado vital.

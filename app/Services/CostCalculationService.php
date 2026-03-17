@@ -60,6 +60,18 @@ class CostCalculationService
     ];
 
     /**
+     * Multiplicadores de Subcategoría (S)
+     * Factor según el tipo de hecho ilícito en biodiversidad
+     */
+    private const SUBCATEGORY_MULTIPLIERS = [
+        'Comercio'                      => 1,
+        'Caza furtiva'                  => 2,
+        'Especies cinegéticas'          => 2,
+        'Endemismos'                    => 2,
+        'Especie Exótica Invasora (EEI)' => 1.5,
+    ];
+
+    /**
      * Valores estándar para Índice de Gravedad (IG)
      * Cada dimensión pondera 25% del total
      */
@@ -113,9 +125,14 @@ class CostCalculationService
     /**
      * Calcular costes para categoría BIODIVERSIDAD
      * 
-     * Fórmula VR = [(CB * L * N * B) * q] + CR
+     * Fórmula VR = [(CB * L * N * B * S) * q] + CR
      * Fórmula VS = VR * IG
      * VE = introducido manualmente
+     * 
+     * Donde S es el multiplicador de subcategoría:
+     * - Comercio: S = 1
+     * - Caza furtiva, Especies cinegéticas, Endemismos: S = 2
+     * - Especie Exótica Invasora (EEI): S = 1.5
      */
     public function calculateBiodiversidad(Report $report): array
     {
@@ -235,6 +252,10 @@ class CostCalculationService
         $N = self::CITES_MULTIPLIERS[$citesAppendix] ?? 1; // Default a 1 si no está en CITES
         $B = self::MADUREZ_MULTIPLIERS[$madurez] ?? 1.1; // Default a Inmaduro
 
+        // Obtener el multiplicador de Subcategoría (S)
+        $subcategoryName = $report->subcategory->name ?? '';
+        $S = self::SUBCATEGORY_MULTIPLIERS[$subcategoryName] ?? 1; // Default a 1 si no se encuentra
+
         // Log para debug
         Log::debug("Calculando costes para {$groupKey}", [
             'especie' => $especie,
@@ -246,10 +267,12 @@ class CostCalculationService
             'L' => $L,
             'N' => $N,
             'B' => $B,
+            'S' => $S,
+            'subcategoria' => $subcategoryName,
         ]);
 
-        // Calcular VR = [(CB * L * N * B) * q] + CR
-        $vrBase = self::COSTE_BASE * $L * $N * $B;
+        // Calcular VR = [(CB * L * N * B * S) * q] + CR
+        $vrBase = self::COSTE_BASE * $L * $N * $B * $S;
         $vrTotal = ($vrBase * $cantidad) + $costeReposicion;
 
         // Calcular Índice de Gravedad (IG)
@@ -277,7 +300,7 @@ class CostCalculationService
             'gi_value' => null,
             'total_cost' => $vrTotal,
             'coef_info_json' => [
-                'formula' => 'VR = [(CB * L * N * B) * q] + CR',
+                'formula' => 'VR = [(CB * L * N * B * S) * q] + CR',
                 'CB' => self::COSTE_BASE,
                 'L' => $L,
                 'L_source' => "IUCN: {$iucnCategory}",
@@ -285,6 +308,8 @@ class CostCalculationService
                 'N_source' => "CITES: " . ($citesAppendix ?: 'No'),
                 'B' => $B,
                 'B_source' => "Madurez: {$madurez}",
+                'S' => $S,
+                'S_source' => "Subcategoría: {$subcategoryName}",
                 'q' => $cantidad,
                 'CR' => $costeReposicion,
             ],
@@ -527,13 +552,14 @@ class CostCalculationService
         return match ($category) {
             'Biodiversidad' => [
                 'VR' => [
-                    'formula' => 'VR = [(CB × L × N × B) × q] + CR',
+                    'formula' => 'VR = [(CB × L × N × B × S) × q] + CR',
                     'descripcion' => 'Valor de Reposición',
                     'variables' => [
                         'CB' => 'Coste Base (300€)',
                         'L' => 'Situación Legal según IUCN (CR=70, EN=60, VU=40, NT=20, LC=6.5, DD=5)',
                         'N' => 'CITES (I=3, II=2, III=1.5, Sin CITES=1)',
                         'B' => 'Madurez (Maduro=1.5, Inmaduro=1.1)',
+                        'S' => 'Subcategoría (Comercio=1, Caza furtiva/Cinegéticas/Endemismos=2, EEI=1.5)',
                         'q' => 'Cantidad de individuos',
                         'CR' => 'Coste de Reposición introducido',
                     ],

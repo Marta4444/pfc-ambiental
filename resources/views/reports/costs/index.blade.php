@@ -142,7 +142,7 @@
                                             CR
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            GI
+                                            IG
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Coste Total
@@ -215,14 +215,18 @@
                         {{-- Información adicional --}}
                         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                             <h4 class="text-sm font-semibold text-gray-700 mb-2">Leyenda de Coeficientes</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-600">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
                                 <div>
-                                    <strong>CR (Coeficiente de Recuperabilidad):</strong> 
+                                    <strong>CR (Coste de Reposición):</strong> 
                                     Factor que ajusta el valor según la posibilidad de recuperación del recurso dañado.
                                 </div>
                                 <div>
-                                    <strong>GI (Índice de Gravedad):</strong> 
+                                    <strong>IG (Índice de Gravedad):</strong> 
                                     Multiplicador basado en el estado del recurso afectado.
+                                </div>
+                                <div>
+                                    <strong>S (Subcategoría):</strong> 
+                                    Factor según tipo de hecho ilícito (Comercio=1, Caza/Cinegéticas/Endemismos=2, EEI=1.5).
                                 </div>
                             </div>
                         </div>
@@ -413,20 +417,33 @@
                             <p class="text-xs text-green-500">${coef.B_source || ''}</p>
                         </div>
                         
+                        <div class="p-3 bg-teal-50 rounded-lg">
+                            <p class="text-xs text-teal-600 font-medium">S (Subcategoría)</p>
+                            <p class="text-lg font-bold text-teal-800">×${coef.S || 1}</p>
+                            <p class="text-xs text-teal-500">${coef.S_source || ''}</p>
+                        </div>
+                        
                         <div class="p-3 bg-indigo-50 rounded-lg">
                             <p class="text-xs text-indigo-600 font-medium">q (Cantidad)</p>
                             <p class="text-lg font-bold text-indigo-800">${coef.q || 1} uds.</p>
                         </div>
                         
-                        <div class="p-3 bg-red-50 rounded-lg">
+                        <div class="p-3 bg-red-50 rounded-lg col-span-2">
                             <p class="text-xs text-red-600 font-medium">CR (Coste Reposición)</p>
                             <p class="text-lg font-bold text-red-800">+${formatMoney(coef.CR || 0)} €</p>
                         </div>
                     </div>
                     
+                    <div class="mt-4 p-3 bg-teal-50 rounded-lg border-l-4 border-teal-500">
+                        <p class="text-sm text-teal-700">
+                            <strong>Coeficiente S (Subcategoría):</strong> Este factor ajusta el cálculo según el tipo de hecho ilícito. 
+                            Comercio = 1; Caza furtiva, Especies cinegéticas, Endemismos = 2; Especie Exótica Invasora = 1.5.
+                        </p>
+                    </div>
+                    
                     <div class="mt-4 p-3 bg-gray-50 rounded-lg border-l-4 border-blue-500">
                         <p class="text-sm text-gray-600">
-                            <strong>Cálculo:</strong> (${coef.CB || 300} × ${coef.L || 1} × ${coef.N || 1} × ${coef.B || 1}) × ${coef.q || 1} + ${coef.CR || 0}
+                            <strong>Cálculo:</strong> (${coef.CB || 300} × ${coef.L || 1} × ${coef.N || 1} × ${coef.B || 1} × ${coef.S || 1}) × ${coef.q || 1} + ${coef.CR || 0}
                         </p>
                         <p class="text-sm text-gray-600 mt-1">
                             = ${formatMoney(item.base_value)} × ${coef.q || 1} + ${formatMoney(coef.CR || 0)} = <strong>${formatMoney(item.total_cost)} €</strong>
@@ -616,7 +633,7 @@
             // HOJA 2: DESGLOSE POR CONCEPTO
             // ==========================================
             const detailHeaders = [
-                'Grupo', 'Concepto', 'Tipo', 'Valor Base (€)', 'CR', 'GI', 'Coste Total (€)'
+                'Grupo', 'Concepto', 'Tipo', 'Valor Base (€)', 'CR', 'IG', 'Coste Total (€)'
             ];
             
             const detailRows = exportData.costs.map(item => [
@@ -642,7 +659,7 @@
             // ==========================================
             const calcHeaders = [
                 'Concepto', 'Tipo', 'Fórmula', 
-                'CB (Coste Base)', 'L (IUCN)', 'N (CITES)', 'B (Madurez)', 
+                'CB (Coste Base)', 'L (IUCN)', 'N (CITES)', 'B (Madurez)', 'S (Subcategoría)',
                 'q (Cantidad)', 'CR (Coste Repos.)', 'IG (Gravedad)',
                 'Ubicación', 'Nivel Trófico', 'Reprod. Cautiverio', 'Estado Vital',
                 'Total (€)'
@@ -660,6 +677,7 @@
                     coef.L ? `${coef.L} (${coef.L_source || ''})` : '',
                     coef.N ? `${coef.N} (${coef.N_source || ''})` : '',
                     coef.B ? `${coef.B} (${coef.B_source || ''})` : '',
+                    coef.S ? `${coef.S} (${coef.S_source || ''})` : '',
                     coef.q || '',
                     coef.CR || '',
                     item.gi_value || coef.IG || '',
@@ -674,7 +692,7 @@
             const ws3 = XLSX.utils.aoa_to_sheet([calcHeaders, ...calcRows]);
             ws3['!cols'] = [
                 { wch: 30 }, { wch: 6 }, { wch: 40 },
-                { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 },
+                { wch: 12 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 25 },
                 { wch: 10 }, { wch: 15 }, { wch: 12 },
                 { wch: 25 }, { wch: 25 }, { wch: 25 }, { wch: 25 },
                 { wch: 15 }

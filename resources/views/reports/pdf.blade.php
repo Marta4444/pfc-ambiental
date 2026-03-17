@@ -646,7 +646,7 @@
                             <th style="width: 25%;">Concepto</th>
                             <th style="width: 12%;" class="text-right">Base</th>
                             <th style="width: 8%;" class="text-right">CR</th>
-                            <th style="width: 8%;" class="text-right">GI</th>
+                            <th style="width: 8%;" class="text-right">IG</th>
                             <th style="width: 12%;" class="text-right">Total</th>
                         </tr>
                     </thead>
