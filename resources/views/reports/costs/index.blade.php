@@ -246,6 +246,36 @@
                                         VE = Volumen × P.U. | VR = Manual | VS = VS_base × T
                                     </div>
                                 </div>
+                            @elseif($categoryName === 'Vertidos' && $subcategoryName === 'Vertido de aguas')
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
+                                    <div>
+                                        <strong>CL (Coste de Limpieza):</strong> 
+                                        Coste de limpieza/tratamiento del agua vertida por metro cúbico (€/m³).
+                                    </div>
+                                    <div>
+                                        <strong>VR y VS manuales:</strong> 
+                                        Los valores de reposición y ecosistémico se introducen manualmente según evaluación técnica del daño.
+                                    </div>
+                                    <div>
+                                        <strong>Fórmulas:</strong> 
+                                        VE = Volumen × CL | VR = Manual | VS = Manual
+                                    </div>
+                                </div>
+                            @elseif($categoryName === 'Biodiversidad')
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
+                                    <div>
+                                        <strong>CR (Coste de Reposición):</strong> 
+                                        Factor que ajusta el valor según la posibilidad de recuperación del recurso dañado.
+                                    </div>
+                                    <div>
+                                        <strong>IG (Índice de Gravedad):</strong> 
+                                        Multiplicador basado en el estado del recurso afectado (ubicación, nivel trófico, reproducción, estado vital).
+                                    </div>
+                                    <div>
+                                        <strong>S (Subcategoría):</strong> 
+                                        Factor según tipo de hecho ilícito (Comercio=1, Caza/Cinegéticas/Endemismos=2, EEI=1.5).
+                                    </div>
+                                </div>
                             @else
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-600">
                                     <div>
@@ -257,8 +287,8 @@
                                         Multiplicador basado en el estado del recurso afectado.
                                     </div>
                                     <div>
-                                        <strong>S (Subcategoría):</strong> 
-                                        Factor según tipo de hecho ilícito (Comercio=1, Caza/Cinegéticas/Endemismos=2, EEI=1.5).
+                                        <strong>Fórmulas:</strong> 
+                                        Cálculo genérico aplicado a esta categoría/subcategoría.
                                     </div>
                                 </div>
                             @endif

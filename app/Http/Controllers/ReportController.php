@@ -213,6 +213,9 @@ class ReportController extends Controller
         }
 
         $assigned = !empty($validated['assigned_to']);
+        
+        // Determinar estado inicial: NUEVO si no hay asignado, EN_ESPERA si hay asignado
+        $initialStatus = $assigned ? Report::STATUS_EN_ESPERA : Report::STATUS_NUEVO;
 
         $report = Report::create([
             'user_id' => Auth::id(),
@@ -232,7 +235,7 @@ class ReportController extends Controller
             'urgency' => $validated['urgency'],
             'date_petition' => $validated['date_petition'],
             'date_damage' => $validated['date_damage'],
-            'status' => Report::STATUS_NUEVO,
+            'status' => $initialStatus,
             'assigned' => $assigned,
             'assigned_to' => $validated['assigned_to'] ?? null,
             'pdf_report' => $path,
@@ -527,11 +530,19 @@ class ReportController extends Controller
             'assigned_to' => 'required|exists:users,id',
         ]);
 
+        // Determinar nuevo estado según si tiene detalles:
+        // - Si tiene detalles → EN_PROCESO
+        // - Si no tiene detalles → EN_ESPERA
+        $hasDetails = $report->details()->exists();
+        $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_EN_ESPERA;
+        
+        // Solo cambiar estado si está en NUEVO o EN_ESPERA (no si ya está EN_PROCESO o COMPLETADO)
+        $shouldChangeStatus = in_array($report->status, [Report::STATUS_NUEVO, Report::STATUS_EN_ESPERA]);
+
         $report->update([
             'assigned_to' => $request->assigned_to,
             'assigned' => true,
-            'status' => $report->isNuevo() ? Report::STATUS_EN_PROCESO : $report->status,
-            /*'status' => $report->status === 'nuevo' ? 'en_proceso' : $report->status,*/
+            'status' => $shouldChangeStatus ? $newStatus : $report->status,
         ]);
 
         return redirect()->back()->with('success', 'Caso asignado correctamente.');
@@ -552,9 +563,17 @@ class ReportController extends Controller
             abort(403, 'No tienes permiso para desasignar este caso.');
         }
 
+        // Al desasignar, volver a NUEVO si no tiene detalles, o mantener EN_PROCESO si los tiene
+        $hasDetails = $report->details()->exists();
+        $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_NUEVO;
+        
+        // Solo cambiar estado si no está COMPLETADO
+        $shouldChangeStatus = $report->status !== Report::STATUS_COMPLETADO;
+
         $report->update([
             'assigned_to' => null,
             'assigned' => false,
+            'status' => $shouldChangeStatus ? $newStatus : $report->status,
         ]);
 
         return redirect()->back()->with('success', 'Caso desasignado correctamente.');
@@ -572,11 +591,19 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'Este caso ya está asignado a otro usuario.');
         }
 
+        // Determinar nuevo estado según si tiene detalles:
+        // - Si tiene detalles → EN_PROCESO
+        // - Si no tiene detalles → EN_ESPERA
+        $hasDetails = $report->details()->exists();
+        $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_EN_ESPERA;
+        
+        // Solo cambiar estado si está en NUEVO o EN_ESPERA
+        $shouldChangeStatus = in_array($report->status, [Report::STATUS_NUEVO, Report::STATUS_EN_ESPERA]);
+
         $report->update([
             'assigned_to' => $user->id,
             'assigned' => true,
-            'status' => $report->isNuevo() ? Report::STATUS_EN_PROCESO : $report->status,
-            /*'status' => $report->status === 'nuevo' ? 'en_proceso' : $report->status,*/
+            'status' => $shouldChangeStatus ? $newStatus : $report->status,
         ]);
 
         return redirect()->back()->with('success', 'Te has asignado el caso correctamente.');

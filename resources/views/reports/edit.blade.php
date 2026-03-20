@@ -261,7 +261,7 @@
                 {{-- USUARIO NORMAL: Puede editar campos limitados (excepto IP, categoría y subcategoría) --}}
                 
                 <div class="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-eco-700 rounded">
-                    <p class="font-semibold">Camposos para usuarios:</p>
+                    <p class="font-semibold">Camposos No editables por usuarios:</p>
                     <ul class="list-disc list-inside text-sm mt-2">
                         <li>Número IP (Informe Pericial)</li>
                         <li>Categoría y Subcategoría</li>

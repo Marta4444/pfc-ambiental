@@ -157,6 +157,11 @@ class ReportDetailController extends Controller
                 $this->updateSpeciesProtectionData($speciesId, $fieldValues);
             }
 
+            // Actualizar estado del report a EN_PROCESO si está en NUEVO o EN_ESPERA
+            if (in_array($report->status, [Report::STATUS_NUEVO, Report::STATUS_EN_ESPERA])) {
+                $report->update(['status' => Report::STATUS_EN_PROCESO]);
+            }
+
             DB::commit();
 
             if ($request->has('add_another')) {
