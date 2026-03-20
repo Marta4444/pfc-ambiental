@@ -138,7 +138,6 @@
                     <div class="text-center">
                         <strong>${area.name}</strong><br>
                         <span class="text-xs">${area.protection_type}</span>
-                        ${area.iucn_category ? `<br><span class="text-xs">IUCN: ${area.iucn_category}</span>` : ''}
                         ${area.region ? `<br><span class="text-xs">${area.region}</span>` : ''}
                     </div>
                 `);
@@ -198,7 +197,6 @@
                             <div class="flex flex-wrap gap-2 items-center">
                                 <span class="font-medium">${area.name}</span>
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">${area.protection_type}</span>
-                                ${area.iucn_category ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-100 text-teal-800">IUCN: ${area.iucn_category}</span>` : ''}
                                 ${area.region ? `<span class="text-xs text-gray-500">(${area.region})</span>` : ''}
                             </div>
                         `;

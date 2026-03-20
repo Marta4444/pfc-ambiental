@@ -116,6 +116,7 @@ Para la sincronización automática se crea un cron, que se crea mediante el com
 - Validación de Localización (ubicaciones correctas).
   - Para esto se crea el Helper SpainGeoHelper.php, que valida que la provincia pertenezca a la comunidad seleccionada, y que las coordenadas estén dentro de los límites de esa comunidad.
   - Se ha creado además el archivo spain-geo.json (public > data) con los datos de las ccaa y localidades. Tanto el helper, como las visttas de create y edit de report (usando el método fetch()) leen de este archivo.
+- No se pueden borrar usuarios, solo desactivarlos, y solo lo puede hacer un administrador. Asi se previene que se borren los datos asociados a los usuarios borrados. -> El controlador UserAdminController gestiona los usuarios.
 
 
 ## Audit log -> registro de cambios

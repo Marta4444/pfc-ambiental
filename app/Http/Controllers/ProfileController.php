@@ -76,7 +76,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Deactivate the user's account (instead of deleting).
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -86,19 +86,20 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // VALIDACIÓN: Prevenir que el último admin se elimine
+        // VALIDACIÓN: Prevenir que el último admin activo se desactive
         if ($user->role === 'admin') {
-            $adminCount = User::where('role', 'admin')->count();
+            $activeAdminCount = User::where('role', 'admin')->where('active', true)->count();
             
-            if ($adminCount <= 1) {
+            if ($activeAdminCount <= 1) {
                 return Redirect::route('profile.edit')
-                    ->withErrors(['error' => 'No puedes eliminar tu cuenta. Debe haber al menos un administrador en el sistema.']);
+                    ->withErrors(['error' => 'No puedes desactivar tu cuenta. Debe haber al menos un administrador activo en el sistema.']);
             }
         }
 
-        Auth::logout();
+        // Desactivar usuario en lugar de borrarlo
+        $user->update(['active' => false]);
 
-        $user->delete();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

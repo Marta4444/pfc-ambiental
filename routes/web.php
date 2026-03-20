@@ -13,6 +13,7 @@ use App\Http\Controllers\ProtectedAreaController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\SpeciesAdminController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\UserAdminController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -88,6 +89,14 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
+    // Gestión de usuarios (solo admin)
+    Route::get('admin/users', [UserAdminController::class, 'index'])->name('admin.users.index');
+    Route::get('admin/users/create', [UserAdminController::class, 'create'])->name('admin.users.create');
+    Route::post('admin/users', [UserAdminController::class, 'store'])->name('admin.users.store');
+    Route::get('admin/users/{user}/edit', [UserAdminController::class, 'edit'])->name('admin.users.edit');
+    Route::put('admin/users/{user}', [UserAdminController::class, 'update'])->name('admin.users.update');
+    Route::post('admin/users/{user}/toggle-active', [UserAdminController::class, 'toggleActive'])->name('admin.users.toggle-active');
+
     // Auditoría (solo admin)
     Route::get('audit', [AuditLogController::class, 'index'])->name('audit.index');
     Route::get('audit/{auditLog}', [AuditLogController::class, 'show'])->name('audit.show');

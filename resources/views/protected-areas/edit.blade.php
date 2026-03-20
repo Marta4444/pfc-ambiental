@@ -47,20 +47,6 @@
                                 </div>
 
                                 <div>
-                                    <label for="iucn_category" class="block text-sm font-medium text-gray-700">Categoría IUCN</label>
-                                    <select name="iucn_category" id="iucn_category"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                                        <option value="">Sin categoría</option>
-                                        @foreach($iucnCategories as $code => $label)
-                                            <option value="{{ $code }}" {{ old('iucn_category', $area->iucn_category) == $code ? 'selected' : '' }}>
-                                                {{ $code }} - {{ $label }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('iucn_category')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
-                                </div>
-
-                                <div>
                                     <label for="designation" class="block text-sm font-medium text-gray-700">Designación</label>
                                     <input type="text" name="designation" id="designation" value="{{ old('designation', $area->designation) }}"
                                         placeholder="Ej: Red Natura 2000"

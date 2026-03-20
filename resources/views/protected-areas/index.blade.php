@@ -123,7 +123,6 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IUCN</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Región</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Área (km²)</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
@@ -143,15 +142,6 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             {{ $area->protection_type }}
                                         </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-500">
-                                        @if($area->iucn_category)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-100 text-teal-800" title="{{ \App\Models\ProtectedArea::IUCN_CATEGORIES[$area->iucn_category] ?? '' }}">
-                                                {{ $area->iucn_category }}
-                                            </span>
-                                        @else
-                                            <span class="text-gray-400">-</span>
-                                        @endif
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-500">
                                         {{ $area->region ?? '-' }}

@@ -199,11 +199,6 @@
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                                                 {{ $protectedArea->protection_type }}
                                             </span>
-                                            @if($protectedArea->iucn_category)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-100 text-teal-800">
-                                                    IUCN: {{ $protectedArea->iucn_category }}
-                                                </span>
-                                            @endif
                                             @if($protectedArea->region)
                                                 <span class="text-xs text-green-600">({{ $protectedArea->region }})</span>
                                             @endif

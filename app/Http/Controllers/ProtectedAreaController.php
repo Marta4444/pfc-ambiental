@@ -107,7 +107,6 @@ class ProtectedAreaController extends Controller
     {
         return view('protected-areas.create', [
             'protectionTypes' => ProtectedArea::PROTECTION_TYPES,
-            'iucnCategories' => ProtectedArea::IUCN_CATEGORIES,
         ]);
     }
 
@@ -119,7 +118,6 @@ class ProtectedAreaController extends Controller
         return view('protected-areas.edit', [
             'area' => $protectedArea,
             'protectionTypes' => ProtectedArea::PROTECTION_TYPES,
-            'iucnCategories' => ProtectedArea::IUCN_CATEGORIES,
         ]);
     }
 
