@@ -18,11 +18,14 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
+        $agentNum = '2026-' . str_pad(random_int(1, 99999), 5, '0', STR_PAD_LEFT);
         $response = $this->post('/register', [
             'name' => 'Test User',
-            'email' => 'test@example.com',
+            'email' => 'test' . uniqid() . '@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'agent_num' => $agentNum,
+            'role' => 'user',
         ]);
 
         $this->assertAuthenticated();

@@ -160,7 +160,7 @@ class CostCalculationService
             'errors' => [],
         ];
 
-        // Eliminar costes anteriores
+        // Eliminar costes anteriores en el caso de que se recalculen los costes (necesario si se modifican los detalles del report)
         $report->costItems()->delete();
 
         // Obtener grupos de detalles (species_1, species_2, etc.)
@@ -439,7 +439,8 @@ class CostCalculationService
      * 
      * Subcategorías soportadas:
      * - Extracciones de aguas: VE = volumen * precio_unitario, VR = manual, VS = VS_manual * T
-     * - Parques eólicos: fórmula genérica (pendiente de implementar)
+     * Otras (pendiente)
+     * Función usada para escalar los cálculos y añadir más subcategorías, referenciando las funciones específicas concretas según la subcategoría.
      */
     public function calculateInfraestructuras(Report $report): array
     {
@@ -472,7 +473,7 @@ class CostCalculationService
             'errors' => [],
         ];
 
-        // Eliminar costes anteriores
+        // Eliminar costes anteriores en el caso de que se vuelvan a calcular los costes (necesario cuando se actualizan los detalles del report)
         $report->costItems()->delete();
 
         // Obtener grupos de detalles (agua_1, agua_2, etc.)
@@ -523,12 +524,12 @@ class CostCalculationService
             ->keyBy('field_key');
 
         // Extraer valores de los campos
-        $volumen = (float) ($details->get('volumen')?->value ?? 0);
+        $volumen = max(0, (float) ($details->get('volumen')?->value ?? 0));
         $origenAgua = $details->get('origen_agua')?->value ?? 'Otros';
-        $caudal = (float) ($details->get('caudal')?->value ?? 0);
-        $precioUnitario = (float) ($details->get('precio_unitario')?->value ?? 0);
-        $vrManual = (float) ($details->get('vr_manual')?->value ?? 0);
-        $vsManual = (float) ($details->get('vs_manual')?->value ?? 0);
+        $caudal = max(0, (float) ($details->get('caudal')?->value ?? 0));
+        $precioUnitario = max(0, (float) ($details->get('precio_unitario')?->value ?? 0));
+        $vrManual = max(0, (float) ($details->get('vr_manual')?->value ?? 0));
+        $vsManual = max(0, (float) ($details->get('vs_manual')?->value ?? 0));
 
         // Obtener el multiplicador T según origen del agua
         $T = self::ORIGEN_AGUA_MULTIPLIERS[$origenAgua] ?? 1.4;

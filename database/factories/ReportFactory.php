@@ -37,7 +37,6 @@ class ReportFactory extends Factory
             'community' => $this->faker->randomElement(['Andalucía', 'Cataluña', 'Madrid', 'Valencia']),
             'province' => $this->faker->randomElement(['Sevilla', 'Barcelona', 'Madrid', 'Valencia']),
             'locality' => $this->faker->city(),
-            'location' => $this->faker->streetAddress(),
             'coordinates' => $this->faker->latitude() . ',' . $this->faker->longitude(),
             'petitioner_id' => $petitioner?->id ?? Petitioner::factory(),
             'petitioner_other' => null,

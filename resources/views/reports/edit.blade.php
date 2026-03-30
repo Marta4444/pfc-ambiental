@@ -151,18 +151,154 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <x-input-label for="urgency" value="Urgencia" />
+                        <select id="urgency" name="urgency" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            @foreach(\App\Models\Report::URGENCY_LABELS as $value => $label)
+                                <option value="{{ $value }}" {{ old('urgency', $report->urgency ?? 'normal') == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('urgency') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <x-input-label for="status" value="Estado" />
+                        <select id="status" name="status" class="mt-1 block w-full border rounded p-2" required>
+                            @foreach(\App\Models\Report::STATUS_LABELS as $value => $label)
+                                <option value="{{ $value }}" {{ old('status', $report->status) == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('status') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <x-input-label for="assigned_to" value="Asignar a" />
+                        <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border rounded p-2">
+                            <option value="">Sin asignar</option>
+                            @foreach($agents as $agent)
+                                <option value="{{ $agent->id }}" {{ old('assigned_to', $report->assigned_to) == $agent->id ? 'selected' : '' }}>
+                                    {{ $agent->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('assigned_to') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
+                    @if($report->pdf_report)
+                        <div class="mb-2">
+                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-eco-700 hover:underline text-sm">Ver archivo actual</a>
+                        </div>
+                    @endif
+                    <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" />
+
+
+                <div class="mb-4">
+                    <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
+                    @if($report->pdf_report)
+                        <div class="mb-2">
+                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-eco-700 hover:underline text-sm">Ver archivo actual</a>
+                        </div>
+                    @endif
+                    <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" />
+                    @error('pdf_report') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                </div>
+
+            @else
+                {{-- USUARIO NORMAL: Solo puede editar campos permitidos --}}
+                <div class="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-eco-700 rounded">
+                    <p class="font-semibold">Campos no editables por usuarios:</p>
+                    <ul class="list-disc list-inside text-sm mt-2">
+                        <li>Número IP (Informe Pericial)</li>
+                        <li>Categoría y Subcategoría</li>
+                    </ul>
+                    <p class="text-sm mt-2">Si necesitas modificar estos campos, contacta con un administrador.</p>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <x-input-label for="location" value="Ubicación específica" />
-                        <x-text-input id="location" name="location" class="mt-1 block w-full" value="{{ old('location', $report->location) }}" />
-                        @error('location') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        <x-input-label value="Número IP" />
+                        <div class="mt-1 p-2 bg-gray-100 border border-gray-300 rounded text-gray-700">
+                            {{ $report->ip }}
+                        </div>
                     </div>
-
                     <div>
-                        <x-input-label for="coordinates" value="Coordenadas (lat,lon)" />
-                        <x-text-input id="coordinates" name="coordinates" placeholder="41.12345,-1.23456" class="mt-1 block w-full" value="{{ old('coordinates', $report->coordinates) }}" />
-                        <p id="coordinates-validation" class="text-xs mt-1 hidden"></p>
+                        <x-input-label value="Categoría / Subcategoría" />
+                        <div class="mt-1 p-2 bg-gray-100 border border-gray-300 rounded text-gray-700">
+                            {{ $report->category->name ?? '—' }} / {{ $report->subcategory->name ?? '—' }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <x-input-label for="title" value="Título" />
+                    <x-text-input id="title" name="title" class="mt-1 block w-full" required value="{{ old('title', $report->title) }}" />
+                    @error('title') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <x-input-label for="date_petition" value="Fecha de petición" />
+                        <x-text-input type="date" id="date_petition" name="date_petition" class="mt-1 block w-full" required value="{{ old('date_petition', optional($report->date_petition)->format('Y-m-d')) }}" />
+                        @error('date_petition') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <x-input-label for="date_damage" value="Fecha del daño" />
+                        <x-text-input type="date" id="date_damage" name="date_damage" class="mt-1 block w-full" required value="{{ old('date_damage', optional($report->date_damage)->format('Y-m-d')) }}" />
+                        @error('date_damage') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <x-input-label for="community_user" value="Comunidad Autónoma" />
+                        <select id="community_user" name="community" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">Selecciona una comunidad</option>
+                        </select>
+                        @error('community') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <x-input-label for="province_user" value="Provincia" />
+                        <select id="province_user" name="province" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required disabled>
+                            <option value="">Selecciona primero una comunidad</option>
+                        </select>
+                        @error('province') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <x-input-label for="locality_user" value="Localidad" />
+                        <input 
+                            type="text" 
+                            id="locality_user" 
+                            name="locality" 
+                            list="locality-suggestions-user"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" 
+                            required 
+                            disabled
+                            autocomplete="off"
+                            value="{{ old('locality', $report->locality) }}"
+                            placeholder="Escribe para buscar..."
+                        />
+                        <datalist id="locality-suggestions-user"></datalist>
+                        @error('locality') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <x-input-label for="coordinates_user" value="Coordenadas (lat,lon)" />
+                        <x-text-input id="coordinates_user" name="coordinates" placeholder="41.12345,-1.23456" class="mt-1 block w-full" value="{{ old('coordinates', $report->coordinates) }}" />
+                        <p id="coordinates_user-validation" class="text-xs mt-1 hidden"></p>
                         @error('coordinates') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <x-input-label for="office" value="Despacho/Oficina" />
+                        <x-text-input id="office" name="office" class="mt-1 block w-full" value="{{ old('office', $report->office) }}" />
+                        @error('office') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
@@ -184,30 +320,19 @@
                         </select>
                         @error('petitioner_id') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
-
-                    <div>
+                    <div id="petitioner-other-container" style="display: none;">
                         <x-input-label for="petitioner_other" value="Otra unidad (especificar)" />
                         <x-text-input id="petitioner_other" name="petitioner_other" class="mt-1 block w-full" value="{{ old('petitioner_other', $report->petitioner_other) }}" />
                         @error('petitioner_other') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <x-input-label for="office" value="Despacho/Oficina" />
-                            <x-text-input id="office" name="office" class="mt-1 block w-full" value="{{ old('office', $report->office) }}" />
-                            @error('office') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div>
-                            <x-input-label for="diligency" value="Diligencias" />
-                            <x-text-input id="diligency" name="diligency" placeholder="D-2025-001" class="mt-1 block w-full" value="{{ old('diligency', $report->diligency) }}" />
-                            @error('diligency') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <x-input-label for="diligency" value="Diligencias" />
+                        <x-text-input id="diligency" name="diligency" placeholder="D-2025-001" class="mt-1 block w-full" value="{{ old('diligency', $report->diligency) }}" />
+                        @error('diligency') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    
                     <div>
                         <x-input-label for="urgency" value="Urgencia" />
                         <select id="urgency" name="urgency" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -219,32 +344,10 @@
                         </select>
                         @error('urgency') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
-
-                    <div>
-                        <x-input-label for="status" value="Estado" />
-                        <select id="status" name="status" class="mt-1 block w-full border rounded p-2" required>
-                            @foreach(\App\Models\Report::STATUS_LABELS as $value => $label)
-                                <option value="{{ $value }}" {{ old('status', $report->status) == $value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('status') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
                 </div>
 
-                <div class="mb-4">
-                    <x-input-label for="assigned_to" value="Asignar a" />
-                    <select id="assigned_to" name="assigned_to" class="mt-1 block w-full border rounded p-2">
-                        <option value="">Sin asignar</option>
-                        @foreach($agents as $agent)
-                            <option value="{{ $agent->id }}" {{ old('assigned_to', $report->assigned_to) == $agent->id ? 'selected' : '' }}>
-                                {{ $agent->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('assigned_to') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
 
                 <div class="mb-4">
                     <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
@@ -257,152 +360,25 @@
                     @error('pdf_report') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
 
-            @else
-                {{-- USUARIO NORMAL: Puede editar campos limitados (excepto IP, categoría y subcategoría) --}}
-                
-                <div class="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-eco-700 rounded">
-                    <p class="font-semibold">Camposos No editables por usuarios:</p>
-                    <ul class="list-disc list-inside text-sm mt-2">
-                        <li>Número IP (Informe Pericial)</li>
-                        <li>Categoría y Subcategoría</li>
-                    </ul>
-                    <p class="text-sm mt-2">Si necesitas modificar estos campos, contacta con un administrador.</p>
-                </div>
-
-                {{-- Campos bloqueados (solo lectura) --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <x-input-label value="Número IP" />
-                        <div class="mt-1 p-2 bg-gray-100 border border-gray-300 rounded text-gray-700">
-                            {{ $report->ip }}
-                        </div>
-                    </div>
-
-                    <div>
-                        <x-input-label value="Categoría / Subcategoría" />
-                        <div class="mt-1 p-2 bg-gray-100 border border-gray-300 rounded text-gray-700">
-                            {{ $report->category->name ?? '—' }} / {{ $report->subcategory->name ?? '—' }}
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Campos editables --}}
-                <div class="mb-4">
-                    <x-input-label for="title" value="Título" />
-                    <x-text-input id="title" name="title" class="mt-1 block w-full" required value="{{ old('title', $report->title) }}" />
-                    @error('title') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <x-input-label for="date_petition" value="Fecha de petición" />
-                        <x-text-input type="date" id="date_petition" name="date_petition" class="mt-1 block w-full" required value="{{ old('date_petition', optional($report->date_petition)->format('Y-m-d')) }}" />
-                        @error('date_petition') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <x-input-label for="date_damage" value="Fecha del daño" />
-                        <x-text-input type="date" id="date_damage" name="date_damage" class="mt-1 block w-full" required value="{{ old('date_damage', optional($report->date_damage)->format('Y-m-d')) }}" />
-                        @error('date_damage') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <x-input-label for="community_user" value="Comunidad Autónoma" />
-                        <select id="community_user" name="community" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
-                            <option value="">Selecciona una comunidad</option>
-                        </select>
-                        @error('community') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <x-input-label for="province_user" value="Provincia" />
-                        <select id="province_user" name="province" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required disabled>
-                            <option value="">Selecciona primero una comunidad</option>
-                        </select>
-                        @error('province') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <x-input-label for="locality_user" value="Localidad" />
-                        <input 
-                            type="text" 
-                            id="locality_user" 
-                            name="locality" 
-                            list="locality-suggestions-user"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" 
-                            required 
-                            disabled
-                            autocomplete="off"
-                            value="{{ old('locality', $report->locality) }}"
-                            placeholder="Escribe para buscar..."
-                        />
-                        <datalist id="locality-suggestions-user"></datalist>
-                        @error('locality') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                
-                <div class="mb-4">
-                    <x-input-label for="background" value="Antecedentes" />
-                    <textarea id="background" name="background" rows="4" class="mt-1 block w-full border rounded p-2" required>{{ old('background', $report->background) }}</textarea>
-                    @error('background') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <div class="mb-4">
-                    <x-input-label for="petitioner_other" value="Otra unidad peticionaria (especificar)" />
-                    <x-text-input id="petitioner_other" name="petitioner_other" class="mt-1 block w-full" value="{{ old('petitioner_other', $report->petitioner_other) }}" />
-                    @error('petitioner_other') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    <p class="text-sm text-gray-500 mt-1">Solo si la unidad peticionaria es "Otro"</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <x-input-label for="affected_area" value="Área afectada (m²)" />
-                        <x-text-input type="number" step="0.01" id="affected_area" name="affected_area" class="mt-1 block w-full" value="{{ old('affected_area', $report->affected_area) }}" />
-                        @error('affected_area') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <x-input-label for="urgency" value="Urgencia" />
-                        <select id="urgency" name="urgency" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" {{ $isCompleted ? 'disabled' : '' }}>
-                            @foreach(\App\Models\Report::URGENCY_LABELS as $value => $label)
-                                <option value="{{ $value }}" {{ old('urgency', $report->urgency ?? 'normal') == $value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('urgency') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <x-input-label for="status" value="Estado" />
-                        <select id="status" name="status" class="mt-1 block w-full border rounded p-2" required {{ $isCompleted ? 'disabled' : '' }}>
-                            @foreach(\App\Models\Report::STATUS_LABELS as $value => $label)
-                                <option value="{{ $value }}" {{ old('status', $report->status) == $value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('status') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                        @if($isCompleted)
-                            <p class="text-sm text-gray-500 mt-2">Informe completado. Solo un administrador puede modificarlo.</p>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
-                    @if($report->pdf_report)
-                        <div class="mb-2">
-                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-eco-700 hover:underline text-sm">Ver archivo actual</a>
-                        </div>
-                    @endif
-                    <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" {{ $isCompleted ? 'disabled' : '' }} />
-                    @error('pdf_report') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                </div>
+                <script>
+                // Mostrar/ocultar input petitioner_other según selección
+                document.addEventListener('DOMContentLoaded', function() {
+                    const petitionerSelect = document.getElementById('petitioner_id');
+                    const petitionerOtherContainer = document.getElementById('petitioner-other-container');
+                    function togglePetitionerOther() {
+                        const selected = petitionerSelect.options[petitionerSelect.selectedIndex].text;
+                        if (selected === 'Otro') {
+                            petitionerOtherContainer.style.display = '';
+                        } else {
+                            petitionerOtherContainer.style.display = 'none';
+                        }
+                    }
+                    if (petitionerSelect && petitionerOtherContainer) {
+                        petitionerSelect.addEventListener('change', togglePetitionerOther);
+                        togglePetitionerOther();
+                    }
+                });
+                </script>
             @endif
 
             <div class="flex items-center space-x-3 mt-4">

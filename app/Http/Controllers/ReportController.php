@@ -311,7 +311,6 @@ class ReportController extends Controller
         // CAMBIO: Permitir edición a creador, asignado o admin
         $user = Auth::user();
         $canEdit = $user->role === 'admin' || 
-                   $report->user_id === $user->id || 
                    $report->assigned_to === $user->id;
 
         if (!$canEdit) {
@@ -433,13 +432,13 @@ class ReportController extends Controller
             'province' => 'required|string|max:100',
             'locality' => 'required|string|max:255',
             'coordinates' => 'nullable|string|max:100',
+            'petitioner_id' => 'required|exists:petitioners,id',
             'petitioner_other' => 'nullable|string|max:255',
             'office' => 'nullable|string|max:255',
-'diligency' => 'nullable|string|max:100',
+            'diligency' => 'nullable|string|max:100',
             'urgency' => ['required', \Illuminate\Validation\Rule::in(Report::VALID_URGENCIES)],
             'date_petition' => 'required|date',
             'date_damage' => 'required|date',
-            'status' => ['required', \Illuminate\Validation\Rule::in(Report::VALID_STATUSES)],
             'pdf_report' => 'nullable|file|mimes:pdf|max:20480',
             'vr_total' => 'nullable|numeric|min:0',
             've_total' => 'nullable|numeric|min:0',
@@ -447,8 +446,8 @@ class ReportController extends Controller
             'total_cost' => 'nullable|numeric|min:0',
         ]);
 
-        // Validar si cambió el petitioner_other
-        if ($report->petitioner && $report->petitioner->name === 'Otro' && empty($validated['petitioner_other'])) {
+        $petitioner = Petitioner::find($validated['petitioner_id']);
+        if ($petitioner && $petitioner->name === 'Otro' && empty($validated['petitioner_other'])) {
             return back()
                 ->withErrors(['petitioner_other' => 'Debe especificar la unidad peticionaria.'])
                 ->withInput();
@@ -472,16 +471,18 @@ class ReportController extends Controller
             if ($report->pdf_report) {
                 Storage::disk('public')->delete($report->pdf_report);
             }
-            
             $originalName = $request->file('pdf_report')->getClientOriginalName();
             $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
             $validated['pdf_report'] = $request->file('pdf_report')->storeAs('reports', time() . '_' . $sanitizedName, 'public');
         }
 
         // Mantener campos que no pueden editar
-        $validated['petitioner_other'] = $report->petitioner && $report->petitioner->name === 'Otro' 
-            ? $validated['petitioner_other'] 
-            : $report->petitioner_other;
+        $validated['petitioner_other'] = $petitioner && $petitioner->name === 'Otro'
+            ? $validated['petitioner_other']
+            : null;
+
+        // El estado no es editable por el usuario normal
+        unset($validated['status']);
     }
 
     $report->update($validated);
@@ -660,7 +661,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Export a report to PDF.
+     * Exportar un informe en PDF.
      */
     public function exportPdf(Report $report)
     {

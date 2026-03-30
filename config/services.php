@@ -39,11 +39,7 @@ return [
     |--------------------------------------------------------------------------
     | Species API Services
     |--------------------------------------------------------------------------
-    |
-    | Configuration for external biodiversity APIs used to sync species data.
-    | GBIF is free and doesn't require authentication.
-    | IUCN and CITES require API tokens (get them from their respective websites).
-    |
+   
     */
 
     'gbif' => [

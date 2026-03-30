@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class SyncProtectedAreas extends Command
 {
     protected $signature = 'protected-areas:sync 
-                            {--source=wdpa : Fuente de datos (wdpa, csv)}
+                            {--source=wdpa : Fuente de datos (wdpa)}
                             {--region= : Filtrar por región/CCAA}
                             {--type= : Filtrar por tipo de protección}
                             {--force : Forzar actualización de todas las áreas}
@@ -47,8 +47,6 @@ class SyncProtectedAreas extends Command
         try {
             if ($source === 'wdpa') {
                 $this->syncFromWdpa($region, $dryRun);
-            } elseif ($source === 'csv') {
-                $this->syncFromCsv($dryRun);
             }
 
             $this->showSummary();
@@ -455,24 +453,6 @@ class SyncProtectedAreas extends Command
         $this->newLine();
     }
 
-    /**
-     * Sincronizar desde CSV local
-     */
-    protected function syncFromCsv(bool $dryRun): void
-    {
-        $csvPath = storage_path('app/data/protected_areas.csv');
-
-        if (!file_exists($csvPath)) {
-            $this->error("Archivo CSV no encontrado: {$csvPath}");
-            return;
-        }
-
-        $this->info("📍 Cargando áreas protegidas desde CSV...");
-
-        // Implementar similar a species:sync --source=boe
-        // Por ahora, placeholder
-        $this->warn("  Importación desde CSV pendiente de implementar.");
-    }
 
     /**
      * Mostrar resumen

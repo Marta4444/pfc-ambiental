@@ -62,6 +62,12 @@ class ReportCostItemController extends Controller
                 ->with('error', 'El caso no tiene detalles. Añade detalles antes de calcular costes.');
         }
 
+        // Permitir solo al usuario asignado o admin
+        $user = auth()->user();
+        if (!$user || ($user->role !== 'admin' && $report->assigned_to !== $user->id)) {
+            abort(403, 'No tienes permiso para calcular los costes de este caso.');
+        }
+
         try {
             // Usar el servicio de cálculo de costes
             $results = $this->costService->calculateForReport($report);

@@ -359,3 +359,43 @@ php artisan species:sync --source=all --limit=10
   - VE: volumen * coste de limpieza del agua.
   - VS: introducido manualmente por el usuario.
   - VR: introducido manualmente por el usuario.
+
+
+# Pruebas
+
+Para ejecutar pruebas, se ejecuta "php artisan test" en la terminal del VSC.
+
+## Creación de reports
+Se crean pruebas de integración para testear:
+- Creación exitosa de un report con datos válidos.
+- Intento de creación con datos inválidos (debería fallar y mostrar errores de validación).
+  - Formato inválido de IP.
+  - IP duplicado.
+  - Valor erróneo para Nivel de urgencia.
+- Verificar que los datos se guardan correctamente en la base de datos.
+
+Para estos tests he creado el archivo ReportCreationTest.php (en la carpeta tests > Feature) con las 3 pruebas de integración, usando datos de ejemplo. Además, he tenido que crear factories para Category, Subcategory y Petitioner, para usarlos en los tests.
+
+## Actualización de reports
+Se crean pruebas de integración para testear:
+- Actualización correcta de los reports por parte de los Users.
+- Actualización de coordenadas con valores inválidos.
+
+Para estos tests he creado el archivo ReportUpdateTest.php con las 2 pruebas de integración.
+
+## Exportar reports en PDF 
+Para probar la exportación de reports en PDF se ha creado un test:
+- Un usuario puede exportar un report en PDF, se exporta correctamente y las cabeceras son correctas.
+
+Para este test he creado el archivo ReportExportPdfTest.php.
+
+La exportación de cálculos en Excel no se puede probar con Tests porque funciona todo enteramente desde frontend. No hay código backend que probar.
+
+## Cálculo de Costes
+Se han diseñado los tests Unitarios para probar los costes en el archivo CostCalculationServiceTest.php (tests > Unit). Se han diseñado tests para probar cada categoría: Biodiversidad, infraestructuras y vertidos. Se han creado tests para:
+- Cálculo de costes (x3, uno por categoría).
+- Cálculo de costes con cantidad = 0 (debe devolver 0).
+- Cálculo de costes con valores negativos (los debe tratar como 0).
+- Cálculo de costes con campos obligatorios que faltan (se deben tratar con valores por defecto).
+
+Para ejecutar los tests Unitarios, se ejecuta en la terminal: php artisan test --testsuite=Unit
