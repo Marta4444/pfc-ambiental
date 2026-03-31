@@ -399,3 +399,51 @@ Se han diseñado los tests Unitarios para probar los costes en el archivo CostCa
 - Cálculo de costes con campos obligatorios que faltan (se deben tratar con valores por defecto).
 
 Para ejecutar los tests Unitarios, se ejecuta en la terminal: php artisan test --testsuite=Unit
+
+## Seguridad y permisos
+Se han creado tests de integración, en ReportAuthorizationTest.php, para probar:
+- Que solo los usuarios autorizados (asignados al report) pueden crear, editar, añadir detalles o calcular costes en los reports.
+
+
+# Creacion del mapa web
+Para crear el mapa web se ha usado la web Mermaid.live.
+Para la generación del mapa web, se ha descrito, en formato de código, las relaciones entre las paáginas. eEste ha sido el código utilizado:
+graph TD
+    %% Usuario Normal
+    UA["Dashboard (User)"] --> UB[Listado de Reports]
+    UB --> UC[Crear Report]
+    UB --> UD[Ver Report]
+    UD --> UE["Editar Report (si asignado)"]
+    UD --> UF[Detalles del Report]
+    UF --> UF1["Añadir Detalle (si asignado)"]
+    UF --> UF2["Editar Detalle (si asignado)"]
+    UD --> UG[Costes del Report]
+    UG --> UH["Calcular Costes (si asignado)"]
+    UG --> UI[Exportar Excel]
+    UD --> UJ[Exportar PDF]
+    UA --> UO[Perfil de Usuario]
+    UA --> UP[Login/Logout]
+    UA --> US[Estadísticas]
+
+    %% Admin
+    AA["Dashboard (Admin)"] --> AB[Listado de Reports]
+    AB --> AC[Crear Report]
+    AB --> AD[Ver Report]
+    AD --> AE[Editar Report]
+    AD --> AF[Detalles del Report]
+    AF --> AF1[Añadir Detalle]
+    AF --> AF2[Editar Detalle]
+    AD --> AG[Costes del Report]
+    AG --> AH[Calcular Costes]
+    AG --> AI[Exportar Excel]
+    AD --> AJ[Exportar PDF]
+    AA --> AK[Gestión de Categorías]
+    AA --> AL[Gestión de Subcategorías]
+    AA --> AM[Gestión de Peticionarios]
+    AA --> AN[Gestión de Especies]
+    AA --> AO[Gestión de Áreas Protegidas]
+    AA --> AP[Gestión de Usuarios]
+    AA --> AQ[Perfil de Usuario]
+    AA --> AT[Login/Logout]
+    AA --> AS[Estadísticas]
+    AA --> AR[Auditoría]
