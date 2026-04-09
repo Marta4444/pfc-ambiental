@@ -447,3 +447,44 @@ graph TD
     AA --> AT[Login/Logout]
     AA --> AS[Estadísticas]
     AA --> AR[Auditoría]
+
+# Estructura de directorios
+Para obtener la estructura de directorios, se ha ejecutado el comando: "tree /F /A > estructura.txt" en la terminal.
+Esto genera el archivo estructura.txt en la raíz del proyecto.
+Este archivo contiene toda la información de todas las carpetas y archivos. He borrado los archivos y subcarpetas de carpetas de configuración, node_modules y otros que no son de interés, y he dejado las vistas, controladores, modelos, rutas, servicios, etc.
+
+# Descargar los archivos pdf guardados
+Para que se puedan ver los archivos que se adjuntan a un caso, como parte de la configuración del entorno de despliegue, se debe ejecutar el comando "php artisan storage:link". En el entorno de producción (donde lo despliegue), lo tengo que ejecutar.
+El Pdf se guarda en la carpeta reports, usando la carpeta public. Pero para que estos archivos sean accesibles desde el navegador, Laravel necesita un enlace simbólico de public/storage a la carpeta public. Este enlace simbólico se crea con el comando anterior.
+
+# Depliegue con Railway
+## Archivos de configuración creados
+- nixpacks.toml: para indicarle a Railway como construir la app automáticamente. El archivo indica:
+  - Versión de PHP a instalar (8.2) y qué extensiones se necesitan.
+  - Que instale dependencias con "composer install"
+  - Que optimice la cache de configuración, rutas y vistas para producción.
+  - Cómo arrancar el servidor de Laravel.
+- Procfile: define cómo arrancar la app.
+- railway.json: define la configuración específica de Railway. Es el archivo de configuración princila y define:
+  - que use Nixpacks como vuilder (usando nixpacks.toml).
+  - El comando de arranque del servidor.
+  - Un healthcheck para que Railway sepa si la app está corriendo correctamente.
+  - Política de reinicio automático en caso de que la app falle.
+- env.example: actualizado para Railway, para que sirva de referencia para las variables que ha que configurar en el panel de Railway. Cambios importantes respecto a Local:
+  - APP_ENV=production y APP_DEBUG=false (para no mostrar errores en producción).
+  - DB_CONNECTION=mysql
+  - SESSION_DRIVER=file y CACHE_STORE=file
+  - FILESYSTEM_DISK=public (para que los pdfs subidos sean accesibles)
+  - QEUE_CONNECTION=sync (sin sistema de colas externo).
+  - Tiene placeholders para los tokens de las APIs, que se configuran directamente en Railway, ya que si no se subirían a github.
+
+Pasos:
+1. Subir los archivos a GitHub con el "git add .", "git commit..." y "git push origin main".
+2. Crear una cuenta en railway.app con Github
+3. Crear un Nuevo proyecto y conectar ocn el repositorio de GitHub
+4. Añadir un servicio de MySQL desde el panel.
+5. Configurar las variables de entorno (del env.example)
+6. Ejecutar desde la consola de Railway los comandos:
+   1. php artisan migrate --seed
+   2. php artisan sync:species
+   3. php artisan sync:protected-areas 

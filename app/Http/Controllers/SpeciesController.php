@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Species;
-use App\Services\SpeciesSyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class SpeciesController extends Controller
 {
@@ -266,107 +264,6 @@ class SpeciesController extends Controller
                 'has_iucn_data' => !empty($species->iucn_category),
             ],
         ]);
-    }
-
-  
-    // MÉTODOS DE ADMINISTRACIÓN (solo admin)
-
-    /**
-     * Listado de especies (admin)
-     * Protegido por AdminMiddleware en web.php
-     */
-    public function index(Request $request)
-    {
-        $query = Species::query();
-
-        if ($request->filled('search')) {
-            $query->search($request->search);
-        }
-
-        if ($request->filled('taxon_group')) {
-            $query->byTaxonGroup($request->taxon_group);
-        }
-
-        if ($request->filled('is_protected')) {
-            $query->where('is_protected', $request->is_protected === 'true');
-        }
-
-        if ($request->filled('has_boe')) {
-            if ($request->has_boe === 'true') {
-                $query->whereNotNull('boe_status')->where('boe_status', '!=', '');
-            } else {
-                $query->where(function ($q) {
-                    $q->whereNull('boe_status')->orWhere('boe_status', '');
-                });
-            }
-        }
-
-        $species = $query->orderBy('scientific_name')->paginate(25);
-
-        return view('species.index', [
-            'species' => $species,
-            'taxonGroups' => Species::TAXON_GROUPS,
-            'iucnCategories' => Species::IUCN_CATEGORIES,
-        ]);
-    }
-
-    /**
-     * Ver detalles de una especie (admin - vista HTML)
-     * Protegido por AdminMiddleware en web.php
-     */
-    public function adminShow(Species $species)
-    {
-        return view('species.show', [
-            'species' => $species,
-            'iucnCategories' => Species::IUCN_CATEGORIES,
-        ]);
-    }
-
-    /**
-     * Formulario de edición de especie (admin)
-     * Protegido por AdminMiddleware en web.php
-     */
-    public function edit(Species $species)
-    {
-        return view('species.edit', [
-            'species' => $species,
-            'taxonGroups' => Species::TAXON_GROUPS,
-            'boeStatuses' => Species::BOE_STATUSES,
-            'ccaaStatuses' => Species::CCAA_STATUSES,
-            'iucnCategories' => Species::IUCN_CATEGORIES,
-            'citesAppendices' => Species::CITES_APPENDICES,
-        ]);
-    }
-
-    /**
-     * Actualizar especie (admin)
-     * Protegido por AdminMiddleware en web.php
-     */
-    public function update(Request $request, Species $species)
-    {
-        $validated = $request->validate([
-            'scientific_name' => 'required|string|max:255',
-            'common_name' => 'nullable|string|max:255',
-            'taxon_group' => 'nullable|string|max:100',
-            'boe_status' => ['nullable', 'string', Rule::in(array_keys(Species::BOE_STATUSES))],
-            'boe_law_ref' => 'nullable|string|max:255',
-            'ccaa_status' => ['nullable', 'string', Rule::in(array_keys(Species::CCAA_STATUSES))],
-            'iucn_category' => ['nullable', 'string', Rule::in(array_keys(Species::IUCN_CATEGORIES))],
-            'cites_appendix' => ['nullable', 'string', Rule::in(array_keys(Species::CITES_APPENDICES))],
-        ]);
-
-        $species->fill($validated);
-
-        // Recalcular is_protected usando métodos de validación del modelo
-        $species->is_protected = Species::isValidBoeStatus($species->boe_status) 
-            || Species::isValidCcaaStatus($species->ccaa_status)
-            || Species::isValidCitesAppendix($species->cites_appendix)
-            || Species::isProtectedIucnCategory($species->iucn_category);
-
-        $species->save();
-
-        return redirect()->route('species.index')
-            ->with('success', 'Especie actualizada correctamente.');
     }
 
     /**

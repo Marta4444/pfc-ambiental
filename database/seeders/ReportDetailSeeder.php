@@ -39,8 +39,11 @@ class ReportDetailSeeder extends Seeder
      */
     public function run(): void
     {
-        // Obtener reports que tengan subcategorías con campos asignados
-        $reports = Report::with('subcategory.fields')->get();
+        // Solo crear detalles para reports asignados con estado en_proceso, en_espera o completado
+        $reports = Report::with('subcategory.fields')
+            ->where('assigned', true)
+            ->whereIn('status', ['en_proceso', 'en_espera', 'completado'])
+            ->get();
 
         if ($reports->isEmpty()) {
             $this->command->warn('No hay reportes. Ejecuta primero ReportSeeder.');
@@ -51,11 +54,6 @@ class ReportDetailSeeder extends Seeder
         $totalDetails = 0;
 
         foreach ($reports as $report) {
-            // Solo crear detalles para ~60% de los reports
-            if (rand(1, 100) > 60) {
-                continue;
-            }
-
             $subcategory = $report->subcategory;
             $fields = $subcategory->fields;
 

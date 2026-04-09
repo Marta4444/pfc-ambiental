@@ -52,6 +52,9 @@ Route::middleware('auth')->group(function () {
     // Ruta para exportar a PDF
     Route::get('reports/{report}/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
 
+    // Ruta para descargar el PDF adjunto
+    Route::get('reports/{report}/download-attachment', [ReportController::class, 'downloadAttachment'])->name('reports.downloadAttachment');
+
     Route::resource('reports', ReportController::class);
 
     // Report Details
@@ -125,12 +128,6 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
         ->name('fields.unassignFromSubcategory');
     Route::put('fields/{field}/subcategories/{subcategory}', [FieldController::class, 'updateSubcategoryPivot'])
         ->name('fields.updateSubcategoryPivot');
-
-    // Gestión de Species (admin)
-    Route::get('species', [SpeciesController::class, 'index'])->name('species.index');
-    Route::get('species/{species}/show', [SpeciesController::class, 'adminShow'])->name('species.admin.show');
-    Route::get('species/{species}/edit', [SpeciesController::class, 'edit'])->name('species.edit');
-    Route::put('species/{species}', [SpeciesController::class, 'update'])->name('species.update');
 
     // Administración de especies con sincronización API
     Route::prefix('admin/species')->name('admin.species.')->group(function () {

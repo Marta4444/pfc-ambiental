@@ -119,16 +119,16 @@
                     <p class="text-xs text-gray-500">Sincronizadas</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-yellow-600">{{ $stats['pending_sync'] }}</p>
+                    <p class="text-2xl font-bold text-yellow-600">{{ $stats['pending'] }}</p>
                     <p class="text-xs text-gray-500">Pendientes</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-red-600">{{ $stats['sync_errors'] }}</p>
+                    <p class="text-2xl font-bold text-red-600">{{ $stats['errors'] }}</p>
                     <p class="text-xs text-gray-500">Con errores</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-purple-600">{{ $stats['from_gbif'] }}</p>
-                    <p class="text-xs text-gray-500">Desde GBIF</p>
+                    <p class="text-2xl font-bold text-purple-600">{{ $stats['not_protected'] }}</p>
+                    <p class="text-xs text-gray-500">No protegidas</p>
                 </div>
             </div>
 

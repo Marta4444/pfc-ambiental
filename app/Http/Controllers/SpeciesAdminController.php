@@ -243,6 +243,8 @@ class SpeciesAdminController extends Controller
      */
     public function logs(): View
     {
+        $species = Species::all();
+
         $recentErrors = Species::where('sync_status', 'error')
             ->orderBy('last_sync_attempt', 'desc')
             ->limit(50)
@@ -253,7 +255,7 @@ class SpeciesAdminController extends Controller
             ->limit(50)
             ->get();
 
-        return view('admin.species.logs', compact('recentErrors', 'recentSynced'));
+        return view('admin.species.logs', compact('species', 'recentErrors', 'recentSynced'));
     }
 
     /**

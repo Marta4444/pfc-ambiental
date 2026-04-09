@@ -150,6 +150,7 @@ class SpeciesSyncService
             
             $species->update([
                 'synced_at' => now(),
+                'last_synced_at' => now(),
                 'sync_status' => 'synced',
                 'sync_error' => null,
             ]);

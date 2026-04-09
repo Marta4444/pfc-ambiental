@@ -131,7 +131,7 @@
                             </h4>
                             <span class="text-sm"><span class="font-bold text-green-600">{{ $totalSpecies }}</span> <span class="text-gray-500">({{ $protectedSpecies }} prot.)</span></span>
                         </div>
-                        <a href="{{ route('species.index') }}" class="flex items-center p-2 bg-green-50 rounded hover:bg-green-100 transition group">
+                        <a href="{{ route('admin.species.index') }}" class="flex items-center p-2 bg-green-50 rounded hover:bg-green-100 transition group">
                             <svg class="w-4 h-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                             </svg>

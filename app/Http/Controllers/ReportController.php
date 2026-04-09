@@ -708,4 +708,17 @@ class ReportController extends Controller
         // Descargar el PDF
         return $pdf->download($filename);
     }
+
+    /**
+     * Descargar el PDF adjunto del informe.
+     */
+    public function downloadAttachment(Report $report)
+    {
+        if (!$report->pdf_report || !Storage::disk('public')->exists($report->pdf_report)) {
+            abort(404, 'El archivo no existe.');
+        }
+
+        $filename = basename($report->pdf_report);
+        return Storage::disk('public')->download($report->pdf_report, $filename);
+    }
 }

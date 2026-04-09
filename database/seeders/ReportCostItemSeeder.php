@@ -37,8 +37,10 @@ class ReportCostItemSeeder extends Seeder
      */
     public function run(): void
     {
-        // Obtener reports que tengan detalles
-        $reportsWithDetails = Report::whereHas('details')->get();
+        // Solo crear costes para reports completados que tengan detalles
+        $reportsWithDetails = Report::whereHas('details')
+            ->where('status', 'completado')
+            ->get();
 
         if ($reportsWithDetails->isEmpty()) {
             $this->command->warn('No hay reportes con detalles. Ejecuta primero ReportDetailSeeder.');
@@ -49,11 +51,6 @@ class ReportCostItemSeeder extends Seeder
         $costItemsCreated = 0;
 
         foreach ($reportsWithDetails as $report) {
-            // Solo procesar ~70% de los reports con detalles
-            if (rand(1, 100) > 70) {
-                continue;
-            }
-
             // Eliminar cost items existentes para este report
             $report->costItems()->delete();
 

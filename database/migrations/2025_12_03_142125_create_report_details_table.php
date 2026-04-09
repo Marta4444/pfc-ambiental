@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('report_details', function (Blueprint $table) {
             $table->id();
             
-            // Relación con Report
             $table->foreignId('report_id')->constrained()->onDelete('cascade');
             
             // Agrupación de campos relacionados (misma especie, mismo residuo, etc.)
@@ -23,7 +22,7 @@ return new class extends Migration
             $table->string('field_key', 100);   
             $table->text('value')->nullable();
             
-            // Referencias opcionales a tablas relacionadas
+            // Referencias a tablas de especies y areas protegidas
             $table->foreignId('species_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('protected_area_id')->nullable()->constrained()->onDelete('set null');
             

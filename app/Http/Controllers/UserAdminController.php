@@ -10,7 +10,7 @@ use Illuminate\Validation\Rules;
 class UserAdminController extends Controller
 {
     /**
-     * Display a listing of all users.
+     * Mostrar todos los usuarios.
      */
     public function index(Request $request)
     {
@@ -42,7 +42,7 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Toggle the active status of a user.
+     * Cambiar el estado activo de un usuario.
      */
     public function toggleActive(User $user)
     {
@@ -62,7 +62,7 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Show the form for creating a new user.
+     * Mostrar el formulario para crear un nuevo usuario.
      */
     public function create()
     {
@@ -70,7 +70,7 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Store a newly created user.
+     * Guardar un nuevo usuario en la base de datos.
      */
     public function store(Request $request)
     {
@@ -95,7 +95,7 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Show the form for editing a user.
+     * Mostrar el formulario para editar un usuario.
      */
     public function edit(User $user)
     {
@@ -103,7 +103,7 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Update the specified user.
+     * Actualizar un usuario específico.
      */
     public function update(Request $request, User $user)
     {

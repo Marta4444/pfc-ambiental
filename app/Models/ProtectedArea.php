@@ -154,8 +154,8 @@ class ProtectedArea extends Model
         $n = count($ring);
 
         for ($i = 0, $j = $n - 1; $i < $n; $j = $i++) {
-            $xi = $ring[$i][0]; // longitude
-            $yi = $ring[$i][1]; // latitude
+            $xi = $ring[$i][0]; // longitud
+            $yi = $ring[$i][1]; // latitud
             $xj = $ring[$j][0];
             $yj = $ring[$j][1];
 
