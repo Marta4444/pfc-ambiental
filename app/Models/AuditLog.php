@@ -94,23 +94,6 @@ class AuditLog extends Model
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Obtener el modelo relacionado dinámicamente
-     */
-    public function auditable(): ?Model
-    {
-        if (!$this->model_type || !$this->model_id) {
-            return null;
-        }
-
-        $modelClass = $this->model_type;
-        
-        if (!class_exists($modelClass)) {
-            return null;
-        }
-
-        return $modelClass::find($this->model_id);
-    }
 
     /**
      * Obtener etiqueta legible de la acción

@@ -61,21 +61,6 @@ class ReportDetail extends Model
         return Field::where('key_name', $this->field_key)->first();
     }
 
-    /**
-     * Scope: Filtrar por report
-     */
-    public function scopeForReport($query, int $reportId)
-    {
-        return $query->where('report_id', $reportId);
-    }
-
-    /**
-     * Scope: Filtrar por grupo
-     */
-    public function scopeInGroup($query, string $groupKey)
-    {
-        return $query->where('group_key', $groupKey);
-    }
 
     /**
      * Scope: Obtener todos los grupos únicos de un report

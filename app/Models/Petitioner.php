@@ -24,19 +24,4 @@ class Petitioner extends Model
         return $this->hasMany(Report::class);
     }
 
-    /**
-     * Scope para obtener solo peticionarios activos
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('active', true);
-    }
-
-    /**
-     * Scope para ordenar por campo order
-     */
-    public function scopeOrdered($query)
-    {
-        return $query->orderBy('order', 'asc');
-    }
 }

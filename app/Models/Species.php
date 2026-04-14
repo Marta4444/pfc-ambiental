@@ -177,25 +177,6 @@ class Species extends Model
         $this->save();
     }
 
-    /**
-     * Obtener el nivel de protección más alto
-     */
-    public function getHighestProtectionAttribute(): ?string
-    {
-        if ($this->boe_status === 'En peligro de extinción' || $this->iucn_category === 'CR') {
-            return 'Crítico';
-        }
-        if ($this->boe_status === 'Vulnerable' || in_array($this->iucn_category, ['EN', 'VU'])) {
-            return 'Alto';
-        }
-        if ($this->boe_status === 'Régimen de protección especial' || $this->iucn_category === 'NT') {
-            return 'Medio';
-        }
-        if ($this->cites_appendix) {
-            return 'CITES';
-        }
-        return null;
-    }
 
     /**
      * Obtener protección en una CCAA específica
@@ -206,7 +187,7 @@ class Species extends Model
     }
 
     /**
-     * Buscar especies por nombre (científico o común)
+     * Scope para buscar especies por nombre científico o común
      */
     public function scopeSearch($query, string $term)
     {
@@ -214,70 +195,5 @@ class Species extends Model
             $q->where('scientific_name', 'LIKE', "%{$term}%")
               ->orWhere('common_name', 'LIKE', "%{$term}%");
         });
-    }
-
-    /**
-     * Filtrar solo especies protegidas
-     */
-    public function scopeProtected($query)
-    {
-        return $query->where('is_protected', true);
-    }
-
-    /**
-     * Filtrar por grupo taxonómico
-     */
-    public function scopeByTaxonGroup($query, string $group)
-    {
-        return $query->where('taxon_group', $group);
-    }
-
-    /**
-     * Especies que necesitan sincronización (más de X días sin actualizar)
-     */
-    public function scopeNeedsSync($query, int $days = 30)
-    {
-        return $query->where(function ($q) use ($days) {
-            $q->whereNull('synced_at')
-              ->orWhere('synced_at', '<', now()->subDays($days));
-        });
-    }
-
-    /**
-     * Obtener resumen de protección para mostrar al usuario
-     */
-    public function getProtectionSummaryAttribute(): array
-    {
-        $summary = [];
-
-        if ($this->boe_status) {
-            $summary['nacional'] = [
-                'status' => $this->boe_status,
-                'law' => $this->boe_law_ref,
-            ];
-        }
-
-        if ($this->ccaa_status && is_array($this->ccaa_status) && count($this->ccaa_status) > 0) {
-            $summary['autonomica'] = $this->ccaa_status;
-        } elseif ($this->ccaa_status && is_string($this->ccaa_status)) {
-            $summary['autonomica'] = [$this->ccaa_status];
-        }
-
-        if ($this->iucn_category) {
-            $summary['iucn'] = [
-                'category' => $this->iucn_category,
-                'label' => self::IUCN_CATEGORIES[$this->iucn_category] ?? $this->iucn_category,
-                'year' => $this->iucn_assessment_year,
-            ];
-        }
-
-        if ($this->cites_appendix) {
-            $summary['cites'] = [
-                'appendix' => $this->cites_appendix,
-                'label' => self::CITES_APPENDICES[$this->cites_appendix] ?? "Apéndice {$this->cites_appendix}",
-            ];
-        }
-
-        return $summary;
     }
 }

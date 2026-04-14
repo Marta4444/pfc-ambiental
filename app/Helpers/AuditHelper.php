@@ -144,15 +144,4 @@ class AuditHelper
         );
     }
 
-    /**
-     * Registrar acción personalizada
-     */
-    public static function logCustom(
-        string $action,
-        string $description,
-        ?Model $model = null,
-        ?array $metadata = null
-    ): AuditLog {
-        return self::log($action, $description, $model, null, null, $metadata);
-    }
 }

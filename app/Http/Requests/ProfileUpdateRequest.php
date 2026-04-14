@@ -17,12 +17,6 @@ class ProfileUpdateRequest extends FormRequest
     {
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'agent_num' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique(User::class)->ignore($this->user()->id),
-            ],
             'email' => [
                 'required',
                 'string',
@@ -33,8 +27,14 @@ class ProfileUpdateRequest extends FormRequest
             ],
         ];
 
-        // Solo los administradores pueden actualizar el rol
+        // Solo los administradores pueden actualizar el número de agente y el rol
         if ($this->user()->role === 'admin') {
+            $rules['agent_num'] = [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique(User::class)->ignore($this->user()->id),
+            ];
             $rules['role'] = ['required', Rule::in(['admin', 'user'])];
         }
 

@@ -27,18 +27,31 @@
         {{-- Número de Agente --}}
         <div>
             <x-input-label for="agent_num" :value="__('Número de Agente')" />
-            <x-text-input 
-                id="agent_num" 
-                name="agent_num" 
-                type="text" 
-                class="mt-1 block w-full bg-gray-100 cursor-not-allowed" 
-                :value="$user->agent_num" 
-                readonly 
-                disabled 
-            />
-            <p class="mt-1 text-xs text-gray-500">
-                Este campo solo puede ser modificado por un administrador.
-            </p>
+            @if(auth()->user()->role === 'admin')
+                <x-text-input
+                    id="agent_num"
+                    name="agent_num"
+                    type="text"
+                    class="mt-1 block w-full"
+                    :value="old('agent_num', $user->agent_num)"
+                    required
+                    autocomplete="off"
+                />
+                <x-input-error class="mt-2" :messages="$errors->get('agent_num')" />
+            @else
+                <x-text-input
+                    id="agent_num"
+                    name="agent_num"
+                    type="text"
+                    class="mt-1 block w-full bg-gray-100 cursor-not-allowed"
+                    :value="$user->agent_num"
+                    readonly
+                    disabled
+                />
+                <p class="mt-1 text-xs text-gray-500">
+                    Este campo solo puede ser modificado por un administrador.
+                </p>
+            @endif
         </div>
 
         {{-- Email --}}

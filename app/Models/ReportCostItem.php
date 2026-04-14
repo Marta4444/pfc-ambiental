@@ -13,9 +13,9 @@ class ReportCostItem extends Model
     /**
      * Tipos de coste disponibles
      */
-    public const COST_TYPE_VR = 'VR'; // Valor de Reposición
-    public const COST_TYPE_VE = 'VE'; // Valor del recurso extraido
-    public const COST_TYPE_VS = 'VS'; // Valor ecosistémico
+    public const COST_TYPE_VR = 'VR'; 
+    public const COST_TYPE_VE = 'VE'; 
+    public const COST_TYPE_VS = 'VS'; 
 
     public const COST_TYPES = [
         self::COST_TYPE_VR => 'Valor de Reposición',
@@ -51,29 +51,6 @@ class ReportCostItem extends Model
         return $this->belongsTo(Report::class);
     }
 
-    /**
-     * Obtener el nombre legible del tipo de coste
-     */
-    public function getCostTypeLabelAttribute(): string
-    {
-        return self::COST_TYPES[$this->cost_type] ?? $this->cost_type;
-    }
-
-    /**
-     * Scope para filtrar por tipo de coste
-     */
-    public function scopeOfType($query, string $type)
-    {
-        return $query->where('cost_type', $type);
-    }
-
-    /**
-     * Scope para filtrar por grupo
-     */
-    public function scopeOfGroup($query, string $groupKey)
-    {
-        return $query->where('group_key', $groupKey);
-    }
 
     /**
      * Obtener la suma de costes por tipo para un report

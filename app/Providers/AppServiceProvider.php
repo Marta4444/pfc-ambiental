@@ -11,6 +11,7 @@ use App\Models\ReportCostItem;
 use App\Models\ReportDetail;
 use App\Models\Species;
 use App\Models\Subcategory;
+use App\Models\User;
 use App\Observers\AuditObserver;
 use Illuminate\Support\ServiceProvider;
 
@@ -40,8 +41,10 @@ class AppServiceProvider extends ServiceProvider
             Petitioner::class,
             Species::class,
             ProtectedArea::class,
+            User::class,
         ];
 
+        //Para usar el AuditObserver con cada modelo auditado, se llama desde aquí.
         foreach ($auditableModels as $model) {
             $model::observe(AuditObserver::class);
         }

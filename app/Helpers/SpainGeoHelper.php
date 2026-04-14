@@ -39,17 +39,9 @@ class SpainGeoHelper
     }
 
     /**
-     * Obtiene todas las comunidades autónomas
-     */
-    public static function getComunidades(): array
-    {
-        return array_keys(self::loadGeoData());
-    }
-
-    /**
      * Verifica si una comunidad autónoma es válida
      */
-    public static function isValidComunidad(string $comunidad): bool
+    private static function isValidComunidad(string $comunidad): bool
     {
         return isset(self::loadGeoData()[$comunidad]);
     }
@@ -57,7 +49,7 @@ class SpainGeoHelper
     /**
      * Obtiene las provincias de una comunidad autónoma
      */
-    public static function getProvincias(string $comunidad): array
+    private static function getProvincias(string $comunidad): array
     {
         $data = self::loadGeoData()[$comunidad] ?? null;
         if (!$data || !isset($data['provincias'])) {
@@ -69,7 +61,7 @@ class SpainGeoHelper
     /**
      * Verifica si una provincia pertenece a una comunidad autónoma
      */
-    public static function isValidProvincia(string $provincia, string $comunidad): bool
+    private static function isValidProvincia(string $provincia, string $comunidad): bool
     {
         $provincias = self::getProvincias($comunidad);
         return in_array($provincia, $provincias, true);
@@ -78,24 +70,12 @@ class SpainGeoHelper
     /**
      * Obtener el bounding box de una comunidad autónoma
      */
-    public static function getComunidadBbox(string $comunidad): ?array
+    private static function getComunidadBbox(string $comunidad): ?array
     {
         $data = self::loadGeoData()[$comunidad] ?? null;
         return $data['bbox'] ?? null;
     }
     
-    /**
-     * Obtiene los municipios de una provincia
-     */
-    public static function getMunicipios(string $comunidad, string $provincia): array
-    {
-        $data = self::loadGeoData()[$comunidad] ?? null;
-        if (!$data || !isset($data['provincias'][$provincia])) {
-            return [];
-        }
-        return $data['provincias'][$provincia]['municipios'] ?? [];
-    }
-
     /**
      * Parsea coordenadas del formato "lat,lng"
      */
@@ -130,7 +110,7 @@ class SpainGeoHelper
     /**
      * Verifica si unas coordenadas están dentro de una comunidad autónoma
      */
-    public static function validateCoordinatesInComunidad(float $lat, float $lng, string $comunidad): array
+    private static function validateCoordinatesInComunidad(float $lat, float $lng, string $comunidad): array
     {
         $bbox = self::getComunidadBbox($comunidad);
         
@@ -169,7 +149,7 @@ class SpainGeoHelper
             $errors['community'] = 'La comunidad autónoma no es válida.';
         }
 
-        // Validar provincia pertenece a comunidad
+        // Validar que la provincia pertenece a la comunidad
         if (empty($errors['community']) && !self::isValidProvincia($provincia, $comunidad)) {
             $errors['province'] = "La provincia '{$provincia}' no pertenece a '{$comunidad}'.";
         }

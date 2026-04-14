@@ -139,13 +139,10 @@ class SpeciesAdminController extends Controller
             'cites_appendix' => ['nullable', 'string', Rule::in(array_keys(Species::CITES_APPENDICES))],
         ]);
 
-        // Recalcular protección usando métodos de validación del modelo
-        $validated['is_protected'] = Species::isValidBoeStatus($validated['boe_status'] ?? null) 
-            || Species::isValidCcaaStatus($validated['ccaa_status'] ?? null)
-            || Species::isProtectedIucnCategory($validated['iucn_category'] ?? null)
-            || Species::isValidCitesAppendix($validated['cites_appendix'] ?? null);
-
         $species->update($validated);
+
+        // Recalcular y guardar is_protected según los nuevos valores de protección
+        $species->updateProtectionStatus();
 
         return redirect()->route('admin.species.index')
             ->with('success', 'Especie actualizada correctamente.');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AuditHelper;
 use App\Models\Report;
 use App\Models\ReportCostItem;
 use App\Services\CostCalculationService;
@@ -86,6 +87,9 @@ class ReportCostItemController extends Controller
             }
 
             $total = number_format($results['totals']['total'], 2, ',', '.');
+
+            AuditHelper::logCalculateCosts($report, $results);
+
             return redirect()->route('report-costs.index', $report)
                 ->with('success', "Costes calculados correctamente. Total: {$total} €");
         } catch (\Exception $e) {
@@ -118,6 +122,8 @@ class ReportCostItemController extends Controller
             'vs_total' => 0,
             'total_cost' => 0,
         ]);
+
+        AuditHelper::logResetCosts($report);
 
         return back()->with('success', 'Costes eliminados correctamente.');
     }

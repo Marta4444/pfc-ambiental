@@ -9,38 +9,21 @@ use Illuminate\Database\Eloquent\Model;
 class AuditObserver
 {
     /**
-     * Modelos que deben ser auditados
-     */
-    protected array $auditableModels = [
-        \App\Models\Report::class,
-        \App\Models\ReportDetail::class,
-        \App\Models\ReportCostItem::class,
-        \App\Models\Category::class,
-        \App\Models\Subcategory::class,
-        \App\Models\Field::class,
-        \App\Models\Petitioner::class,
-        \App\Models\Species::class,
-        \App\Models\ProtectedArea::class,
-    ];
-
-    /**
      * Campos a ignorar en los cambios
      */
     protected array $ignoredFields = [
         'updated_at',
         'created_at',
         'remember_token',
+        'password',
+        'email_verified_at',
     ];
 
     /**
-     * Handle the Model "created" event.
+     * Gestionar el evento de create.
      */
     public function created(Model $model): void
     {
-        if (!$this->shouldAudit($model)) {
-            return;
-        }
-
         AuditHelper::log(
             AuditLog::ACTION_CREATE,
             $this->getDescription($model, 'creado'),
@@ -51,14 +34,10 @@ class AuditObserver
     }
 
     /**
-     * Handle the Model "updated" event.
+     * Gestionar el evento de Update.
      */
     public function updated(Model $model): void
     {
-        if (!$this->shouldAudit($model)) {
-            return;
-        }
-
         $oldValues = $this->filterFields($model->getOriginal());
         $newValues = $this->filterFields($model->getChanges());
 
@@ -81,10 +60,6 @@ class AuditObserver
      */
     public function deleted(Model $model): void
     {
-        if (!$this->shouldAudit($model)) {
-            return;
-        }
-
         AuditHelper::log(
             AuditLog::ACTION_DELETE,
             $this->getDescription($model, 'eliminado'),
@@ -92,14 +67,6 @@ class AuditObserver
             $this->filterFields($model->getAttributes()),
             null
         );
-    }
-
-    /**
-     * Verificar si el modelo debe ser auditado
-     */
-    protected function shouldAudit(Model $model): bool
-    {
-        return in_array(get_class($model), $this->auditableModels);
     }
 
     /**
@@ -136,6 +103,7 @@ class AuditObserver
             \App\Models\Petitioner::class => 'Peticionario',
             \App\Models\Species::class => 'Especie',
             \App\Models\ProtectedArea::class => 'Área protegida',
+            \App\Models\User::class => 'Usuario',
         ];
 
         return $names[get_class($model)] ?? class_basename($model);
@@ -146,11 +114,6 @@ class AuditObserver
      */
     protected function getModelIdentifier(Model $model): string
     {
-        // Intentar obtener un identificador legible
-        if (method_exists($model, 'getAuditIdentifier')) {
-            return $model->getAuditIdentifier();
-        }
-
         // Campos comunes de identificación
         $identifierFields = ['ip', 'title', 'name', 'key_name', 'scientific_name'];
 

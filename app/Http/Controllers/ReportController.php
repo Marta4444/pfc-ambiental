@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Petitioner;
 use App\Models\ProtectedArea;
 use App\Http\Controllers\Controller;
+use App\Helpers\AuditHelper;
 use App\Helpers\SpainGeoHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class ReportController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Mostrar la lista de casos.
      */
     public function index(Request $request)
     {
@@ -121,7 +122,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostrar el formulario para crear un nuevo caso.
      */
     public function create()
     {
@@ -134,7 +135,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Guardar un nuevo caso.
      */
     public function store(Request $request)
     {
@@ -214,7 +215,7 @@ class ReportController extends Controller
 
         $assigned = !empty($validated['assigned_to']);
         
-        // Determinar estado inicial: NUEVO si no hay asignado, EN_ESPERA si hay asignado
+        // Determinar estado inicial: NUEVO si no hay asignado, EN_ESPERA si está asignado
         $initialStatus = $assigned ? Report::STATUS_EN_ESPERA : Report::STATUS_NUEVO;
 
         $report = Report::create([
@@ -249,7 +250,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar un caso específico.
      */
     public function show(Report $report)
     {
@@ -261,9 +262,9 @@ class ReportController extends Controller
         // Verificar si las coordenadas están en área protegida
         $protectedAreas = collect();
         if ($report->coordinates) {
-            $coords = $this->parseCoordinates($report->coordinates);
+            $coords = SpainGeoHelper::parseCoordinates($report->coordinates);
             if ($coords) {
-                $protectedAreas = ProtectedArea::findAreasContainingPoint($coords['lat'], $coords['long']);
+                $protectedAreas = ProtectedArea::findAreasContainingPoint($coords['lat'], $coords['lng']);
             }
         }
         
@@ -271,34 +272,7 @@ class ReportController extends Controller
     }
     
     /**
-     * Parsear coordenadas desde string "lat,long" o "lat, long"
-     */
-    private function parseCoordinates(?string $coordinates): ?array
-    {
-        if (empty($coordinates)) {
-            return null;
-        }
-        
-        // Soportar formatos: "lat,long", "lat, long", "lat;long"
-        $parts = preg_split('/[,;]\s*/', trim($coordinates));
-        
-        if (count($parts) !== 2) {
-            return null;
-        }
-        
-        $lat = (float) trim($parts[0]);
-        $long = (float) trim($parts[1]);
-        
-        // Validar rangos
-        if ($lat < -90 || $lat > 90 || $long < -180 || $long > 180) {
-            return null;
-        }
-        
-        return ['lat' => $lat, 'long' => $long];
-    }
-
-    /**
-     * Show the form for editing the specified resource.
+     * Mostrar el formulario para editar un caso.
      */
     public function edit(Report $report)
     {
@@ -308,7 +282,7 @@ class ReportController extends Controller
                 ->with('error', 'Este caso está finalizado y no se puede editar. Contacte con un administrador para reabrirlo.');
         }
 
-        // CAMBIO: Permitir edición a creador, asignado o admin
+        // CAMBIO: Permitir edición al usuario asignado o un admin
         $user = Auth::user();
         $canEdit = $user->role === 'admin' || 
                    $report->assigned_to === $user->id;
@@ -326,7 +300,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar un caso.
      */
     public function update(Request $request, Report $report)
 {
@@ -491,7 +465,7 @@ class ReportController extends Controller
 }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar un caso.
      */
     public function destroy(Report $report)
     {
@@ -509,14 +483,13 @@ class ReportController extends Controller
     }
 
     /**
-     * Assign a report to a user.
+     * Asignar un caso a un usuario.
      */
     public function assign(Request $request, Report $report)
     {
-        $user = Auth::user();
-        
         // Cualquier usuario autenticado puede asignar casos
         // Admin tiene permiso total
+        $user = Auth::user();
        
         $canAssign = $user->role === 'admin' || 
                      !$report->assigned || 
@@ -546,25 +519,28 @@ class ReportController extends Controller
             'status' => $shouldChangeStatus ? $newStatus : $report->status,
         ]);
 
+        $assignedUser = \App\Models\User::find($request->assigned_to);
+        AuditHelper::logAssign($report, $assignedUser?->name);
+
         return redirect()->back()->with('success', 'Caso asignado correctamente.');
     }
 
     /**
-     * Unassign a report from a user.
+     * Desasignar un caso de un usuario.
      */
     public function unassign(Report $report)
     {
-        $user = Auth::user();
-        
         // Admin puede desasignar cualquier caso
         // Usuario puede desasignarse solo si está asignado a él mismo
+        $user = Auth::user();
+        
         $canUnassign = $user->role === 'admin' || $report->assigned_to === $user->id;
         
         if (!$canUnassign) {
             abort(403, 'No tienes permiso para desasignar este caso.');
         }
 
-        // Al desasignar, volver a NUEVO si no tiene detalles, o mantener EN_PROCESO si los tiene
+        // Al desasignar, el estado vuelve a NUEVO si no tiene detalles, o mantener EN_PROCESO si los tiene
         $hasDetails = $report->details()->exists();
         $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_NUEVO;
         
@@ -577,11 +553,13 @@ class ReportController extends Controller
             'status' => $shouldChangeStatus ? $newStatus : $report->status,
         ]);
 
+        AuditHelper::logUnassign($report);
+
         return redirect()->back()->with('success', 'Caso desasignado correctamente.');
     }
 
     /**
-     * Self-assign a report to the authenticated user.
+     * Auto-asignar un caso al usuario autenticado.
      */
     public function selfAssign(Report $report)
     {
@@ -607,11 +585,13 @@ class ReportController extends Controller
             'status' => $shouldChangeStatus ? $newStatus : $report->status,
         ]);
 
+        AuditHelper::logSelfAssign($report);
+
         return redirect()->back()->with('success', 'Te has asignado el caso correctamente.');
     }
 
     /**
-     * Finalize a report (close it permanently).
+     * Finalizar un caso (cerrarlo permanentemente).
      */
     public function finalize(Report $report)
     {
@@ -637,7 +617,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Reopen a finalized report (admin only).
+     * Reabrir un caso finalizado (solo admin).
      */
     public function reopen(Report $report)
     {
@@ -685,9 +665,9 @@ class ReportController extends Controller
         // Verificar áreas protegidas por coordenadas
         $protectedAreas = collect();
         if ($report->coordinates) {
-            $coords = $this->parseCoordinates($report->coordinates);
+            $coords = SpainGeoHelper::parseCoordinates($report->coordinates);
             if ($coords) {
-                $protectedAreas = ProtectedArea::findAreasContainingPoint($coords['lat'], $coords['long']);
+                $protectedAreas = ProtectedArea::findAreasContainingPoint($coords['lat'], $coords['lng']);
             }
         }
         
@@ -704,7 +684,9 @@ class ReportController extends Controller
         
         // Nombre del archivo
         $filename = 'caso_' . $report->ip . '_' . now()->format('Ymd_His') . '.pdf';
-        
+
+        AuditHelper::logExport('PDF', ['report_id' => $report->id, 'report_ip' => $report->ip]);
+
         // Descargar el PDF
         return $pdf->download($filename);
     }
