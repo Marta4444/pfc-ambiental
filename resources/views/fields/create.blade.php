@@ -26,7 +26,7 @@
                                     <label for="key_name" class="block text-sm font-medium text-gray-700">Nombre Clave *</label>
                                     <input type="text" name="key_name" id="key_name" value="{{ old('key_name') }}" required 
                                         pattern="[a-z0-9_]+" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
                                         placeholder="ej: tree_count, water_ph">
                                     <p class="mt-1 text-xs text-gray-500">Solo letras minúsculas, números y guiones bajos</p>
                                     @error('key_name') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
@@ -35,17 +35,17 @@
                                 <div>
                                     <label for="label" class="block text-sm font-medium text-gray-700">Etiqueta *</label>
                                     <input type="text" name="label" id="label" value="{{ old('label') }}" required 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
                                         placeholder="ej: Número de árboles">
                                     @error('label') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                                 </div>
 
                                 <div>
                                     <label for="type" class="block text-sm font-medium text-gray-700">Tipo *</label>
-                                    <select name="type" id="type" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <select name="type" id="type" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500">
                                         <option value="">Seleccionar tipo...</option>
                                         @foreach($types as $type)
-                                            <option value="{{ $type }}" {{ old('type') == $type ? 'selected' : '' }}>{{ ucfirst($type) }}</option>
+                                            <option value="{{ $type }}" @selected(old('type') == $type)>{{ ucfirst($type) }}</option>
                                         @endforeach
                                     </select>
                                     @error('type') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
@@ -54,7 +54,7 @@
                                 <div>
                                     <label for="units" class="block text-sm font-medium text-gray-700">Unidades</label>
                                     <input type="text" name="units" id="units" value="{{ old('units') }}" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
                                         placeholder="ej: kg, m², €, litros">
                                     <p class="mt-1 text-xs text-gray-500">Opcional - para campos numéricos</p>
                                     @error('units') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
@@ -70,7 +70,7 @@
                                 <div>
                                     <label for="placeholder" class="block text-sm font-medium text-gray-700">Placeholder</label>
                                     <input type="text" name="placeholder" id="placeholder" value="{{ old('placeholder') }}" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
                                         placeholder="Texto de ejemplo para el campo">
                                     @error('placeholder') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                                 </div>
@@ -78,7 +78,7 @@
                                 <div>
                                     <label for="help_text" class="block text-sm font-medium text-gray-700">Texto de Ayuda</label>
                                     <textarea name="help_text" id="help_text" rows="2" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
                                         placeholder="Descripción o instrucciones para el usuario">{{ old('help_text') }}</textarea>
                                     @error('help_text') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                                 </div>
@@ -86,7 +86,7 @@
                                 <div id="options_container" class="hidden">
                                     <label for="options_json" class="block text-sm font-medium text-gray-700">Opciones (JSON)</label>
                                     <textarea name="options_json" id="options_json" rows="4" 
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500 font-mono text-sm"
                                         placeholder='{"opcion1": "Etiqueta 1", "opcion2": "Etiqueta 2"}'>{{ old('options_json') }}</textarea>
                                     <p class="mt-1 text-xs text-gray-500">Formato JSON: {"clave": "valor"}</p>
                                     @error('options_json') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
@@ -94,14 +94,14 @@
 
                                 <div class="flex items-center space-x-6">
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="is_numeric" id="is_numeric" value="1" {{ old('is_numeric') ? 'checked' : '' }}
-                                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <input type="checkbox" name="is_numeric" id="is_numeric" value="1" @checked(old('is_numeric'))
+                                            class="rounded border-gray-300 text-eco-600 shadow-sm focus:border-eco-300 focus:ring focus:ring-eco-200 focus:ring-opacity-50">
                                         <span class="ml-2 text-sm text-gray-700">Campo numérico (para cálculos)</span>
                                     </label>
 
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="active" id="active" value="1" {{ old('active', true) ? 'checked' : '' }}
-                                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <input type="checkbox" name="active" id="active" value="1" @checked(old('active', true))
+                                            class="rounded border-gray-300 text-eco-600 shadow-sm focus:border-eco-300 focus:ring focus:ring-eco-200 focus:ring-opacity-50">
                                         <span class="ml-2 text-sm text-gray-700">Activo</span>
                                     </label>
                                 </div>

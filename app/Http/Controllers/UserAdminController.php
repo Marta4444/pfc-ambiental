@@ -47,12 +47,8 @@ class UserAdminController extends Controller
     public function toggleActive(User $user)
     {
         // No permitir desactivar al último admin activo
-        if ($user->role === 'admin' && $user->active) {
-            $activeAdminCount = User::where('role', 'admin')->where('active', true)->count();
-            
-            if ($activeAdminCount <= 1) {
-                return redirect()->back()->with('error', 'No se puede desactivar. Debe haber al menos un administrador activo en el sistema.');
-            }
+        if ($user->role === 'admin' && $user->active && $this->isLastActiveAdmin()) {
+            return redirect()->back()->with('error', 'No se puede desactivar. Debe haber al menos un administrador activo en el sistema.');
         }
 
         $user->update(['active' => !$user->active]);
@@ -116,12 +112,8 @@ class UserAdminController extends Controller
         ]);
 
         // No permitir cambiar el rol del último admin activo
-        if ($user->role === 'admin' && $validated['role'] !== 'admin') {
-            $activeAdminCount = User::where('role', 'admin')->where('active', true)->count();
-            
-            if ($activeAdminCount <= 1) {
-                return redirect()->back()->with('error', 'No se puede cambiar el rol. Debe haber al menos un administrador en el sistema.');
-            }
+        if ($user->role === 'admin' && $validated['role'] !== 'admin' && $this->isLastActiveAdmin()) {
+            return redirect()->back()->with('error', 'No se puede cambiar el rol. Debe haber al menos un administrador en el sistema.');
         }
 
         $updateData = [
@@ -138,5 +130,10 @@ class UserAdminController extends Controller
         $user->update($updateData);
 
         return redirect()->route('admin.users.index')->with('success', "Usuario {$user->name} actualizado correctamente.");
+    }
+
+    private function isLastActiveAdmin(): bool
+    {
+        return User::where('role', 'admin')->where('active', true)->count() <= 1;
     }
 }

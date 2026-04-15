@@ -27,8 +27,8 @@
                 <div class="mb-4">
                     <x-input-label for="active" value="Estado" />
                     <select id="active" name="active" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
-                        <option value="1" {{ old('active', '1') == '1' ? 'selected' : '' }}>Activa</option>
-                        <option value="0" {{ old('active') == '0' ? 'selected' : '' }}>Inactiva</option>
+                        <option value="1" @selected(old('active', '1') == '1')>Activa</option>
+                        <option value="0" @selected(old('active') == '0')>Inactiva</option>
                     </select>
                     @error('active')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>

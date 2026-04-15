@@ -34,7 +34,7 @@ class ReportDetailController extends Controller
 
     /**
      * Formulario para crear nuevos detalles
-     * RESTRINGIDO: Solo admin o asignado
+     * RESTRINGIDO: Solo admin o usuario asignado al caso
      */
     public function create(Report $report)
     {
@@ -72,7 +72,7 @@ class ReportDetailController extends Controller
 
     /**
      * Guardar nuevos detalles
-     * RESTRINGIDO: Solo admin o asignado
+     * RESTRINGIDO: Solo admin o usuario asignado al caso
      */
     public function store(Request $request, Report $report)
     {
@@ -82,31 +82,7 @@ class ReportDetailController extends Controller
         $fields = $subcategory->fields()->get();
 
         // Validar campos requeridos
-        $rules = [];
-        $messages = [];
-
-        foreach ($fields as $field) {
-            $pivot = $field->pivot;
-            $fieldKey = "fields.{$field->key_name}";
-            
-            $fieldRules = [];
-            
-            if ($pivot->is_required) {
-                $fieldRules[] = 'required';
-                $messages["{$fieldKey}.required"] = "El campo '{$field->label}' es obligatorio.";
-            } else {
-                $fieldRules[] = 'nullable';
-            }
-
-            if ($field->is_numeric) {
-                $fieldRules[] = 'numeric';
-            }
-
-            if (!empty($fieldRules)) {
-                $rules[$fieldKey] = implode('|', $fieldRules);
-            }
-        }
-
+        ['rules' => $rules, 'messages' => $messages] = $this->buildValidationRules($fields);
         $rules['group_key'] = 'required|string|max:50';
         $validated = $request->validate($rules, $messages);
 
@@ -116,41 +92,7 @@ class ReportDetailController extends Controller
         DB::beginTransaction();
 
         try {
-            $orderIndex = 0;
-            $speciesId = null;
-            $protectedAreaId = null;
-            $validFieldKeys = $fields->pluck('key_name')->toArray();
-
-            // Primero buscar la especie si existe el campo
-            if (!empty($fieldValues['especie'])) {
-                $species = Species::where('scientific_name', $fieldValues['especie'])
-                    ->orWhere('common_name', $fieldValues['especie'])
-                    ->first();
-                $speciesId = $species?->id;
-            }
-
-            foreach ($fieldValues as $fieldKey => $value) {
-                if (!in_array($fieldKey, $validFieldKeys)) {
-                    continue;
-                }
-                
-                if (empty($value) && $value !== '0') {
-                    continue;
-                }
-
-                $field = $fields->firstWhere('key_name', $fieldKey);
-                if (!$field) continue;
-
-                ReportDetail::create([
-                    'report_id' => $report->id,
-                    'group_key' => $groupKey,
-                    'field_key' => $fieldKey,
-                    'value' => $value,
-                    'species_id' => $speciesId,
-                    'protected_area_id' => $protectedAreaId,
-                    'order_index' => $orderIndex++,
-                ]);
-            }
+            $speciesId = $this->saveDetailRows($report, $groupKey, $fields, $fieldValues);
 
             // Actualizar datos de protección en la tabla Species cuando el usuario los introduce manualmente si no existían antes.
             if ($speciesId) {
@@ -206,7 +148,7 @@ class ReportDetailController extends Controller
 
     /**
      * Formulario para editar un grupo de detalles
-     * RESTRINGIDO: Solo admin o asignado
+     * RESTRINGIDO: Solo admin o usuario asignado al caso
      */
     public function edit(Report $report, string $groupKey)
     {
@@ -243,7 +185,7 @@ class ReportDetailController extends Controller
 
     /**
      * Actualizar un grupo de detalles
-     * RESTRINGIDO: Solo admin o asignado
+     * RESTRINGIDO: Solo admin o usuario asignado al caso
      */
     public function update(Request $request, Report $report, string $groupKey)
     {
@@ -254,31 +196,7 @@ class ReportDetailController extends Controller
         $fieldValues = $request->input('fields', []);
 
         // Validar campos requeridos
-        $rules = [];
-        $messages = [];
-
-        foreach ($fields as $field) {
-            $pivot = $field->pivot;
-            $fieldKey = "fields.{$field->key_name}";
-            
-            $fieldRules = [];
-            
-            if ($pivot->is_required) {
-                $fieldRules[] = 'required';
-                $messages["{$fieldKey}.required"] = "El campo '{$field->label}' es obligatorio.";
-            } else {
-                $fieldRules[] = 'nullable';
-            }
-
-            if ($field->is_numeric) {
-                $fieldRules[] = 'numeric';
-            }
-
-            if (!empty($fieldRules)) {
-                $rules[$fieldKey] = implode('|', $fieldRules);
-            }
-        }
-
+        ['rules' => $rules, 'messages' => $messages] = $this->buildValidationRules($fields);
         $request->validate($rules, $messages);
 
         DB::beginTransaction();
@@ -290,38 +208,7 @@ class ReportDetailController extends Controller
                 ->delete();
 
             // Recrear con nuevos valores
-            $orderIndex = 0;
-            $speciesId = null;
-            $protectedAreaId = null;
-            $validFieldKeys = $fields->pluck('key_name')->toArray();
-
-            // Primero buscar la especie
-            if (!empty($fieldValues['especie'])) {
-                $species = Species::where('scientific_name', $fieldValues['especie'])
-                    ->orWhere('common_name', $fieldValues['especie'])
-                    ->first();
-                $speciesId = $species?->id;
-            }
-
-            foreach ($fieldValues as $fieldKey => $value) {
-                if (!in_array($fieldKey, $validFieldKeys)) {
-                    continue;
-                }
-                
-                if (empty($value) && $value !== '0') {
-                    continue;
-                }
-
-                ReportDetail::create([
-                    'report_id' => $report->id,
-                    'group_key' => $groupKey,
-                    'field_key' => $fieldKey,
-                    'value' => $value,
-                    'species_id' => $speciesId,
-                    'protected_area_id' => $protectedAreaId,
-                    'order_index' => $orderIndex++,
-                ]);
-            }
+            $speciesId = $this->saveDetailRows($report, $groupKey, $fields, $fieldValues);
 
             // Actualizar datos de protección en la tabla Species
             if ($speciesId) {
@@ -342,7 +229,7 @@ class ReportDetailController extends Controller
 
     /**
      * Eliminar un grupo de detalles
-     * RESTRINGIDO: Solo admin o asignado
+     * RESTRINGIDO: Solo admin o usuario asignado al caso
      */
     public function destroy(Report $report, string $groupKey)
     {
@@ -387,39 +274,8 @@ class ReportDetailController extends Controller
         }
 
         if ($updated) {
-            // Recalcular is_protected basándose en los datos actualizados
-            $species->is_protected = $this->calculateIsProtected($species);
-            $species->save();
+            $species->updateProtectionStatus();
         }
-    }
-
-    /**
-     * Calcular si una especie está protegida
-     * Solo considera valores válidos de las constantes definidas
-     */
-    protected function calculateIsProtected(Species $species): bool
-    {
-        // Está protegida si tiene estado BOE válido
-        if (Species::isValidBoeStatus($species->boe_status)) {
-            return true;
-        }
-
-        // O si tiene estado CCAA válido
-        if (Species::isValidCcaaStatus($species->ccaa_status)) {
-            return true;
-        }
-
-        // O si tiene CITES válido
-        if (Species::isValidCitesAppendix($species->cites_appendix)) {
-            return true;
-        }
-
-        // O si tiene categoría IUCN de riesgo
-        if (Species::isProtectedIucnCategory($species->iucn_category)) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -450,8 +306,80 @@ class ReportDetailController extends Controller
         }
 
         if (!$this->canEdit($report)) {
-            abort(403, 'No tienes permiso para editar los detalles de este caso. Solo el agente asignado o un administrador pueden hacerlo.');
+            abort(403, 'No tienes permiso para editar los detalles de este caso. Solo el agente asignado al caso o un administrador pueden hacerlo.');
         }
+    }
+
+    /**
+     * Construir reglas de validación para los campos de una subcategoría
+     */
+    private function buildValidationRules(\Illuminate\Support\Collection $fields): array
+    {
+        $rules = [];
+        $messages = [];
+
+        foreach ($fields as $field) {
+            $pivot = $field->pivot;
+            $fieldKey = "fields.{$field->key_name}";
+            $fieldRules = [];
+
+            if ($pivot->is_required) {
+                $fieldRules[] = 'required';
+                $messages["{$fieldKey}.required"] = "El campo '{$field->label}' es obligatorio.";
+            } else {
+                $fieldRules[] = 'nullable';
+            }
+
+            if ($field->is_numeric) {
+                $fieldRules[] = 'numeric';
+            }
+
+            if (!empty($fieldRules)) {
+                $rules[$fieldKey] = implode('|', $fieldRules);
+            }
+        }
+
+        return ['rules' => $rules, 'messages' => $messages];
+    }
+
+    /**
+     * Crear los registros ReportDetail a partir de los valores del formulario
+     * Devuelve el species_id si se encontró una especie, null en caso contrario
+     */
+    private function saveDetailRows(Report $report, string $groupKey, \Illuminate\Support\Collection $fields, array $fieldValues): ?int
+    {
+        $orderIndex = 0;
+        $speciesId = null;
+        $validFieldKeys = $fields->pluck('key_name')->toArray();
+
+        if (!empty($fieldValues['especie'])) {
+            $species = Species::where('scientific_name', $fieldValues['especie'])
+                ->orWhere('common_name', $fieldValues['especie'])
+                ->first();
+            $speciesId = $species?->id;
+        }
+
+        foreach ($fieldValues as $fieldKey => $value) {
+            if (!in_array($fieldKey, $validFieldKeys)) {
+                continue;
+            }
+
+            if (empty($value) && $value !== '0') {
+                continue;
+            }
+
+            ReportDetail::create([
+                'report_id'         => $report->id,
+                'group_key'         => $groupKey,
+                'field_key'         => $fieldKey,
+                'value'             => $value,
+                'species_id'        => $speciesId,
+                'protected_area_id' => null,
+                'order_index'       => $orderIndex++,
+            ]);
+        }
+
+        return $speciesId;
     }
 
     /**

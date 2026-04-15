@@ -80,7 +80,7 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                 </svg>
-                                Sincronizar Existentes (50)
+                                Sincronizar Existentes
                             </button>
                         </form>
 
@@ -140,33 +140,33 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
                             <input type="text" name="search" value="{{ request('search') }}" 
                                 placeholder="Nombre científico o común..."
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Estado Sync</label>
-                            <select name="sync_status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
+                            <select name="sync_status" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500">
                                 <option value="">Todos</option>
-                                <option value="synced" {{ request('sync_status') == 'synced' ? 'selected' : '' }}>Sincronizados</option>
-                                <option value="pending" {{ request('sync_status') == 'pending' ? 'selected' : '' }}>Pendientes</option>
-                                <option value="error" {{ request('sync_status') == 'error' ? 'selected' : '' }}>Con error</option>
+                                <option value="synced" @selected(request('sync_status') == 'synced')>Sincronizados</option>
+                                <option value="pending" @selected(request('sync_status') == 'pending')>Pendientes</option>
+                                <option value="error" @selected(request('sync_status') == 'error')>Con error</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fuente</label>
-                            <select name="sync_source" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
+                            <select name="sync_source" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500">
                                 <option value="">Todas</option>
-                                <option value="gbif" {{ request('sync_source') == 'gbif' ? 'selected' : '' }}>GBIF</option>
-                                <option value="iucn" {{ request('sync_source') == 'iucn' ? 'selected' : '' }}>IUCN</option>
-                                <option value="cites" {{ request('sync_source') == 'cites' ? 'selected' : '' }}>CITES</option>
-                                <option value="manual" {{ request('sync_source') == 'manual' ? 'selected' : '' }}>Manual</option>
+                                <option value="gbif" @selected(request('sync_source') == 'gbif')>GBIF</option>
+                                <option value="iucn" @selected(request('sync_source') == 'iucn')>IUCN</option>
+                                <option value="cites" @selected(request('sync_source') == 'cites')>CITES</option>
+                                <option value="manual" @selected(request('sync_source') == 'manual')>Manual</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Protección</label>
-                            <select name="is_protected" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500">
+                            <select name="is_protected" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500">
                                 <option value="">Todas</option>
-                                <option value="1" {{ request('is_protected') == '1' ? 'selected' : '' }}>Protegidas</option>
-                                <option value="0" {{ request('is_protected') == '0' ? 'selected' : '' }}>No protegidas</option>
+                                <option value="1" @selected(request('is_protected') == '1')>Protegidas</option>
+                                <option value="0" @selected(request('is_protected') == '0')>No protegidas</option>
                             </select>
                         </div>
                         <div class="flex items-end gap-2">

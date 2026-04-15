@@ -20,10 +20,10 @@
                             {{-- Filtro por usuario --}}
                             <div>
                                 <label for="user_id" class="block text-xs font-medium text-gray-700 mb-1">Usuario</label>
-                                <select name="user_id" id="user_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
+                                <select name="user_id" id="user_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500 text-sm">
                                     <option value="">Todos</option>
                                     @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                        <option value="{{ $user->id }}" @selected(request('user_id') == $user->id)>
                                             {{ $user->name }}
                                         </option>
                                     @endforeach
@@ -33,10 +33,10 @@
                             {{-- Filtro por acción --}}
                             <div>
                                 <label for="action" class="block text-xs font-medium text-gray-700 mb-1">Acción</label>
-                                <select name="action" id="action" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
+                                <select name="action" id="action" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500 text-sm">
                                     <option value="">Todas</option>
                                     @foreach($actions as $key => $label)
-                                        <option value="{{ $key }}" {{ request('action') == $key ? 'selected' : '' }}>
+                                        <option value="{{ $key }}" @selected(request('action') == $key)>
                                             {{ $label }}
                                         </option>
                                     @endforeach
@@ -46,10 +46,10 @@
                             {{-- Filtro por modelo --}}
                             <div>
                                 <label for="model_type" class="block text-xs font-medium text-gray-700 mb-1">Tipo de registro</label>
-                                <select name="model_type" id="model_type" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
+                                <select name="model_type" id="model_type" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500 text-sm">
                                     <option value="">Todos</option>
                                     @foreach($modelTypes as $type => $label)
-                                        <option value="{{ $type }}" {{ request('model_type') == $type ? 'selected' : '' }}>
+                                        <option value="{{ $type }}" @selected(request('model_type') == $type)>
                                             {{ $label }}
                                         </option>
                                     @endforeach
@@ -59,13 +59,13 @@
                             {{-- Fecha desde --}}
                             <div>
                                 <label for="date_from" class="block text-xs font-medium text-gray-700 mb-1">Desde</label>
-                                <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
+                                <input type="date" name="date_from" id="date_from" value="{{ request('date_from') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500 text-sm">
                             </div>
 
                             {{-- Fecha hasta --}}
                             <div>
                                 <label for="date_to" class="block text-xs font-medium text-gray-700 mb-1">Hasta</label>
-                                <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
+                                <input type="date" name="date_to" id="date_to" value="{{ request('date_to') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500 text-sm">
                             </div>
                         </div>
 
@@ -73,7 +73,7 @@
                             {{-- Búsqueda --}}
                             <div style="grid-column: span 3;">
                                 <label for="search" class="block text-xs font-medium text-gray-700 mb-1">Buscar</label>
-                                <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Buscar en descripción..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-eco-500 text-sm">
+                                <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Buscar en descripción..." class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500 text-sm">
                             </div>
 
                             {{-- Botones --}}

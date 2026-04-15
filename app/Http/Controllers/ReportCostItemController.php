@@ -7,6 +7,7 @@ use App\Models\Report;
 use App\Models\ReportCostItem;
 use App\Services\CostCalculationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -35,12 +36,10 @@ class ReportCostItemController extends Controller
         // Totales por tipo
         $totals = ReportCostItem::getTotalsByType($report->id);
 
-        // Obtener info de las fórmulas para la categoría y subcategoría
         $categoryName = $report->category->name ?? '';
         $subcategoryName = $report->subcategory->name ?? '';
-        $formulaInfo = CostCalculationService::getFormulaInfo($categoryName, $subcategoryName);
 
-        return view('reports.costs.index', compact('report', 'groupedCosts', 'totals', 'formulaInfo', 'categoryName', 'subcategoryName'));
+        return view('reports.costs.index', compact('report', 'groupedCosts', 'totals', 'categoryName', 'subcategoryName'));
     }
 
     /**
@@ -48,17 +47,14 @@ class ReportCostItemController extends Controller
      */
     public function calculate(Report $report): RedirectResponse
     {
-        \Log::info('Iniciando cálculo de costes', ['report_id' => $report->id]);
-
         // Bloquear si el caso está finalizado
         if ($report->isFinalizado()) {
             return redirect()->route('reports.show', $report)
-                ->with('error', 'Este caso está finalizado y no se puede modificar. Contacte con un administrador para reabrirlo.');
+                ->with('error', 'Este caso está finalizado y no se puede modificar. Contacta con un administrador para reabrirlo.');
         }
 
         // Verificar que hay detalles
         if (!$report->hasDetails()) {
-            \Log::warning('El report no tiene detalles', ['report_id' => $report->id]);
             return redirect()->route('reports.show', $report)
                 ->with('error', 'El caso no tiene detalles. Añade detalles antes de calcular costes.');
         }
@@ -73,7 +69,7 @@ class ReportCostItemController extends Controller
             // Usar el servicio de cálculo de costes
             $results = $this->costService->calculateForReport($report);
 
-            \Log::info('Cálculo completado', [
+            Log::info('Cálculo completado', [
                 'report_id' => $report->id,
                 'totals' => $results['totals'],
                 'errors' => $results['errors'] ?? [],
@@ -93,7 +89,7 @@ class ReportCostItemController extends Controller
             return redirect()->route('report-costs.index', $report)
                 ->with('success', "Costes calculados correctamente. Total: {$total} €");
         } catch (\Exception $e) {
-            \Log::error('Error al calcular costes', [
+            Log::error('Error al calcular costes', [
                 'report_id' => $report->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

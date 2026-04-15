@@ -22,8 +22,8 @@
                     <label for="active" class="text-sm text-gray-700">Filtrar por estado:</label>
                     <select id="active" name="active" class="ml-2 border-gray-300 rounded text-sm" onchange="this.form.submit()">
                         <option value="">Todas</option>
-                        <option value="1" {{ request('active') === '1' ? 'selected' : '' }}>Activas</option>
-                        <option value="0" {{ request('active') === '0' ? 'selected' : '' }}>Inactivas</option>
+                        <option value="1" @selected(request('active') === '1')>Activas</option>
+                        <option value="0" @selected(request('active') === '0')>Inactivas</option>
                     </select>
                 </div>
 
@@ -48,7 +48,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($categories as $category)
+                        @forelse($categories as $category)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-2 border">{{ $category->name }}</td>
                                 <td class="px-4 py-2 border">{{ $category->description }}</td>
@@ -81,7 +81,8 @@
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                        @endforelse
                     </tbody>
                 </table>
             </div>

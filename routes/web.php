@@ -77,9 +77,6 @@ Route::middleware('auth')->group(function () {
 
     // Rutas de Species (búsqueda para todos los usuarios autenticados)
     Route::get('species/search', [SpeciesController::class, 'search'])->name('species.search');
-    Route::post('species/find-or-create', [SpeciesController::class, 'findOrCreate'])->name('species.findOrCreate');
-    Route::get('species/{species}', [SpeciesController::class, 'show'])->name('species.show');
-    Route::post('species/check-protection', [SpeciesController::class, 'checkProtection'])->name('species.checkProtection');
 
     // Rutas de Áreas Protegidas (para usuarios autenticados)
     Route::post('protected-areas/check-coordinates', [ProtectedAreaController::class, 'checkCoordinates'])
@@ -103,7 +100,6 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     // Auditoría (solo admin)
     Route::get('audit', [AuditLogController::class, 'index'])->name('audit.index');
     Route::get('audit/{auditLog}', [AuditLogController::class, 'show'])->name('audit.show');
-    Route::get('audit/user/{user}', [AuditLogController::class, 'userActivity'])->name('audit.user-activity');
 
     // Estadísticas de administración (solo admin)
     Route::get('statistics/admin', [StatisticsController::class, 'admin'])->name('statistics.admin');
@@ -126,8 +122,6 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
         ->name('fields.assignToSubcategory');
     Route::delete('fields/{field}/subcategories/{subcategory}', [FieldController::class, 'unassignFromSubcategory'])
         ->name('fields.unassignFromSubcategory');
-    Route::put('fields/{field}/subcategories/{subcategory}', [FieldController::class, 'updateSubcategoryPivot'])
-        ->name('fields.updateSubcategoryPivot');
 
     // Administración de especies con sincronización API
     Route::prefix('admin/species')->name('admin.species.')->group(function () {

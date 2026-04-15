@@ -206,12 +206,7 @@ class ReportController extends Controller
                 ->withInput();
         }
 
-        $path = null;
-        if ($request->hasFile('pdf_report')) {
-            $originalName = $request->file('pdf_report')->getClientOriginalName();
-            $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-            $path = $request->file('pdf_report')->storeAs('reports', time() . '_' . $sanitizedName, 'public');
-        }
+        $path = $this->storePdfAttachment($request);
 
         $assigned = !empty($validated['assigned_to']);
         
@@ -384,14 +379,9 @@ class ReportController extends Controller
                 ->withInput();
         }
 
-        if ($request->hasFile('pdf_report')) {
-            if ($report->pdf_report) {
-                Storage::disk('public')->delete($report->pdf_report);
-            }
-            
-            $originalName = $request->file('pdf_report')->getClientOriginalName();
-            $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-            $validated['pdf_report'] = $request->file('pdf_report')->storeAs('reports', time() . '_' . $sanitizedName, 'public');
+        $newPath = $this->storePdfAttachment($request, $report->pdf_report);
+        if ($newPath) {
+            $validated['pdf_report'] = $newPath;
         }
 
         $validated['assigned'] = !empty($validated['assigned_to']);
@@ -440,14 +430,9 @@ class ReportController extends Controller
                 ->withInput();
         }
 
-        // Subir PDF si existe
-        if ($request->hasFile('pdf_report')) {
-            if ($report->pdf_report) {
-                Storage::disk('public')->delete($report->pdf_report);
-            }
-            $originalName = $request->file('pdf_report')->getClientOriginalName();
-            $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
-            $validated['pdf_report'] = $request->file('pdf_report')->storeAs('reports', time() . '_' . $sanitizedName, 'public');
+        $newPath = $this->storePdfAttachment($request, $report->pdf_report);
+        if ($newPath) {
+            $validated['pdf_report'] = $newPath;
         }
 
         // Mantener campos que no pueden editar
@@ -504,22 +489,13 @@ class ReportController extends Controller
             'assigned_to' => 'required|exists:users,id',
         ]);
 
-        // Determinar nuevo estado según si tiene detalles:
-        // - Si tiene detalles → EN_PROCESO
-        // - Si no tiene detalles → EN_ESPERA
-        $hasDetails = $report->details()->exists();
-        $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_EN_ESPERA;
-        
-        // Solo cambiar estado si está en NUEVO o EN_ESPERA (no si ya está EN_PROCESO o COMPLETADO)
-        $shouldChangeStatus = in_array($report->status, [Report::STATUS_NUEVO, Report::STATUS_EN_ESPERA]);
-
         $report->update([
             'assigned_to' => $request->assigned_to,
             'assigned' => true,
-            'status' => $shouldChangeStatus ? $newStatus : $report->status,
+            'status' => $this->resolveStatusAfterAssignment($report, true),
         ]);
 
-        $assignedUser = \App\Models\User::find($request->assigned_to);
+        $assignedUser = User::find($request->assigned_to);
         AuditHelper::logAssign($report, $assignedUser?->name);
 
         return redirect()->back()->with('success', 'Caso asignado correctamente.');
@@ -540,17 +516,10 @@ class ReportController extends Controller
             abort(403, 'No tienes permiso para desasignar este caso.');
         }
 
-        // Al desasignar, el estado vuelve a NUEVO si no tiene detalles, o mantener EN_PROCESO si los tiene
-        $hasDetails = $report->details()->exists();
-        $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_NUEVO;
-        
-        // Solo cambiar estado si no está COMPLETADO
-        $shouldChangeStatus = $report->status !== Report::STATUS_COMPLETADO;
-
         $report->update([
             'assigned_to' => null,
             'assigned' => false,
-            'status' => $shouldChangeStatus ? $newStatus : $report->status,
+            'status' => $this->resolveStatusAfterAssignment($report, false),
         ]);
 
         AuditHelper::logUnassign($report);
@@ -570,19 +539,10 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'Este caso ya está asignado a otro usuario.');
         }
 
-        // Determinar nuevo estado según si tiene detalles:
-        // - Si tiene detalles → EN_PROCESO
-        // - Si no tiene detalles → EN_ESPERA
-        $hasDetails = $report->details()->exists();
-        $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_EN_ESPERA;
-        
-        // Solo cambiar estado si está en NUEVO o EN_ESPERA
-        $shouldChangeStatus = in_array($report->status, [Report::STATUS_NUEVO, Report::STATUS_EN_ESPERA]);
-
         $report->update([
             'assigned_to' => $user->id,
             'assigned' => true,
-            'status' => $shouldChangeStatus ? $newStatus : $report->status,
+            'status' => $this->resolveStatusAfterAssignment($report, true),
         ]);
 
         AuditHelper::logSelfAssign($report);
@@ -702,5 +662,39 @@ class ReportController extends Controller
 
         $filename = basename($report->pdf_report);
         return Storage::disk('public')->download($report->pdf_report, $filename);
+    }
+
+    /**
+     * Sube y almacena el PDF adjunto, eliminando el anterior si existe.
+     */
+    private function storePdfAttachment(Request $request, ?string $oldPath = null): ?string
+    {
+        if (!$request->hasFile('pdf_report')) {
+            return null;
+        }
+        if ($oldPath) {
+            Storage::disk('public')->delete($oldPath);
+        }
+        $originalName = $request->file('pdf_report')->getClientOriginalName();
+        $sanitizedName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+        return $request->file('pdf_report')->storeAs('reports', time() . '_' . $sanitizedName, 'public');
+    }
+
+    /**
+     * Calcula el estado del informe tras una operación de asignación o desasignación.
+     */
+    private function resolveStatusAfterAssignment(Report $report, bool $isAssigning): string
+    {
+        $hasDetails = $report->details()->exists();
+
+        if ($isAssigning) {
+            $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_EN_ESPERA;
+            $shouldChange = in_array($report->status, [Report::STATUS_NUEVO, Report::STATUS_EN_ESPERA]);
+        } else {
+            $newStatus = $hasDetails ? Report::STATUS_EN_PROCESO : Report::STATUS_NUEVO;
+            $shouldChange = $report->status !== Report::STATUS_COMPLETADO;
+        }
+
+        return $shouldChange ? $newStatus : $report->status;
     }
 }

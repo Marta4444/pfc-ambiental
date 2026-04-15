@@ -1,16 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Crear Nuevo Usuario
-            </h2>
-            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 transition ease-in-out duration-150">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                Volver
-            </a>
-        </div>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Crear Nuevo Usuario
+        </h2>
     </x-slot>
 
     <div class="py-12">
@@ -41,8 +33,8 @@
                         <div class="mb-4">
                             <x-input-label for="role" :value="__('Rol')" />
                             <select id="role" name="role" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500" required>
-                                <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>Usuario</option>
-                                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Administrador</option>
+                                <option value="user" @selected(old('role') === 'user')>Usuario</option>
+                                <option value="admin" @selected(old('role') === 'admin')>Administrador</option>
                             </select>
                             <x-input-error :messages="$errors->get('role')" class="mt-2" />
                         </div>
@@ -59,7 +51,10 @@
                             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                         </div>
 
-                        <div class="flex items-center justify-end">
+                        <div class="flex items-center justify-between">
+                            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 transition ease-in-out duration-150">
+                                Cancelar
+                            </a>
                             <x-primary-button>
                                 {{ __('Crear Usuario') }}
                             </x-primary-button>

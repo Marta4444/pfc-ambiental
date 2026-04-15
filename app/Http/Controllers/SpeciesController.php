@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Species;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SpeciesController extends Controller
 {
@@ -25,7 +26,7 @@ class SpeciesController extends Controller
             ]);
 
             $term = $request->input('q');
-            $limit = $request->input('limit', 10);
+            $limit = (int) $request->input('limit', 10);
             $includeExternal = $request->boolean('include_external', true);
 
             // Primero buscar en base de datos local
@@ -69,7 +70,7 @@ class SpeciesController extends Controller
                 'messages' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            \Log::error('Error en búsqueda de especies: ' . $e->getMessage());
+            Log::error('Error en búsqueda de especies: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => 'Error interno del servidor',
@@ -130,54 +131,9 @@ class SpeciesController extends Controller
                     ];
                 });
         } catch (\Exception $e) {
-            \Log::warning('Error buscando en GBIF: ' . $e->getMessage());
+            Log::warning('Error buscando en GBIF: ' . $e->getMessage());
             return collect();
         }
-    }
-
-    /**
-     * Crear especie que no existe en la BD (desde búsqueda externa)
-     * Llamado cuando el usuario selecciona una especie de GBIF
-     */
-    public function findOrCreate(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'scientific_name' => 'required|string|max:255',
-            'gbif_key' => 'nullable|integer',
-            'common_name' => 'nullable|string|max:255',
-            'taxon_group' => 'nullable|string|max:100',
-            'gbif_data' => 'nullable|array',
-        ]);
-
-        // Buscar si ya existe
-        $species = Species::where('scientific_name', $validated['scientific_name'])->first();
-
-        if (!$species) {
-            // Crear nueva especie como NO PROTEGIDA
-            $species = Species::create([
-                'scientific_name' => $validated['scientific_name'],
-                'common_name' => $validated['common_name'] ?? null,
-                'taxon_group' => $validated['taxon_group'] ?? null,
-                'gbif_key' => $validated['gbif_key'] ?? null,
-                'kingdom' => $validated['gbif_data']['kingdom'] ?? null,
-                'phylum' => $validated['gbif_data']['phylum'] ?? null,
-                'class' => $validated['gbif_data']['class'] ?? null,
-                'order' => $validated['gbif_data']['order'] ?? null,
-                'family' => $validated['gbif_data']['family'] ?? null,
-                'genus' => $validated['gbif_data']['genus'] ?? null,
-                'is_protected' => false,
-                'boe_status' => null, // Usuario puede editar
-                'sync_source' => 'gbif',
-                'sync_status' => 'synced',
-                'manually_added' => false,
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $this->formatSpeciesResult($species, 'local'),
-            'created' => $species->wasRecentlyCreated,
-        ]);
     }
 
     /**
@@ -239,105 +195,4 @@ class SpeciesController extends Controller
         return $map[$class] ?? null;
     }
 
-    /**
-     * Obtener detalles de una especie (respuesta JSON para AJAX)
-     * Accesible por todos los usuarios autenticados
-     */
-    public function show(Species $species): JsonResponse
-    {
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'id' => $species->id,
-                'scientific_name' => $species->scientific_name,
-                'common_name' => $species->common_name,
-                'taxon_group' => $species->taxon_group,
-                'boe_status' => $species->boe_status,
-                'boe_law_ref' => $species->boe_law_ref,
-                'ccaa_status' => $species->ccaa_status,
-                'iucn_category' => $species->iucn_category,
-                'iucn_label' => Species::IUCN_CATEGORIES[$species->iucn_category] ?? null,
-                'cites_appendix' => $species->cites_appendix,
-                'is_protected' => $species->is_protected,
-                'has_boe_data' => !empty($species->boe_status),
-                'has_ccaa_data' => !empty($species->ccaa_status),
-                'has_iucn_data' => !empty($species->iucn_category),
-            ],
-        ]);
-    }
-
-    /**
-     * Verificar estado de protección de una especie
-     * Usado por AJAX para obtener datos de protección
-     */
-    public function checkProtection(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'species_id' => 'nullable|exists:species,id',
-            'scientific_name' => 'nullable|string|max:255',
-        ]);
-
-        $species = null;
-
-        // Buscar por ID o nombre científico
-        if (!empty($validated['species_id'])) {
-            $species = Species::find($validated['species_id']);
-        } elseif (!empty($validated['scientific_name'])) {
-            $species = Species::where('scientific_name', $validated['scientific_name'])->first();
-        }
-
-        if (!$species) {
-            return response()->json([
-                'success' => true,
-                'found' => false,
-                'is_protected' => false,
-                'message' => 'Especie no encontrada en la base de datos. Se tratará como no protegida.',
-                'data' => [
-                    'boe_status' => null,
-                    'boe_law_ref' => null,
-                    'ccaa_status' => null,
-                    'iucn_category' => null,
-                    'cites_appendix' => null,
-                    'is_protected' => false,
-                    'protection_label' => 'No protegida',
-                ],
-            ]);
-        }
-
-        // Determinar etiqueta de protección
-        $protectionLabel = 'No protegida';
-        if ($species->is_protected) {
-            if (!empty($species->boe_status)) {
-                $protectionLabel = $species->boe_status;
-            } elseif (!empty($species->iucn_category)) {
-                $protectionLabel = 'IUCN: ' . (Species::IUCN_CATEGORIES[$species->iucn_category] ?? $species->iucn_category);
-            } elseif (!empty($species->cites_appendix)) {
-                $protectionLabel = 'CITES Apéndice ' . $species->cites_appendix;
-            } else {
-                $protectionLabel = 'Protegida';
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'found' => true,
-            'is_protected' => $species->is_protected,
-            'data' => [
-                'id' => $species->id,
-                'scientific_name' => $species->scientific_name,
-                'common_name' => $species->common_name,
-                'boe_status' => $species->boe_status,
-                'boe_law_ref' => $species->boe_law_ref,
-                'ccaa_status' => $species->ccaa_status,
-                'iucn_category' => $species->iucn_category,
-                'iucn_label' => Species::IUCN_CATEGORIES[$species->iucn_category] ?? null,
-                'cites_appendix' => $species->cites_appendix,
-                'is_protected' => $species->is_protected,
-                'protection_label' => $protectionLabel,
-                // Indicadores para el frontend
-                'has_boe_data' => !empty($species->boe_status),
-                'has_ccaa_data' => !empty($species->ccaa_status),
-            ],
-        ]);
-    }
 }

@@ -26,6 +26,9 @@ class PetitionerController extends Controller
             'order' => 'integer|min:0',
         ]);
 
+        $validated['active'] = $request->boolean('active');
+        $validated['order'] = $validated['order'] ?? 0;
+
         Petitioner::create($validated);
 
         return redirect()->route('petitioners.index')->with('success', 'Peticionario creado correctamente.');
@@ -52,6 +55,9 @@ class PetitionerController extends Controller
             'active' => 'boolean',
             'order' => 'integer|min:0',
         ]);
+
+        $validated['active'] = $request->boolean('active');
+        $validated['order'] = $validated['order'] ?? 0;
 
         $petitioner->update($validated);
 

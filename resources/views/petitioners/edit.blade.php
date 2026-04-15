@@ -28,7 +28,7 @@
 
                         <div class="mb-6">
                             <label class="flex items-center">
-                                <input type="checkbox" name="active" value="1" {{ old('active', $petitioner->active) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <input type="checkbox" name="active" value="1" @checked(old('active', $petitioner->active)) class="rounded border-gray-300 text-eco-600 shadow-sm focus:ring-eco-500">
                                 <span class="ml-2 text-sm text-gray-600">{{ __('Activo') }}</span>
                             </label>
                             <p class="text-xs text-gray-500 mt-1">Solo los peticionarios activos aparecerán en los formularios</p>

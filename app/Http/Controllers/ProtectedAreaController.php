@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProtectedArea;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
 
 class ProtectedAreaController extends Controller
 {
@@ -138,29 +139,11 @@ class ProtectedAreaController extends Controller
     /**
      * Mostrar detalle de un área protegida
      */
-    public function show(ProtectedArea $protectedArea): JsonResponse
+    public function show(ProtectedArea $protectedArea): View
     {
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'id' => $protectedArea->id,
-                'name' => $protectedArea->name,
-                'protection_type' => $protectedArea->protection_type,
-                'iucn_category' => $protectedArea->iucn_category,
-                'iucn_label' => ProtectedArea::IUCN_CATEGORIES[$protectedArea->iucn_category] ?? null,
-                'designation' => $protectedArea->designation,
-                'description' => $protectedArea->description,
-                'region' => $protectedArea->region,
-                'area_km2' => $protectedArea->area_km2,
-                'established_year' => $protectedArea->established_year,
-                'bounding_box' => [
-                    'lat_min' => $protectedArea->lat_min,
-                    'lat_max' => $protectedArea->lat_max,
-                    'long_min' => $protectedArea->long_min,
-                    'long_max' => $protectedArea->long_max,
-                ],
-                'active' => $protectedArea->active,
-            ],
+        return view('protected-areas.show', [
+            'area' => $protectedArea,
+            'iucnLabel' => ProtectedArea::IUCN_CATEGORIES[$protectedArea->iucn_category] ?? null,
         ]);
     }
 
@@ -226,6 +209,8 @@ class ProtectedAreaController extends Controller
             'active' => 'boolean',
         ]);
 
+        $validated['active'] = $request->boolean('active');
+
         $area = ProtectedArea::create($validated);
 
         if ($request->expectsJson()) {
@@ -261,6 +246,8 @@ class ProtectedAreaController extends Controller
             'active' => 'boolean',
         ]);
 
+        $validated['active'] = $request->boolean('active');
+
         $protectedArea->update($validated);
 
         if ($request->expectsJson()) {
@@ -278,11 +265,11 @@ class ProtectedAreaController extends Controller
     /**
      * Eliminar área protegida (admin)
      */
-    public function destroy(ProtectedArea $protectedArea)
+    public function destroy(Request $request, ProtectedArea $protectedArea)
     {
         $protectedArea->delete();
 
-        if (request()->expectsJson()) {
+        if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Área protegida eliminada correctamente.',

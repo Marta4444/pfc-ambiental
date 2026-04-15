@@ -61,6 +61,7 @@ class AuditLogController extends Controller
             'App\Models\Petitioner' => 'Peticionarios',
             'App\Models\Species' => 'Especies',
             'App\Models\ProtectedArea' => 'Áreas protegidas',
+            'App\Models\User' => 'Usuarios',
         ];
 
         return view('audit.index', compact('audits', 'users', 'actions', 'modelTypes'));
@@ -74,15 +75,4 @@ class AuditLogController extends Controller
         return view('audit.show', compact('auditLog'));
     }
 
-    /**
-     * Mostrar auditoría de un usuario específico
-     */
-    public function userActivity(User $user): View
-    {
-        $audits = AuditLog::byUser($user->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(25);
-
-        return view('audit.user-activity', compact('user', 'audits'));
-    }
 }

@@ -7,6 +7,9 @@ use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\User;
 use App\Models\AuditLog;
+use App\Models\Species;
+use App\Models\ProtectedArea;
+use App\Models\Petitioner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -200,65 +203,7 @@ class StatisticsController extends Controller
     private function getAdminStatistics($dateFrom, $dateTo): array
     {
         // === ESTADÍSTICAS DE AUDITORÍA ===
-        $auditQuery = AuditLog::query();
-        if ($dateFrom) {
-            $auditQuery->whereDate('created_at', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $auditQuery->whereDate('created_at', '<=', $dateTo);
-        }
-
-        $totalAuditLogs = (clone $auditQuery)->count();
-
-        // Actividad por tipo de acción
-        $auditByAction = (clone $auditQuery)
-            ->select('action', DB::raw('count(*) as total'))
-            ->groupBy('action')
-            ->orderByDesc('total')
-            ->pluck('total', 'action')
-            ->toArray();
-
-        // Actividad por usuario (top 10)
-        $auditByUser = (clone $auditQuery)
-            ->select('user_name', DB::raw('count(*) as total'))
-            ->whereNotNull('user_name')
-            ->groupBy('user_name')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->pluck('total', 'user_name')
-            ->toArray();
-
-        // Actividad por tipo de modelo
-        $auditByModelType = (clone $auditQuery)
-            ->select('model_type', DB::raw('count(*) as total'))
-            ->whereNotNull('model_type')
-            ->groupBy('model_type')
-            ->orderByDesc('total')
-            ->pluck('total', 'model_type')
-            ->toArray();
-
-        // Tendencia de auditoría últimos 30 días
-        $auditTrend = AuditLog::select(
-                DB::raw("DATE(created_at) as date"),
-                DB::raw('count(*) as total')
-            )
-            ->where('created_at', '>=', Carbon::now()->subDays(30))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('total', 'date')
-            ->toArray();
-
-        // Rellenar días faltantes
-        $auditTrendFull = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $auditTrendFull[$date] = $auditTrend[$date] ?? 0;
-        }
-
-        // Logins recientes (últimos 7 días)
-        $recentLogins = AuditLog::where('action', AuditLog::ACTION_LOGIN)
-            ->where('created_at', '>=', Carbon::now()->subDays(7))
-            ->count();
+        $auditStats = $this->buildAuditStats($dateFrom, $dateTo);
 
         // === ESTADÍSTICAS DEL SISTEMA ===
         
@@ -266,81 +211,20 @@ class StatisticsController extends Controller
         $totalCategories = Category::count();
         $totalSubcategories = Subcategory::count();
         $totalUsers = User::count();
-        $totalSpecies = \App\Models\Species::count();
-        $totalProtectedAreas = \App\Models\ProtectedArea::count();
-        $totalPetitioners = \App\Models\Petitioner::count();
+        $totalSpecies = Species::count();
+        $totalProtectedAreas = ProtectedArea::count();
+        $totalPetitioners = Petitioner::count();
 
-        // Categorías con más casos
-        $categoryStats = Category::leftJoin('reports', 'categories.id', '=', 'reports.category_id')
-            ->select(
-                'categories.id',
-                'categories.name',
-                DB::raw('COUNT(reports.id) as total_reports'),
-                DB::raw('SUM(CASE WHEN reports.status = "completado" THEN 1 ELSE 0 END) as completed'),
-                DB::raw('SUM(reports.total_cost) as total_cost')
-            )
-            ->groupBy('categories.id', 'categories.name')
-            ->orderByDesc('total_reports')
-            ->get()
-            ->map(function ($cat) {
-                $cat->completion_rate = $cat->total_reports > 0 
-                    ? round(($cat->completed / $cat->total_reports) * 100, 1) 
-                    : 0;
-                return $cat;
-            });
+        $catUserStats = $this->buildCategoryAndUserStats();
 
-        // Top subcategorías más utilizadas
-        $topSubcategories = Subcategory::join('reports', 'subcategories.id', '=', 'reports.subcategory_id')
-            ->join('categories', 'subcategories.category_id', '=', 'categories.id')
-            ->select(
-                'subcategories.name as subcategory_name',
-                'categories.name as category_name',
-                DB::raw('COUNT(reports.id) as total')
-            )
-            ->groupBy('subcategories.id', 'subcategories.name', 'categories.name')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get();
-
-        // Eficiencia por usuario
-        $userEfficiency = User::leftJoin('reports', function($join) {
-                $join->on('users.id', '=', 'reports.assigned_to')
-                     ->where('reports.status', '=', Report::STATUS_COMPLETADO);
-            })
-            ->select(
-                'users.id',
-                'users.name',
-                DB::raw('COUNT(reports.id) as completed_count'),
-                DB::raw('AVG(DATEDIFF(reports.updated_at, reports.created_at)) as avg_days')
-            )
-            ->where('users.role', '!=', 'admin')
-            ->groupBy('users.id', 'users.name')
-            ->having('completed_count', '>', 0)
-            ->orderByDesc('completed_count')
-            ->limit(10)
-            ->get();
-
-        // Labels para acciones de auditoría
-        $actionLabels = AuditLog::ACTION_LABELS;
-
-        return [
-            'totalAuditLogs' => $totalAuditLogs,
-            'auditByAction' => $auditByAction,
-            'auditByUser' => $auditByUser,
-            'auditByModelType' => $auditByModelType,
-            'auditTrendFull' => $auditTrendFull,
-            'recentLogins' => $recentLogins,
-            'actionLabels' => $actionLabels,
+        return array_merge($auditStats, $catUserStats, [
             'totalCategories' => $totalCategories,
             'totalSubcategories' => $totalSubcategories,
             'totalUsers' => $totalUsers,
             'totalSpecies' => $totalSpecies,
             'totalProtectedAreas' => $totalProtectedAreas,
             'totalPetitioners' => $totalPetitioners,
-            'categoryStats' => $categoryStats,
-            'topSubcategories' => $topSubcategories,
-            'userEfficiency' => $userEfficiency,
-        ];
+        ]);
     }
 
     /**
@@ -424,86 +308,10 @@ class StatisticsController extends Controller
         $vsTotal = (clone $baseQuery)->whereNotNull('vs_total')->sum('vs_total');
 
         // === ESTADÍSTICAS DE AUDITORÍA ===
-        $auditQuery = AuditLog::query();
-        if ($dateFrom) {
-            $auditQuery->whereDate('created_at', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $auditQuery->whereDate('created_at', '<=', $dateTo);
-        }
-
-        $totalAuditLogs = (clone $auditQuery)->count();
-
-        // Actividad por tipo de acción
-        $auditByAction = (clone $auditQuery)
-            ->select('action', DB::raw('count(*) as total'))
-            ->groupBy('action')
-            ->orderByDesc('total')
-            ->pluck('total', 'action')
-            ->toArray();
-
-        // Actividad por usuario (top 10)
-        $auditByUser = (clone $auditQuery)
-            ->select('user_name', DB::raw('count(*) as total'))
-            ->whereNotNull('user_name')
-            ->groupBy('user_name')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->pluck('total', 'user_name')
-            ->toArray();
-
-        // Actividad por tipo de modelo
-        $auditByModelType = (clone $auditQuery)
-            ->select('model_type', DB::raw('count(*) as total'))
-            ->whereNotNull('model_type')
-            ->groupBy('model_type')
-            ->orderByDesc('total')
-            ->pluck('total', 'model_type')
-            ->toArray();
-
-        // Tendencia de auditoría últimos 30 días
-        $auditTrend = AuditLog::select(
-                DB::raw("DATE(created_at) as date"),
-                DB::raw('count(*) as total')
-            )
-            ->where('created_at', '>=', Carbon::now()->subDays(30))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('total', 'date')
-            ->toArray();
-
-        // Rellenar días faltantes
-        $auditTrendFull = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $auditTrendFull[$date] = $auditTrend[$date] ?? 0;
-        }
-
-        // Logins recientes (últimos 7 días)
-        $recentLogins = AuditLog::where('action', AuditLog::ACTION_LOGIN)
-            ->where('created_at', '>=', Carbon::now()->subDays(7))
-            ->count();
+        extract($this->buildAuditStats($dateFrom, $dateTo));
 
         // === ESTADÍSTICAS DE CATEGORÍAS ===
-        
-        // Casos por categoría con métricas
-        $categoryStats = Category::leftJoin('reports', 'categories.id', '=', 'reports.category_id')
-            ->select(
-                'categories.id',
-                'categories.name',
-                DB::raw('COUNT(reports.id) as total_reports'),
-                DB::raw('SUM(CASE WHEN reports.status = "completado" THEN 1 ELSE 0 END) as completed'),
-                DB::raw('SUM(reports.total_cost) as total_cost')
-            )
-            ->groupBy('categories.id', 'categories.name')
-            ->orderByDesc('total_reports')
-            ->get()
-            ->map(function ($cat) {
-                $cat->completion_rate = $cat->total_reports > 0 
-                    ? round(($cat->completed / $cat->total_reports) * 100, 1) 
-                    : 0;
-                return $cat;
-            });
+        extract($this->buildCategoryAndUserStats());
 
         // Top 5 categorías más costosas
         $topCostlyCategories = (clone $baseQuery)
@@ -515,39 +323,6 @@ class StatisticsController extends Controller
             ->limit(5)
             ->pluck('total_cost', 'name')
             ->toArray();
-
-        // === ESTADÍSTICAS DE SUBCATEGORÍAS ===
-        
-        // Top 10 subcategorías más utilizadas
-        $topSubcategories = Subcategory::join('reports', 'subcategories.id', '=', 'reports.subcategory_id')
-            ->join('categories', 'subcategories.category_id', '=', 'categories.id')
-            ->select(
-                'subcategories.name as subcategory_name',
-                'categories.name as category_name',
-                DB::raw('COUNT(reports.id) as total')
-            )
-            ->groupBy('subcategories.id', 'subcategories.name', 'categories.name')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get();
-
-        // === EFICIENCIA POR USUARIO ===
-        $userEfficiency = User::leftJoin('reports', function($join) {
-                $join->on('users.id', '=', 'reports.assigned_to')
-                     ->where('reports.status', '=', Report::STATUS_COMPLETADO);
-            })
-            ->select(
-                'users.id',
-                'users.name',
-                DB::raw('COUNT(reports.id) as completed_count'),
-                DB::raw('AVG(DATEDIFF(reports.updated_at, reports.created_at)) as avg_days')
-            )
-            ->where('users.role', '!=', 'admin')
-            ->groupBy('users.id', 'users.name')
-            ->having('completed_count', '>', 0)
-            ->orderByDesc('completed_count')
-            ->limit(10)
-            ->get();
 
         // === COMUNIDADES AUTÓNOMAS ===
         $communitiesStats = (clone $baseQuery)
@@ -571,9 +346,6 @@ class StatisticsController extends Controller
 
         // Lista de usuarios para filtros
         $users = User::orderBy('name')->get();
-
-        // Labels para acciones de auditoría
-        $actionLabels = AuditLog::ACTION_LABELS;
 
         return view('statistics.admin', compact(
             'reportsByAssignedUser',
@@ -609,5 +381,128 @@ class StatisticsController extends Controller
             'userEfficiency',
             'communitiesStats'
         ));
+    }
+
+    private function buildAuditStats(string $dateFrom, string $dateTo): array
+    {
+        $auditQuery = AuditLog::query();
+        if ($dateFrom) {
+            $auditQuery->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $auditQuery->whereDate('created_at', '<=', $dateTo);
+        }
+
+        $totalAuditLogs = (clone $auditQuery)->count();
+
+        $auditByAction = (clone $auditQuery)
+            ->select('action', DB::raw('count(*) as total'))
+            ->groupBy('action')
+            ->orderByDesc('total')
+            ->pluck('total', 'action')
+            ->toArray();
+
+        $auditByUser = (clone $auditQuery)
+            ->select('user_name', DB::raw('count(*) as total'))
+            ->whereNotNull('user_name')
+            ->groupBy('user_name')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->pluck('total', 'user_name')
+            ->toArray();
+
+        $auditByModelType = (clone $auditQuery)
+            ->select('model_type', DB::raw('count(*) as total'))
+            ->whereNotNull('model_type')
+            ->groupBy('model_type')
+            ->orderByDesc('total')
+            ->pluck('total', 'model_type')
+            ->toArray();
+
+        $auditTrend = AuditLog::select(
+                DB::raw("DATE(created_at) as date"),
+                DB::raw('count(*) as total')
+            )
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total', 'date')
+            ->toArray();
+
+        $auditTrendFull = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->format('Y-m-d');
+            $auditTrendFull[$date] = $auditTrend[$date] ?? 0;
+        }
+
+        $recentLogins = AuditLog::where('action', AuditLog::ACTION_LOGIN)
+            ->where('created_at', '>=', Carbon::now()->subDays(7))
+            ->count();
+
+        return [
+            'totalAuditLogs' => $totalAuditLogs,
+            'auditByAction' => $auditByAction,
+            'auditByUser' => $auditByUser,
+            'auditByModelType' => $auditByModelType,
+            'auditTrendFull' => $auditTrendFull,
+            'recentLogins' => $recentLogins,
+            'actionLabels' => AuditLog::ACTION_LABELS,
+        ];
+    }
+
+    private function buildCategoryAndUserStats(): array
+    {
+        $categoryStats = Category::leftJoin('reports', 'categories.id', '=', 'reports.category_id')
+            ->select(
+                'categories.id',
+                'categories.name',
+                DB::raw('COUNT(reports.id) as total_reports'),
+                DB::raw('SUM(CASE WHEN reports.status = "completado" THEN 1 ELSE 0 END) as completed'),
+                DB::raw('SUM(reports.total_cost) as total_cost')
+            )
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('total_reports')
+            ->get()
+            ->map(function ($cat) {
+                $cat->completion_rate = $cat->total_reports > 0
+                    ? round(($cat->completed / $cat->total_reports) * 100, 1)
+                    : 0;
+                return $cat;
+            });
+
+        $topSubcategories = Subcategory::join('reports', 'subcategories.id', '=', 'reports.subcategory_id')
+            ->join('categories', 'subcategories.category_id', '=', 'categories.id')
+            ->select(
+                'subcategories.name as subcategory_name',
+                'categories.name as category_name',
+                DB::raw('COUNT(reports.id) as total')
+            )
+            ->groupBy('subcategories.id', 'subcategories.name', 'categories.name')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->get();
+
+        $userEfficiency = User::leftJoin('reports', function ($join) {
+                $join->on('users.id', '=', 'reports.assigned_to')
+                     ->where('reports.status', '=', Report::STATUS_COMPLETADO);
+            })
+            ->select(
+                'users.id',
+                'users.name',
+                DB::raw('COUNT(reports.id) as completed_count'),
+                DB::raw('AVG(DATEDIFF(reports.updated_at, reports.created_at)) as avg_days')
+            )
+            ->where('users.role', '!=', 'admin')
+            ->groupBy('users.id', 'users.name')
+            ->having('completed_count', '>', 0)
+            ->orderByDesc('completed_count')
+            ->limit(10)
+            ->get();
+
+        return [
+            'categoryStats' => $categoryStats,
+            'topSubcategories' => $topSubcategories,
+            'userEfficiency' => $userEfficiency,
+        ];
     }
 }

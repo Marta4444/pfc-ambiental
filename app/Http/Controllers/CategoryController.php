@@ -5,12 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Mostrar la lista de Categorías.
      */
     public function index(Request $request)
     {
@@ -27,29 +26,18 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostrar el formulario para crear una nueva categoría.
      */
     public function create()
     {
-        // Solo los admin pueden crear nuevas categorías
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->route('categories.index')->with('error', 'No tienes permisos para crear categorías. Contacta con un administrador.');
-        }
-
         return view('categories.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Guardar una nueva categoría.
      */
     public function store(Request $request)
     {
-
-        // Solo los admin pueden crear nuevas categorías
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->route('categories.index')->with('error', 'No tienes permisos para crear categorías. Contacta con un Administrador');
-        }
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -62,7 +50,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar una categoría.
      */
     public function show(Category $category)
     {
@@ -70,28 +58,18 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mostrar el formulario para editar una categoría.
      */
     public function edit(Category $category)
     {
-
-        // Solo los admin pueden editar las categorías
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->route('categories.show', $category)->with('error', 'No tienes permisos para editar categorías. Contacta con un Administrador.');
-        }
         return view('categories.edit', compact('category'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar una categoría.
      */
     public function update(Request $request, Category $category)
     {
-        // Solo los admin pueden actualizar categorías, cualquier atributo.
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->route('categories.show', $category)->with('error', 'No tienes permisos para editar categorías.');
-        }
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -104,15 +82,10 @@ class CategoryController extends Controller
     }
 
     /**
-     * Change Active atrtibute, only for Admins
+     * Cambiar el atributo Active, solo para Admins
      */
     public function toggleActive(Category $category)
     {
-        // Solo los admin pueden activar o desactivar categorías
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->route('categories.index')->with('error', 'No tienes permisos para cambiar el estado de categorías. Contacta con un Administrador.');
-        }
-
         $category->update(['active' => !$category->active]);
 
         $status = $category->active ? 'activada' : 'desactivada';
@@ -120,15 +93,10 @@ class CategoryController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar una categoría.
      */
     public function destroy(Category $category)
     {
-        // Solo los admin pueden eliminar categorías
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->route('categories.index')->with('error', 'No tienes permisos para eliminar categorías.');
-        }
-
         $category->delete();
 
         return redirect()->route('categories.index')->with('success', 'Categoría borrada con éxito!');

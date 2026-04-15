@@ -41,16 +41,16 @@
                             <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
                             <select name="role" id="role" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500">
                                 <option value="">Todos</option>
-                                <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="user" {{ request('role') === 'user' ? 'selected' : '' }}>Usuario</option>
+                                <option value="admin" @selected(request('role') === 'admin')>Admin</option>
+                                <option value="user" @selected(request('role') === 'user')>Usuario</option>
                             </select>
                         </div>
                         <div class="w-40">
                             <label for="active" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
                             <select name="active" id="active" class="w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500">
                                 <option value="">Todos</option>
-                                <option value="true" {{ request('active') === 'true' ? 'selected' : '' }}>Activos</option>
-                                <option value="false" {{ request('active') === 'false' ? 'selected' : '' }}>Inactivos</option>
+                                <option value="true" @selected(request('active') === 'true')>Activos</option>
+                                <option value="false" @selected(request('active') === 'false')>Inactivos</option>
                             </select>
                         </div>
                         <div class="flex gap-2">

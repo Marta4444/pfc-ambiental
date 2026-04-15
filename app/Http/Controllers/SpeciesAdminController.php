@@ -97,12 +97,8 @@ class SpeciesAdminController extends Controller
         $validated['sync_status'] = 'synced';
         $validated['synced_at'] = now();
 
-        // Calcular si está protegida
-        $validated['is_protected'] = !empty($validated['boe_status']) 
-            || in_array($validated['iucn_category'] ?? '', ['CR', 'EN', 'VU', 'NT'])
-            || !empty($validated['cites_appendix']);
-
-        Species::create($validated);
+        $species = Species::create($validated);
+        $species->updateProtectionStatus();
 
         return redirect()->route('admin.species.index')
             ->with('success', 'Especie creada correctamente.');
@@ -186,7 +182,7 @@ class SpeciesAdminController extends Controller
      */
     public function syncAll(Request $request): RedirectResponse
     {
-        $limit = $request->get('limit', 100);
+        $limit = (int) $request->get('limit', 100);
         $force = $request->boolean('force');
 
         $stats = $this->syncService->syncAll($limit, $force);
@@ -223,7 +219,7 @@ class SpeciesAdminController extends Controller
      */
     public function importSpanish(Request $request): RedirectResponse
     {
-        $limit = $request->get('limit', 200);
+        $limit = (int) $request->get('limit', 200);
         
         // Ejecutar en segundo plano si es posible
         Artisan::call('species:sync', [
@@ -240,19 +236,24 @@ class SpeciesAdminController extends Controller
      */
     public function logs(): View
     {
-        $species = Species::all();
+        $stats = [
+            'synced'         => Species::where('sync_status', 'synced')->count(),
+            'errors'         => Species::where('sync_status', 'error')->count(),
+            'no_status'      => Species::whereNull('sync_status')->count(),
+            'with_last_sync' => Species::whereNotNull('last_synced_at')->count(),
+        ];
 
         $recentErrors = Species::where('sync_status', 'error')
             ->orderBy('last_sync_attempt', 'desc')
-            ->limit(50)
+            ->limit(20)
             ->get();
 
         $recentSynced = Species::where('sync_status', 'synced')
             ->orderBy('synced_at', 'desc')
-            ->limit(50)
+            ->limit(30)
             ->get();
 
-        return view('admin.species.logs', compact('species', 'recentErrors', 'recentSynced'));
+        return view('admin.species.logs', compact('stats', 'recentErrors', 'recentSynced'));
     }
 
     /**

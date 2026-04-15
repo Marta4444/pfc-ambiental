@@ -15,19 +15,19 @@
             {{-- Resumen --}}
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-green-600">{{ $species->where('sync_status', 'synced')->count() }}</p>
+                    <p class="text-2xl font-bold text-green-600">{{ $stats['synced'] }}</p>
                     <p class="text-xs text-gray-500">Sincronizados OK</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-red-600">{{ $species->where('sync_status', 'error')->count() }}</p>
+                    <p class="text-2xl font-bold text-red-600">{{ $stats['errors'] }}</p>
                     <p class="text-xs text-gray-500">Con Errores</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-yellow-600">{{ $species->whereNull('sync_status')->count() }}</p>
+                    <p class="text-2xl font-bold text-yellow-600">{{ $stats['no_status'] }}</p>
                     <p class="text-xs text-gray-500">Sin Sincronizar</p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <p class="text-2xl font-bold text-eco-600">{{ $species->whereNotNull('last_synced_at')->count() }}</p>
+                    <p class="text-2xl font-bold text-eco-600">{{ $stats['with_last_sync'] }}</p>
                     <p class="text-xs text-gray-500">Con Historial</p>
                 </div>
             </div>
@@ -42,24 +42,19 @@
                         Errores de Sincronización
                     </h3>
 
-                    @php
-                        $errored = $species->where('sync_status', 'error')->take(20);
-                    @endphp
-
-                    @if($errored->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-red-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Especie</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fuente</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Error</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Último Intento</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    @foreach($errored as $sp)
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-red-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Especie</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fuente</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Error</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Último Intento</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                    @forelse($recentErrors as $sp)
                                     <tr class="hover:bg-red-50">
                                         <td class="px-4 py-3">
                                             <p class="font-medium italic text-gray-900">{{ $sp->scientific_name }}</p>
@@ -85,13 +80,14 @@
                                             </form>
                                         </td>
                                     </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <p class="text-gray-500 text-center py-8">No hay errores de sincronización</p>
-                    @endif
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">No hay errores de sincronización</td>
+                                        </tr>
+                                    @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -105,24 +101,19 @@
                         Sincronizaciones Recientes
                     </h3>
 
-                    @php
-                        $recent = $species->whereNotNull('last_synced_at')->sortByDesc('last_synced_at')->take(30);
-                    @endphp
-
-                    @if($recent->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Especie</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fuente</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IDs Externos</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sincronizado</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    @foreach($recent as $sp)
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Especie</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fuente</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">IDs Externos</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sincronizado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                    @forelse($recentSynced as $sp)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3">
                                             <a href="{{ route('admin.species.edit', $sp) }}" class="font-medium italic text-eco-600 hover:underline">
@@ -153,7 +144,7 @@
                                         <td class="px-4 py-3 text-sm text-gray-500">
                                             <div class="flex flex-wrap gap-1">
                                                 @if($sp->gbif_key)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-eco-700">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
                                                         GBIF: {{ Str::limit($sp->gbif_key, 10) }}
                                                     </span>
                                                 @endif
@@ -174,13 +165,14 @@
                                             <span class="text-xs text-gray-400 block">{{ $sp->last_synced_at->format('d/m/Y H:i') }}</span>
                                         </td>
                                     </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <p class="text-gray-500 text-center py-8">No hay sincronizaciones registradas</p>
-                    @endif
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">No hay sincronizaciones registradas</td>
+                                        </tr>
+                                    @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

@@ -23,7 +23,7 @@ class FieldController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Mostrar el formulario para crear un nuevo campo.
      */
     public function create()
     {
@@ -169,9 +169,8 @@ class FieldController extends Controller
 
         // Obtener el siguiente order_index si no se proporciona
         if (!isset($validated['order_index'])) {
-            $maxOrder = \DB::table('subcategory_fields')
-                ->where('subcategory_id', $validated['subcategory_id'])
-                ->max('order_index');
+            $subcategory = Subcategory::find($validated['subcategory_id']);
+            $maxOrder = $subcategory->fields()->max('subcategory_fields.order_index');
             $validated['order_index'] = ($maxOrder ?? 0) + 1;
         }
 
@@ -196,20 +195,5 @@ class FieldController extends Controller
             ->with('success', 'Campo desasignado correctamente de la subcategoría.');
     }
 
-    /**
-     * Actalizar datos en la tabla pivot de subcategory_fields
-     */
-    public function updateSubcategoryPivot(Request $request, Field $field, Subcategory $subcategory)
-    {
-        $validated = $request->validate([
-            'is_required' => 'boolean',
-            'order_index' => 'required|integer|min:0',
-            'default_value' => 'nullable|string|max:255',
-        ]);
-
-        $field->subcategories()->updateExistingPivot($subcategory->id, $validated);
-
-        return redirect()->back()
-            ->with('success', 'Configuración actualizada correctamente.');
-    }
 }
+
