@@ -30,7 +30,7 @@
                     <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
                         <option value="">Selecciona una categoría</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id', $subcategory->category_id) == $category->id ? 'selected' : '' }}>
+                            <option value="{{ $category->id }}" @selected(old('category_id', $subcategory->category_id) == $category->id)>
                                 {{ $category->name }}
                             </option>
                         @endforeach
@@ -43,8 +43,8 @@
                 <div class="mb-4">
                     <x-input-label for="active" value="Estado" />
                     <select id="active" name="active" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
-                        <option value="1" {{ old('active', $subcategory->active) == '1' ? 'selected' : '' }}>Activa</option>
-                        <option value="0" {{ old('active', $subcategory->active) == '0' ? 'selected' : '' }}>Inactiva</option>
+                        <option value="1" @selected(old('active', $subcategory->active) == '1')>Activa</option>
+                        <option value="0" @selected(old('active', $subcategory->active) == '0')>Inactiva</option>
                     </select>
                     @error('active')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>

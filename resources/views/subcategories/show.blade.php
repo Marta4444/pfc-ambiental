@@ -7,7 +7,7 @@
     $isAdmin = auth()->check() && auth()->user()->role === 'admin';
     @endphp
 
-    <div class="max-w-3xl mx-auto py-6">
+    <div class="max-w-3xl mx-auto py-6" x-data="{ showModal: false }">
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <div class="px-6 py-4 border-b">
                 <div class="flex items-center justify-between">
@@ -37,11 +37,7 @@
                             </button>
                         </form>
 
-                        <form action="{{ route('subcategories.destroy', $subcategory) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar esta subcategoría?');" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200">Eliminar</button>
-                        </form>
+                        <button @click="showModal = true" class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200">Eliminar</button>
                         @endif
 
                         <a href="{{ route('subcategories.index') }}" class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-800 rounded text-sm hover:bg-gray-200">Volver</a>
@@ -138,6 +134,30 @@
                     Última modificación: {{ $subcategory->updated_at->format('d/m/Y H:i') }}
                 </div>
                 @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal confirmación eliminar --}}
+    <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center" style="display:none">
+        <div class="absolute inset-0 bg-gray-500 opacity-75" @click="showModal = false"></div>
+        <div class="relative bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <div class="flex items-center mb-4">
+                <div class="flex-shrink-0 bg-red-100 rounded-full p-2 mr-3">
+                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">Confirmar eliminación</h3>
+            </div>
+            <p class="text-sm text-gray-500 mb-6">¿Estás seguro de que quieres eliminar esta subcategoría? Esta acción no se puede deshacer.</p>
+            <div class="flex justify-end space-x-3">
+                <button @click="showModal = false" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200">Cancelar</button>
+                <form action="{{ route('subcategories.destroy', $subcategory) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700">Eliminar</button>
+                </form>
             </div>
         </div>
     </div>

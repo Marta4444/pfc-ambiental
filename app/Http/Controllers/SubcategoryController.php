@@ -23,7 +23,11 @@ class SubcategoryController extends Controller
 
         $subcategories = $query->orderBy('category_id')->orderBy('name')->get();
 
-        return view('subcategories.index', compact('subcategories'));
+        $groups = $subcategories->groupBy(function ($s) {
+            return $s->category->name ?? 'Sin categoría';
+        });
+
+        return view('subcategories.index', compact('subcategories', 'groups'));
     }
 
     /**
