@@ -193,6 +193,24 @@ class Report extends Model
     }
 
     /**
+     * Verificar si los costes están desactualizados.
+     * Compara el updated_at más reciente de los detalles con el created_at
+     * más reciente de los cost_items. Si los detalles son más nuevos, los
+     * costes necesitan recalcularse.
+     */
+    public function hasCostsOutdated(): bool
+    {
+        if (!$this->hasCostsCalculated()) {
+            return false;
+        }
+
+        $lastDetail = $this->details()->max('updated_at');
+        $lastCalc   = $this->costItems()->max('created_at');
+
+        return $lastDetail > $lastCalc;
+    }
+
+    /**
      * Actualizar totales desde cost_items
      */
     public function updateTotalsFromCostItems(): void
@@ -226,12 +244,15 @@ class Report extends Model
     }
 
     /**
-     * Verificar si el report puede ser finalizado
-     * Requiere que tenga detalles y costes calculados y que no esté ya completado
+     * Verificar si el report puede ser finalizado.
+     * Requiere detalles, costes calculados y actualizados, y que no esté ya completado.
      */
     public function canBeFinalized(): bool
     {
-        return $this->hasDetails() && $this->hasCostsCalculated() && !$this->isCompletado();
+        return $this->hasDetails()
+            && $this->hasCostsCalculated()
+            && !$this->hasCostsOutdated()
+            && !$this->isCompletado();
     }
 
     /**

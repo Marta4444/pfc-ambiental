@@ -60,13 +60,52 @@ class ReportDetailController extends Controller
 
         // Obtener especies para autocompletado (si hay campo de especie)
         $hasSpeciesField = $fields->contains('key_name', 'especie');
+
+        // Opciones válidas para campos de protección (según normativa oficial)
+        $protectionFieldOptions = [
+            'iucn_category' => [
+                '' => 'Seleccionar categoría IUCN...',
+                'EX' => 'EX - Extinto',
+                'EW' => 'EW - Extinto en Estado Silvestre',
+                'CR' => 'CR - En Peligro Crítico',
+                'EN' => 'EN - En Peligro',
+                'VU' => 'VU - Vulnerable',
+                'NT' => 'NT - Casi Amenazado',
+                'LC' => 'LC - Preocupación Menor',
+                'DD' => 'DD - Datos Insuficientes',
+                'NE' => 'NE - No Evaluado',
+            ],
+            'boe_status' => [
+                '' => 'Seleccionar protección BOE/LESPRE...',
+                'En peligro de extinción' => 'En peligro de extinción',
+                'Vulnerable' => 'Vulnerable',
+                'En régimen de protección especial' => 'En régimen de protección especial',
+                'No incluido' => 'No incluido en catálogo nacional',
+            ],
+            'ccaa_status' => [
+                '' => 'Seleccionar protección autonómica...',
+                'En peligro de extinción' => 'En peligro de extinción',
+                'Vulnerable' => 'Vulnerable',
+                'Sensible a la alteración de su hábitat' => 'Sensible a la alteración de su hábitat',
+                'De interés especial' => 'De interés especial',
+                'No catalogada' => 'No catalogada en CCAA',
+            ],
+            'cites_appendix' => [
+                '' => 'Seleccionar apéndice CITES...',
+                'I' => 'Apéndice I - Comercio prohibido',
+                'II' => 'Apéndice II - Comercio regulado',
+                'III' => 'Apéndice III - Listado por países',
+                'No incluido' => 'No incluido en CITES',
+            ],
+        ];
         
         return view('report-details.create', compact(
             'report', 
             'subcategory', 
             'fields', 
             'nextGroupKey',
-            'hasSpeciesField'
+            'hasSpeciesField',
+            'protectionFieldOptions'
         ));
     }
 
@@ -172,6 +211,44 @@ class ReportDetailController extends Controller
         $existingValues = $details->pluck('value', 'field_key')->toArray();
         $hasSpeciesField = $fields->contains('key_name', 'especie');
 
+        // Opciones válidas para campos de protección (según normativa oficial)
+        $protectionFieldOptions = [
+            'iucn_category' => [
+                '' => 'Seleccionar categoría IUCN...',
+                'EX' => 'EX - Extinto',
+                'EW' => 'EW - Extinto en Estado Silvestre',
+                'CR' => 'CR - En Peligro Crítico',
+                'EN' => 'EN - En Peligro',
+                'VU' => 'VU - Vulnerable',
+                'NT' => 'NT - Casi Amenazado',
+                'LC' => 'LC - Preocupación Menor',
+                'DD' => 'DD - Datos Insuficientes',
+                'NE' => 'NE - No Evaluado',
+            ],
+            'boe_status' => [
+                '' => 'Seleccionar protección BOE/LESPRE...',
+                'En peligro de extinción' => 'En peligro de extinción',
+                'Vulnerable' => 'Vulnerable',
+                'En régimen de protección especial' => 'En régimen de protección especial',
+                'No incluido' => 'No incluido en catálogo nacional',
+            ],
+            'ccaa_status' => [
+                '' => 'Seleccionar protección autonómica...',
+                'En peligro de extinción' => 'En peligro de extinción',
+                'Vulnerable' => 'Vulnerable',
+                'Sensible a la alteración de su hábitat' => 'Sensible a la alteración de su hábitat',
+                'De interés especial' => 'De interés especial',
+                'No catalogada' => 'No catalogada en CCAA',
+            ],
+            'cites_appendix' => [
+                '' => 'Seleccionar apéndice CITES...',
+                'I' => 'Apéndice I - Comercio prohibido',
+                'II' => 'Apéndice II - Comercio regulado',
+                'III' => 'Apéndice III - Listado por países',
+                'No incluido' => 'No incluido en CITES',
+            ],
+        ];
+
         return view('report-details.edit', compact(
             'report', 
             'groupKey', 
@@ -179,7 +256,8 @@ class ReportDetailController extends Controller
             'subcategory', 
             'fields', 
             'existingValues',
-            'hasSpeciesField'
+            'hasSpeciesField',
+            'protectionFieldOptions'
         ));
     }
 

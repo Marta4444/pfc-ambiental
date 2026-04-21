@@ -19,7 +19,7 @@
             {{-- FILTROS --}}
             <div class="bg-white shadow-sm sm:rounded-lg p-4 mb-6">
                 <form method="GET" action="{{ route('statistics.admin') }}">
-                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; align-items: end;">
+                    <div class="grid grid-cols-5 gap-3 items-end">
                         <div>
                             <label for="date_from" class="block text-xs font-medium text-gray-700 mb-1">Desde</label>
                             <input type="date" name="date_from" id="date_from" value="{{ $dateFrom }}"
@@ -30,7 +30,7 @@
                             <input type="date" name="date_to" id="date_to" value="{{ $dateTo }}"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-sm">
                         </div>
-                        <div style="grid-column: span 3; display: flex; gap: 8px; justify-content: flex-end;">
+                        <div class="col-span-3 flex gap-2 justify-end">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 rounded-md text-sm text-white font-medium hover:bg-purple-700">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -435,6 +435,14 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
                             </tr>
                         </thead>
+                        @php
+                            $statusColors = [
+                                'nuevo' => 'bg-blue-100 text-blue-800',
+                                'en_proceso' => 'bg-yellow-100 text-yellow-800',
+                                'en_espera' => 'bg-purple-100 text-purple-800',
+                                'completado' => 'bg-green-100 text-green-800',
+                            ];
+                        @endphp
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($recentReports as $report)
                             <tr class="hover:bg-gray-50">
@@ -451,22 +459,8 @@
                                     {{ $report->assignedTo->name ?? 'Sin asignar' }}
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @php
-                                        $statusColors = [
-                                            'nuevo' => 'bg-blue-100 text-blue-800',
-                                            'en_proceso' => 'bg-yellow-100 text-yellow-800',
-                                            'en_espera' => 'bg-purple-100 text-purple-800',
-                                            'completado' => 'bg-green-100 text-green-800',
-                                        ];
-                                        $statusLabels = [
-                                            'nuevo' => 'Nuevo',
-                                            'en_proceso' => 'En Proceso',
-                                            'en_espera' => 'En Espera',
-                                            'completado' => 'Completado',
-                                        ];
-                                    @endphp
                                     <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusColors[$report->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                        {{ $statusLabels[$report->status] ?? $report->status }}
+                                        {{ $report->getStatusLabel() }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
@@ -488,9 +482,8 @@
         </div>
     </div>
 
-    {{-- Chart.js CDN --}}
+    @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const colors = [
@@ -745,4 +738,5 @@
             });
         });
     </script>
+    @endpush
 </x-app-layout>

@@ -143,7 +143,7 @@
                         @error('petitioner_id')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
 
-                    <div id="petitioner_other_wrapper" style="display: none;">
+                    <div id="petitioner_other_wrapper" class="hidden">
                         <x-input-label for="petitioner_other" value="Especificar Otro" />
                         <x-text-input 
                             id="petitioner_other" 
@@ -253,7 +253,6 @@
                 const response = await fetch('{{ asset("data/spain-geo.json") }}');
                 if (!response.ok) throw new Error('Error cargando datos geográficos: ' + response.status);
                 SPAIN_GEO_DATA = await response.json();
-                console.log('Datos geográficos cargados:', Object.keys(SPAIN_GEO_DATA.comunidades).length + ' comunidades');
                 initGeoSelectors();
             } catch (error) {
                 console.error('Error cargando datos geográficos:', error);
@@ -528,10 +527,7 @@
         // ============================================
         // MANEJO DEL CAMPO "OTRO" EN PETICIONARIO
         // ============================================
-        const petitioners = @json($petitioners->map(fn($p) => [
-            'id' => $p->id,
-            'name' => $p->name
-        ]));
+        const petitionerOtherId = @json(optional($petitioners->firstWhere('name', 'Otro'))->id);
 
         function initPetitioner() {
             const petitionerSelect = document.getElementById('petitioner_id');
@@ -539,13 +535,11 @@
             const petitionerOtherInput = document.getElementById('petitioner_other');
 
             petitionerSelect.addEventListener('change', function() {
-                const selectedPetitioner = petitioners.find(p => p.id === parseInt(this.value));
-                
-                if (selectedPetitioner && selectedPetitioner.name === 'Otro') {
-                    petitionerOtherWrapper.style.display = 'block';
+                if (parseInt(this.value) === petitionerOtherId) {
+                    petitionerOtherWrapper.classList.remove('hidden');
                     petitionerOtherInput.required = true;
                 } else {
-                    petitionerOtherWrapper.style.display = 'none';
+                    petitionerOtherWrapper.classList.add('hidden');
                     petitionerOtherInput.required = false;
                     petitionerOtherInput.value = '';
                 }
@@ -553,12 +547,9 @@
 
             // Restaurar valores
             const oldPetitionerId = "{{ old('petitioner_id') }}";
-            if (oldPetitionerId) {
-                const selectedPetitioner = petitioners.find(p => p.id === parseInt(oldPetitionerId));
-                if (selectedPetitioner && selectedPetitioner.name === 'Otro') {
-                    petitionerOtherWrapper.style.display = 'block';
-                    petitionerOtherInput.required = true;
-                }
+            if (oldPetitionerId && parseInt(oldPetitionerId) === petitionerOtherId) {
+                petitionerOtherWrapper.classList.remove('hidden');
+                petitionerOtherInput.required = true;
             }
         }
     </script>

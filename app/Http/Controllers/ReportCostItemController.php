@@ -38,8 +38,9 @@ class ReportCostItemController extends Controller
 
         $categoryName = $report->category->name ?? '';
         $subcategoryName = $report->subcategory->name ?? '';
+        $costsOutdated = $report->hasCostsOutdated();
 
-        return view('reports.costs.index', compact('report', 'groupedCosts', 'totals', 'categoryName', 'subcategoryName'));
+        return view('reports.costs.index', compact('report', 'groupedCosts', 'totals', 'categoryName', 'subcategoryName', 'costsOutdated'));
     }
 
     /**

@@ -108,6 +108,17 @@ class ReportController extends Controller
         $communities = Report::distinct()->pluck('community')->filter()->sort()->values();
         $provinces = Report::distinct()->pluck('province')->filter()->sort()->values();
 
+        $statusCounts = Report::selectRaw("
+            SUM(CASE WHEN status = 'nuevo' THEN 1 ELSE 0 END) as nuevo,
+            SUM(CASE WHEN status = 'en_proceso' THEN 1 ELSE 0 END) as en_proceso,
+            SUM(CASE WHEN status = 'completado' THEN 1 ELSE 0 END) as completado
+        ")->first();
+        $statusCounts = [
+            'nuevo'      => (int) $statusCounts->nuevo,
+            'en_proceso' => (int) $statusCounts->en_proceso,
+            'completado' => (int) $statusCounts->completado,
+        ];
+
         return view('reports.index', compact(
             'reports', 
             'categories', 
@@ -117,7 +128,8 @@ class ReportController extends Controller
             'statuses', 
             'urgencies',
             'communities',
-            'provinces'
+            'provinces',
+            'statusCounts'
         ));
     }
 
@@ -564,8 +576,11 @@ class ReportController extends Controller
             return redirect()->back()->with('error', 'No tienes permiso para finalizar este caso.');
         }
 
-        // Verificar que el caso puede ser finalizado (tiene detalles y costes)
+        // Verificar que el caso puede ser finalizado (tiene detalles y costes actualizados)
         if (!$report->canBeFinalized()) {
+            if ($report->hasCostsOutdated()) {
+                return redirect()->back()->with('error', 'Los costes están desactualizados. Recalcula los costes antes de finalizar el caso.');
+            }
             return redirect()->back()->with('error', 'El caso no puede ser finalizado. Debe tener detalles y costes calculados.');
         }
 
@@ -605,6 +620,11 @@ class ReportController extends Controller
      */
     public function exportPdf(Report $report)
     {
+        // Bloquear exportación si los costes están desactualizados
+        if ($report->hasCostsOutdated()) {
+            return redirect()->back()->with('error', 'Los costes están desactualizados. Recalcula los costes antes de exportar el informe.');
+        }
+
         // Cargar relaciones necesarias
         $report->load(['user', 'category', 'subcategory', 'petitioner', 'assignedTo', 'costItems']);
         

@@ -25,7 +25,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{ showModal: false, deleteUrl: '' }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if (session('success'))
                 <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
@@ -54,7 +54,7 @@
                             <select name="protection_type" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                                 <option value="">Todos</option>
                                 @foreach($protectionTypes as $type)
-                                    <option value="{{ $type }}" {{ request('protection_type') == $type ? 'selected' : '' }}>
+                                    <option value="{{ $type }}" @selected(request('protection_type') == $type)>
                                         {{ $type }}
                                     </option>
                                 @endforeach
@@ -65,7 +65,7 @@
                             <select name="region" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                                 <option value="">Todas</option>
                                 @foreach($regions as $region)
-                                    <option value="{{ $region }}" {{ request('region') == $region ? 'selected' : '' }}>
+                                    <option value="{{ $region }}" @selected(request('region') == $region)>
                                         {{ $region }}
                                     </option>
                                 @endforeach
@@ -75,8 +75,8 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
                             <select name="active" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                                 <option value="">Todos</option>
-                                <option value="true" {{ request('active') == 'true' ? 'selected' : '' }}>Activas</option>
-                                <option value="false" {{ request('active') == 'false' ? 'selected' : '' }}>Inactivas</option>
+                                <option value="true" @selected(request('active') == 'true')>Activas</option>
+                                <option value="false" @selected(request('active') == 'false')>Inactivas</option>
                             </select>
                         </div>
                         <div style="grid-column: span 4; display: flex; gap: 8px;">
@@ -168,20 +168,16 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                 </svg>
                                             </a>
-                                            <a href="{{ route('protected-areas.edit', $area) }}" class="text-eco-600 hover:text-blue-900" title="Editar">
+                                            <a href="{{ route('protected-areas.edit', $area) }}" class="text-eco-600 hover:text-eco-800" title="Editar">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
                                             </a>
-                                            <form action="{{ route('protected-areas.destroy', $area) }}" method="POST" class="inline" onsubmit="return confirm('¿Eliminar esta área protegida?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900" title="Eliminar">
+                                            <button type="button" @click="deleteUrl = '{{ route('protected-areas.destroy', $area) }}'; showModal = true" class="text-red-600 hover:text-red-900" title="Eliminar">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                     </svg>
                                                 </button>
-                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -201,6 +197,30 @@
                         {{ $areas->withQueryString()->links() }}
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de confirmación de eliminación --}}
+    <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showModal = false"></div>
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 relative z-10">
+            <div class="flex items-center mb-4">
+                <div class="flex-shrink-0 bg-red-100 rounded-full p-2 mr-3">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">Eliminar área protegida</h3>
+            </div>
+            <p class="text-sm text-gray-500 mb-6">¿Estás seguro de que quieres eliminar esta área protegida? Esta acción no se puede deshacer.</p>
+            <div class="flex justify-end gap-3">
+                <button @click="showModal = false" class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-200">Cancelar</button>
+                <form :action="deleteUrl" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">Eliminar</button>
+                </form>
             </div>
         </div>
     </div>

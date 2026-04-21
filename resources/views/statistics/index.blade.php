@@ -1,4 +1,5 @@
 <x-app-layout>
+    @php $isAdmin = Auth::user()->role === 'admin'; @endphp
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Estadísticas') }}
@@ -142,7 +143,7 @@
             </div>
 
             {{-- GRÁFICOS FILA 1 --}}
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px;">
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 {{-- Casos por Estado --}}
                 <div class="bg-white shadow-sm sm:rounded-lg p-3">
                     <h3 class="text-sm font-semibold text-gray-800 mb-2">Casos por Estado</h3>
@@ -161,7 +162,7 @@
             </div>
 
             {{-- GRÁFICOS FILA 2 --}}
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px;">
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 {{-- Tendencia Mensual --}}
                 <div class="bg-white shadow-sm sm:rounded-lg p-3">
                     <h3 class="text-sm font-semibold text-gray-800 mb-2">Tendencia Mensual (12 meses)</h3>
@@ -180,7 +181,7 @@
             </div>
 
             {{-- GRÁFICOS FILA 3 --}}
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px;">
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 {{-- Casos por Comunidad --}}
                 <div class="bg-white shadow-sm sm:rounded-lg p-3">
                     <h3 class="text-sm font-semibold text-gray-800 mb-2">Casos por Comunidad (Top 10)</h3>
@@ -201,7 +202,7 @@
             {{-- ============================================== --}}
             {{-- SECCIÓN EXCLUSIVA PARA ADMINISTRADORES --}}
             {{-- ============================================== --}}
-            @if(Auth::user()->role === 'admin' && !empty($adminData))
+            @if($isAdmin && !empty($adminData))
             
             <div class="mt-8 mb-6">
                 <div class="flex items-center">
@@ -281,7 +282,7 @@
             </div>
 
             {{-- GRÁFICOS DE AUDITORÍA --}}
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px;">
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 {{-- Tendencia de Actividad (30 días) --}}
                 <div class="bg-white shadow-sm sm:rounded-lg p-3">
                     <h3 class="text-sm font-semibold text-gray-800 mb-2">Actividad del Sistema (Últimos 30 días)</h3>
@@ -365,7 +366,7 @@
             </div>
 
             {{-- SUBCATEGORÍAS Y EFICIENCIA --}}
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px;">
+            <div class="grid grid-cols-2 gap-4 mb-4">
                 {{-- Top Subcategorías --}}
                 <div class="bg-white shadow-sm sm:rounded-lg p-3">
                     <h3 class="text-sm font-semibold text-gray-800 mb-2 flex items-center">
@@ -432,7 +433,7 @@
         </div>
     </div>
 
-    {{-- Chart.js CDN --}}
+    @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
@@ -458,12 +459,7 @@
                 'completado': colors.green
             };
 
-            const statusLabels = {
-                'nuevo': 'Nuevo',
-                'en_proceso': 'En Proceso',
-                'en_espera': 'En Espera',
-                'completado': 'Completado'
-            };
+            const statusLabels = @json($statusLabels);
 
             const urgencyColors = {
                 'normal': colors.green,
@@ -471,11 +467,7 @@
                 'urgente': colors.red
             };
 
-            const urgencyLabels = {
-                'normal': 'Normal',
-                'alta': 'Alta',
-                'urgente': 'Urgente'
-            };
+            const urgencyLabels = @json($urgencyLabels);
 
             // Datos desde PHP
             const reportsByStatus = @json($reportsByStatus);
@@ -685,20 +677,9 @@
             // ========================================
             // GRÁFICOS EXCLUSIVOS PARA ADMINISTRADORES
             // ========================================
-            @if(Auth::user()->role === 'admin' && !empty($adminData))
+            @if($isAdmin && !empty($adminData))
             
-            const adminColors = [
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(34, 197, 94, 0.8)',
-                'rgba(234, 179, 8, 0.8)',
-                'rgba(168, 85, 247, 0.8)',
-                'rgba(249, 115, 22, 0.8)',
-                'rgba(236, 72, 153, 0.8)',
-                'rgba(20, 184, 166, 0.8)',
-                'rgba(99, 102, 241, 0.8)',
-                'rgba(239, 68, 68, 0.8)',
-                'rgba(6, 182, 212, 0.8)',
-            ];
+            const adminColors = Object.values(colors);
 
             const auditTrendFull = @json($adminData['auditTrendFull']);
             const auditByAction = @json($adminData['auditByAction']);
@@ -836,4 +817,5 @@
             @endif
         });
     </script>
+    @endpush
 </x-app-layout>

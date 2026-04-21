@@ -88,13 +88,22 @@
 
                         <div class="flex gap-2">
                             @if($groupedCosts->count() > 0)
-                                {{-- Botón Exportar Excel (solo visible si hay costes) --}}
-                                <button type="button" onclick="exportToExcel()" class="inline-flex items-center px-3 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    Exportar Excel
-                                </button>
+                                {{-- Botón Exportar Excel: bloqueado si los costes están desactualizados --}}
+                                @if($costsOutdated)
+                                    <button type="button" onclick="document.getElementById('outdatedCostsModal').classList.remove('hidden')" class="inline-flex items-center px-3 py-2 bg-orange-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-600 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        Exportar Excel
+                                    </button>
+                                @else
+                                    <button type="button" onclick="exportToExcel()" class="inline-flex items-center px-3 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        Exportar Excel
+                                    </button>
+                                @endif
                             @endif
 
                             {{-- Botón Recalcular (oculto si está finalizado) --}}
@@ -342,25 +351,25 @@
                         {{-- VE --}}
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
-                                <span class="font-medium" style="color: #047857;">Valor del recurso extraido (VE)</span>
+                                <span class="font-medium text-green-700">Valor del recurso extraido (VE)</span>
                                 <span class="text-gray-600">{{ $vePercent }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-4">
-                                <div class="h-4 rounded-full" style="width: {{ $vePercent }}%; background-color: #10b981;"></div>
+                                <div class="h-4 rounded-full bg-green-500" style="width: {{ $vePercent }}%"></div>
                             </div>
-                            <p class="text-right text-sm font-semibold" style="color: #065f46;">{{ number_format($totals['VE'], 2, ',', '.') }} €</p>
+                            <p class="text-right text-sm font-semibold text-green-900">{{ number_format($totals['VE'], 2, ',', '.') }} €</p>
                         </div>
 
                         {{-- VS --}}
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
-                                <span class="font-medium" style="color: #b45309;">Valor ecosistémico (VS)</span>
+                                <span class="font-medium text-yellow-700">Valor ecosistémico (VS)</span>
                                 <span class="text-gray-600">{{ $vsPercent }}%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-4">
-                                <div class="h-4 rounded-full" style="width: {{ $vsPercent }}%; background-color: #f59e0b;"></div>
+                                <div class="h-4 rounded-full bg-yellow-400" style="width: {{ $vsPercent }}%"></div>
                             </div>
-                            <p class="text-right text-sm font-semibold" style="color: #92400e;">{{ number_format($totals['VS'], 2, ',', '.') }} €</p>
+                            <p class="text-right text-sm font-semibold text-yellow-900">{{ number_format($totals['VS'], 2, ',', '.') }} €</p>
                         </div>
                     </div>
                 </div>
@@ -792,6 +801,37 @@
             }
         });
     </script>
+
+    {{-- Modal: Costes Desactualizados --}}
+    <div id="outdatedCostsModal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="outdated-modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('outdatedCostsModal').classList.add('hidden')"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="outdated-modal-title">Costes desactualizados</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-600">Los detalles del caso han sido modificados desde el último cálculo de costes.</p>
+                                <p class="text-sm text-orange-700 font-semibold mt-2">Es necesario recalcular los costes antes de poder exportar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="document.getElementById('outdatedCostsModal').classList.add('hidden')" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Entendido, recalcularé los costes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {{-- SheetJS para exportación a Excel --}}
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>

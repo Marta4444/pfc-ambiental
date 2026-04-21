@@ -481,7 +481,7 @@ El Pdf se guarda en la carpeta reports, usando la carpeta public. Pero para que 
 Pasos:
 1. Subir los archivos a GitHub con el "git add .", "git commit..." y "git push origin main".
 2. Crear una cuenta en railway.app con Github
-3. Crear un Nuevo proyecto y conectar ocn el repositorio de GitHub
+3. Crear un Nuevo proyecto y conectar con el repositorio de GitHub
 4. Añadir un servicio de MySQL desde el panel.
 5. Configurar las variables de entorno (del env.example)
 6. Ejecutar desde la consola de Railway los comandos:

@@ -5,46 +5,6 @@
         </h2>
     </x-slot>
 
-    @php
-        // Opciones válidas para campos de protección (según normativa oficial)
-        $protectionFieldOptions = [
-            'iucn_category' => [
-                '' => 'Seleccionar categoría IUCN...',
-                'EX' => 'EX - Extinto',
-                'EW' => 'EW - Extinto en Estado Silvestre',
-                'CR' => 'CR - En Peligro Crítico',
-                'EN' => 'EN - En Peligro',
-                'VU' => 'VU - Vulnerable',
-                'NT' => 'NT - Casi Amenazado',
-                'LC' => 'LC - Preocupación Menor',
-                'DD' => 'DD - Datos Insuficientes',
-                'NE' => 'NE - No Evaluado',
-            ],
-            'boe_status' => [
-                '' => 'Seleccionar protección BOE/LESPRE...',
-                'En peligro de extinción' => 'En peligro de extinción',
-                'Vulnerable' => 'Vulnerable',
-                'En régimen de protección especial' => 'En régimen de protección especial',
-                'No incluido' => 'No incluido en catálogo nacional',
-            ],
-            'ccaa_status' => [
-                '' => 'Seleccionar protección autonómica...',
-                'En peligro de extinción' => 'En peligro de extinción',
-                'Vulnerable' => 'Vulnerable',
-                'Sensible a la alteración de su hábitat' => 'Sensible a la alteración de su hábitat',
-                'De interés especial' => 'De interés especial',
-                'No catalogada' => 'No catalogada en CCAA',
-            ],
-            'cites_appendix' => [
-                '' => 'Seleccionar apéndice CITES...',
-                'I' => 'Apéndice I - Comercio prohibido',
-                'II' => 'Apéndice II - Comercio regulado',
-                'III' => 'Apéndice III - Listado por países',
-                'No incluido' => 'No incluido en CITES',
-            ],
-        ];
-        $protectionFieldKeys = array_keys($protectionFieldOptions);
-    @endphp
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
@@ -84,35 +44,30 @@
                             Editando: {{ ucfirst(str_replace('_', ' ', $groupKey)) }}
                         </h3>
 
+                        @php
+                            $protectionFields = ['boe_status', 'ccaa_status', 'iucn_category'];
+                            $isAdmin = auth()->user()->role === 'admin';
+                            $hasProtectionFields = $fields->whereIn('key_name', $protectionFields)->isNotEmpty();
+                        @endphp
+
                         {{-- Aviso de campos de protección restringidos --}}
-                        @if(!auth()->user()->role !== 'admin')
-                            @php
-                                $protectionFields = ['boe_status', 'ccaa_status', 'iucn_category'];
-                                $hasProtectionFields = $fields->whereIn('key_name', $protectionFields)->isNotEmpty();
-                            @endphp
-                            @if($hasProtectionFields)
-                                <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                    <div class="flex items-start">
-                                        <svg class="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                        </svg>
-                                        <div>
-                                            <h4 class="text-sm font-semibold text-amber-800">Campos de protección restringidos</h4>
-                                            <p class="text-sm text-amber-700 mt-1">
-                                                Los campos de nivel de protección (LESPRE/BOE, Catálogo CCAA e IUCN) solo pueden ser editados por un administrador.
-                                            </p>
-                                        </div>
+                        @if(!$isAdmin && $hasProtectionFields)
+                            <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-amber-800">Campos de protección restringidos</h4>
+                                        <p class="text-sm text-amber-700 mt-1">
+                                            Los campos de nivel de protección (LESPRE/BOE, Catálogo CCAA e IUCN) solo pueden ser editados por un administrador.
+                                        </p>
                                     </div>
                                 </div>
-                            @endif
+                            </div>
                         @endif
 
                         <div class="space-y-4">
-                            @php
-                                // Campos de protección que solo admin puede editar
-                                $protectionFields = ['boe_status', 'ccaa_status', 'iucn_category'];
-                                $isAdmin = auth()->user()->role === 'admin';
-                            @endphp
 
                             @foreach($fields as $field)
                                 @php
@@ -203,7 +158,7 @@
                                                     name="fields[{{ $field->key_name }}]" 
                                                     id="field_{{ $field->key_name }}"
                                                     value="{{ old("fields.{$field->key_name}", $currentValue) }}"
-                                                    step="{{ $field->type === 'decimal' ? '0.01' : '1' }}"
+                                                    step="{{ $field->type === 'decimal' ? '0.0000001' : '1' }}"
                                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                     placeholder="{{ $field->placeholder }}"
                                                     {{ $field->pivot->is_required ? 'required' : '' }}
@@ -237,12 +192,12 @@
                                                 @break
 
                                             @default
-                                                @if(in_array($field->key_name, $protectionFieldKeys))
+                                                @if(array_key_exists($field->key_name, $protectionFieldOptions))
                                                     {{-- Campo de protección: usar SELECT con opciones válidas --}}
                                                     <select 
                                                         name="fields[{{ $field->key_name }}]" 
                                                         id="field_{{ $field->key_name }}"
-                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
+                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                         {{ $field->pivot->is_required ? 'required' : '' }}
                                                     >
                                                         @foreach($protectionFieldOptions[$field->key_name] as $value => $label)

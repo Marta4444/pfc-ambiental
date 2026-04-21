@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caso {{ $report->ip }} - Informe</title>
     <style>
         /* Márgenes de página */
@@ -372,11 +371,6 @@
         .page-break {
             page-break-after: always;
         }
-
-        /* No imprimir en vacío */
-        .no-print-empty:empty {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -384,12 +378,11 @@
     <div class="header">
         <div class="header-content">
             <div class="header-left">
-                <h1 style="color: white;">INFORME DE VALORACIÓN DEL DAÑO</h1>
-                <p class="subtitle" style="font-size: 16px; font-weight: bold; margin-top: 8px; color: white;">Caso {{ $report->ip }}</p>
-                <p class="subtitle" style="margin-top: 5px; color: rgba(255,255,255,0.9);">{{ $report->category->name }} - {{ $report->subcategory->name }}</p>
+                <h1>INFORME DE VALORACIÓN DEL DAÑO</h1>
+                <p class="subtitle" style="font-size: 16px; font-weight: bold; margin-top: 8px;">{{ $report->category->name }} - {{ $report->subcategory->name }}</p>
             </div>
             <div class="header-right">
-                <div class="ip-badge" style="color: white;">{{ $report->ip }}</div>
+                <div class="ip-badge">{{ $report->ip }}</div>
             </div>
         </div>
     </div>
@@ -501,9 +494,9 @@
                 <table class="info-table">
                     <tr>
                         <td class="label" style="width: 20%;">Fecha de Petición</td>
-                        <td class="value" style="width: 30%;">{{ \Carbon\Carbon::parse($report->date_petition)->format('d/m/Y') }}</td>
+                        <td class="value" style="width: 30%;">{{ $report->date_petition->format('d/m/Y') }}</td>
                         <td class="label" style="width: 20%;">Fecha del Daño</td>
-                        <td class="value" style="width: 30%;">{{ \Carbon\Carbon::parse($report->date_damage)->format('d/m/Y') }}</td>
+                        <td class="value" style="width: 30%;">{{ $report->date_damage->format('d/m/Y') }}</td>
                     </tr>
                     <tr>
                         <td class="label">Fecha de Creación</td>
@@ -677,7 +670,6 @@
                     </thead>
                     <tbody>
                         @foreach($costItems->groupBy('group_key') as $groupKey => $items)
-                            @php $isFirstInGroup = true; @endphp
                             @foreach($items as $item)
                             @php
                                 $coef = $item->coef_info_json ?? [];
@@ -721,11 +713,10 @@
                                 }
                             @endphp
                             <tr>
-                                @if($isFirstInGroup)
+                                @if($loop->first)
                                 <td rowspan="{{ $items->count() }}" style="vertical-align: middle; font-weight: bold; background: #f9fafb;">
                                     {{ ucfirst(str_replace('_', ' ', $groupKey)) }}
                                 </td>
-                                @php $isFirstInGroup = false; @endphp
                                 @endif
                                 <td>
                                     <span class="badge badge-{{ $item->cost_type === 'VR' ? 'blue' : ($item->cost_type === 'VE' ? 'green' : 'yellow') }}">

@@ -1,4 +1,9 @@
 <x-app-layout>
+    @php
+        $authUser = Auth::user();
+        $isAdmin  = $authUser->role === 'admin';
+        $canEdit  = !$report->isFinalizado() && ($isAdmin || $report->user_id === $authUser->id || $report->assigned_to === $authUser->id);
+    @endphp
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -6,7 +11,7 @@
             </h2>
             <div class="flex gap-2">
                 {{-- Botón Editar: visible para admin, creador o asignado, pero NO si está finalizado (excepto admin para reabrir) --}}
-                @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
+                @if($canEdit)
                     <a href="{{ route('reports.edit', $report) }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -15,13 +20,22 @@
                     </a>
                 @endif
                 
-                {{-- Botón Exportar PDF: visible para todos los usuarios autenticados --}}
-                <a href="{{ route('reports.exportPdf', $report) }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Exportar PDF
-                </a>
+                {{-- Botón Exportar PDF --}}
+                @if($report->hasCostsOutdated())
+                    <button type="button" onclick="document.getElementById('outdatedCostsModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Exportar PDF
+                    </button>
+                @else
+                    <a href="{{ route('reports.exportPdf', $report) }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Exportar PDF
+                    </a>
+                @endif
                 
                 {{-- Botón Volver a la lista --}}
                 <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -66,11 +80,11 @@
                             <p class="text-sm">Este caso está cerrado y no se puede editar. Si necesita reabrirlo, contacte con un administrador.</p>
                         </div>
                     </div>
-                    @if(Auth::user()->role === 'admin')
+                    @if($isAdmin)
                         <div class="mt-3">
                             <form action="{{ route('reports.reopen', $report) }}" method="POST" class="inline">
                                 @csrf
-                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-150" style="background-color: #16a34a;" onclick="return confirm('¿Estás seguro de que deseas reabrir este caso? El caso volverá a ser editable.')">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150" onclick="return confirm('¿Estás seguro de que deseas reabrir este caso? El caso volverá a ser editable.')">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
                                     </svg>
@@ -130,7 +144,7 @@
                                 @endif
 
                                 {{-- Botón para asignar a otro (siempre visible si tienes permisos) --}}
-                                @if(Auth::user()->role === 'admin' || !$report->assigned || $report->user_id === Auth::id())
+                                @if($isAdmin || !$report->assigned || $report->user_id === Auth::id())
                                     <button type="button" onclick="document.getElementById('assignModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 focus:bg-eco-700 active:bg-eco-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -151,7 +165,7 @@
                                 </form>
 
                                 {{-- Admin o creador pueden reasignar --}}
-                                @if(Auth::user()->role === 'admin' || $report->user_id === Auth::id())
+                                @if($isAdmin || $report->user_id === Auth::id())
                                     <button type="button" onclick="document.getElementById('assignModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 focus:bg-eco-700 active:bg-eco-800 focus:outline-none focus:ring-2 focus:ring-eco-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
@@ -311,12 +325,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Fecha de Petición</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::parse($report->date_petition)->format('d/m/Y') }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->date_petition->format('d/m/Y') }}</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Fecha del Daño</label>
-                            <p class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::parse($report->date_damage)->format('d/m/Y') }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ $report->date_damage->format('d/m/Y') }}</p>
                         </div>
 
                         <div>
@@ -469,7 +483,7 @@
                                 </a>
                                 
                                 {{-- Botón Añadir Más (visible para admin, creador o asignado, pero NO si está finalizado) --}}
-                                @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
+                                @if($canEdit)
                                     <a href="{{ route('report-details.create', $report) }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -479,7 +493,7 @@
                                 @endif
                             @else
                                 {{-- Botón Añadir Detalles (visible para admin, creador o asignado, pero NO si está finalizado) --}}
-                                @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
+                                @if($canEdit)
                                     <a href="{{ route('report-details.create', $report) }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-eco-700 transition ease-in-out duration-150">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -530,7 +544,7 @@
                             @endif
 
                             {{-- Botón Calcular Costes (visible para admin, creador o asignado, pero NO si está finalizado) --}}
-                            @if(!$report->isFinalizado() && (Auth::user()->role === 'admin' || $report->user_id === Auth::id() || $report->assigned_to === Auth::id()))
+                            @if($canEdit)
                                 <form action="{{ route('report-costs.calculate', $report) }}" method="POST" class="inline">
                                     @csrf
                                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-700 transition ease-in-out duration-150" onclick="return confirm('{{ $report->hasCosts() ? '¿Recalcular costes? Esto reemplazará los costes actuales.' : '¿Calcular costes para este caso?' }}')">
@@ -542,19 +556,46 @@
                                 </form>
                             @endif
 
-                            {{-- Botón Finalizar Caso (visible si puede ser finalizado y el usuario tiene permisos) --}}
-                            @if($report->canBeFinalized() && (Auth::user()->role === 'admin' || $report->assigned_to === Auth::id()))
-                                <button type="button" onclick="document.getElementById('finalizeModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-150" style="background-color: #dc2626;">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    Finalizar Caso
-                                </button>
+                            {{-- Botón Finalizar Caso --}}
+                            @if($isAdmin || $report->assigned_to === Auth::id())
+                                @if($report->hasCostsOutdated())
+                                    <button type="button" onclick="document.getElementById('outdatedCostsModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        Finalizar Caso
+                                    </button>
+                                @elseif($report->canBeFinalized())
+                                    <button type="button" onclick="document.getElementById('finalizeModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        Finalizar Caso
+                                    </button>
+                                @endif
                             @endif
                         </div>
                     </div>
 
-                    @if($report->hasCosts())
+                    @if($report->hasCostsOutdated())
+                        <div class="bg-orange-50 border border-orange-300 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-orange-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <span class="text-sm font-semibold text-orange-800">⚠️ Costes desactualizados.</span>
+                                    <span class="text-sm text-orange-700 ml-1">Se han modificado los detalles desde el último cálculo. Recalcula los costes antes de exportar o finalizar el caso.</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-orange-600 mt-2">
+                                Últimos valores calculados —
+                                VR: {{ number_format($report->vr_total ?? 0, 2, ',', '.') }} € |
+                                VE: {{ number_format($report->ve_total ?? 0, 2, ',', '.') }} € |
+                                VS: {{ number_format($report->vs_total ?? 0, 2, ',', '.') }} €
+                            </p>
+                        </div>
+                    @elseif($report->hasCosts())
                         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -578,7 +619,7 @@
                                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                                 </svg>
                                 <span class="text-sm text-yellow-800">
-                                    <strong>Costes pendientes de calcular.</strong> 
+                                    <strong>Costes pendientes de calcular.</strong>
                                     Pulsa "Calcular Costes" para generar la valoración económica.
                                 </span>
                             </div>
@@ -634,6 +675,45 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de Costes Desactualizados --}}
+    <div id="outdatedCostsModal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="outdated-modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('outdatedCostsModal').classList.add('hidden')"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="outdated-modal-title">
+                                Costes desactualizados
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-600">
+                                    Los detalles del caso han sido modificados desde el último cálculo de costes.
+                                </p>
+                                <p class="text-sm text-orange-700 font-semibold mt-2">
+                                    Es necesario recalcular los costes antes de poder exportar o finalizar el caso.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="document.getElementById('outdatedCostsModal').classList.add('hidden')" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Entendido, recalcularé los costes
+                    </button>
+                </div>
             </div>
         </div>
     </div>

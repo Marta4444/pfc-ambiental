@@ -1,17 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold">Editar informe</h2>
+        <h2 class="text-xl font-semibold">Editar caso</h2>
     </x-slot>
 
     @php
         $user = auth()->user();
         $isAdmin = $user && $user->role === 'admin';
         $isFinalizado = $report->isFinalizado();
-        $completedStatuses = ['completado'];
-        $isCompleted = in_array($report->status, $completedStatuses, true);
+        $isCompleted = $report->status === 'completado';
         $canEdit = !$isFinalizado && ($isAdmin || (! $isCompleted && $user && ($user->id === $report->user_id || $user->id === $report->assigned_to)));
         $categories = $categories ?? \App\Models\Category::where('active', true)->get();
-        $subcategories = $subcategories ?? \App\Models\Subcategory::where('active', true)->get();
     @endphp
 
     <div class="py-6 px-4 max-w-4xl mx-auto">
@@ -45,6 +43,10 @@
                 @endif
             </div>
         @endif
+
+        <div id="geo-error" class="hidden mb-4 p-3 bg-red-50 border-l-4 border-red-400 text-red-700 rounded">
+            Error cargando datos geográficos. Por favor, recarga la página.
+        </div>
 
         @if($canEdit)
 
@@ -196,16 +198,6 @@
                         </div>
                     @endif
                     <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" />
-
-
-                <div class="mb-4">
-                    <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
-                    @if($report->pdf_report)
-                        <div class="mb-2">
-                            <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-eco-700 hover:underline text-sm">Ver archivo actual</a>
-                        </div>
-                    @endif
-                    <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" />
                     @error('pdf_report') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
 
@@ -346,9 +338,6 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
-
                 <div class="mb-4">
                     <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
                     @if($report->pdf_report)
@@ -360,25 +349,6 @@
                     @error('pdf_report') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <script>
-                // Mostrar/ocultar input petitioner_other según selección
-                document.addEventListener('DOMContentLoaded', function() {
-                    const petitionerSelect = document.getElementById('petitioner_id');
-                    const petitionerOtherContainer = document.getElementById('petitioner-other-container');
-                    function togglePetitionerOther() {
-                        const selected = petitionerSelect.options[petitionerSelect.selectedIndex].text;
-                        if (selected === 'Otro') {
-                            petitionerOtherContainer.style.display = '';
-                        } else {
-                            petitionerOtherContainer.style.display = 'none';
-                        }
-                    }
-                    if (petitionerSelect && petitionerOtherContainer) {
-                        petitionerSelect.addEventListener('change', togglePetitionerOther);
-                        togglePetitionerOther();
-                    }
-                });
-                </script>
             @endif
 
             <div class="flex items-center space-x-3 mt-4">
@@ -389,6 +359,27 @@
                 <a href="{{ route('reports.show', $report) }}" class="inline-flex items-center px-3 py-1 bg-gray-100 border border-gray-200 rounded text-sm text-gray-700 hover:bg-gray-50">Cancelar</a>
             </div>
         </form>
+
+        <script>
+        // Mostrar/ocultar input petitioner_other según selección
+        document.addEventListener('DOMContentLoaded', function() {
+            const petitionerSelect = document.getElementById('petitioner_id');
+            const petitionerOtherContainer = document.getElementById('petitioner-other-container');
+            function togglePetitionerOther() {
+                const selected = petitionerSelect.options[petitionerSelect.selectedIndex].text;
+                if (selected === 'Otro') {
+                    petitionerOtherContainer.style.display = '';
+                } else {
+                    petitionerOtherContainer.style.display = 'none';
+                }
+            }
+            if (petitionerSelect && petitionerOtherContainer) {
+                petitionerSelect.addEventListener('change', togglePetitionerOther);
+                togglePetitionerOther();
+            }
+        });
+        </script>
+
         @endif {{-- fin de if canEdit --}}
     </div>
 
@@ -404,11 +395,11 @@
                 const response = await fetch('{{ asset("data/spain-geo.json") }}');
                 if (!response.ok) throw new Error('Error cargando datos geográficos: ' + response.status);
                 SPAIN_GEO_DATA = await response.json();
-                console.log('Datos geográficos cargados:', Object.keys(SPAIN_GEO_DATA.comunidades).length + ' comunidades');
                 initGeoSelectors();
             } catch (error) {
                 console.error('Error cargando datos geográficos:', error);
-                alert('Error cargando datos geográficos. Por favor, recarga la página.');
+                const geoError = document.getElementById('geo-error');
+                if (geoError) geoError.classList.remove('hidden');
             }
         });
 

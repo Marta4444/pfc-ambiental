@@ -79,6 +79,7 @@ class ReportDetail extends Model
     public static function getGroupedDetails(int $reportId): \Illuminate\Support\Collection
     {
         return self::where('report_id', $reportId)
+            ->with(['species', 'protectedArea'])
             ->orderBy('group_key')
             ->orderBy('order_index')
             ->get()

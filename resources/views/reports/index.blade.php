@@ -193,12 +193,12 @@
                                 </svg>
                                 Limpiar
                             </a>
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                                        </svg>
-                                        Aplicar filtros
-                                    </button>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                </svg>
+                                Aplicar filtros
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -228,14 +228,14 @@
                             </svg>
                             <h3 class="mt-2 text-sm font-medium text-gray-900">No hay casos registrados</h3>
                             <p class="mt-1 text-sm text-gray-500">
-                                @if(request()->hasAny(['search', 'status', 'category_id', 'urgency', 'user_id', 'assigned_to']))
+                                @if(request()->hasAny(['search', 'status', 'category_id', 'subcategory_id', 'urgency', 'user_id', 'assigned_to', 'petitioner_id', 'community', 'province', 'date_from', 'date_to']))
                                     No se encontraron casos con los filtros aplicados.
                                 @else
                                     Comienza creando un nuevo caso.
                                 @endif
                             </p>
                             <div class="mt-6">
-                                @if(request()->hasAny(['search', 'status', 'category_id', 'urgency', 'user_id', 'assigned_to']))
+                                @if(request()->hasAny(['search', 'status', 'category_id', 'subcategory_id', 'urgency', 'user_id', 'assigned_to', 'petitioner_id', 'community', 'province', 'date_from', 'date_to']))
                                     <a href="{{ route('reports.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
                                         Ver todos los casos
                                     </a>
@@ -350,15 +350,15 @@
                                     <p class="text-xs text-gray-500 uppercase">Total casos</p>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-bold text-eco-600">{{ \App\Models\Report::where('status', 'nuevo')->count() }}</p>
+                                    <p class="text-2xl font-bold text-eco-600">{{ $statusCounts['nuevo'] }}</p>
                                     <p class="text-xs text-gray-500 uppercase">Nuevos</p>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-bold text-yellow-600">{{ \App\Models\Report::where('status', 'en_proceso')->count() }}</p>
+                                    <p class="text-2xl font-bold text-yellow-600">{{ $statusCounts['en_proceso'] }}</p>
                                     <p class="text-xs text-gray-500 uppercase">En proceso</p>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-bold text-green-600">{{ \App\Models\Report::where('status', 'completado')->count() }}</p>
+                                    <p class="text-2xl font-bold text-green-600">{{ $statusCounts['completado'] }}</p>
                                     <p class="text-xs text-gray-500 uppercase">Completados</p>
                                 </div>
                             </div>

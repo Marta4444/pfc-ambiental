@@ -5,46 +5,6 @@
         </h2>
     </x-slot>
 
-    @php
-        // Opciones válidas para campos de protección (según normativa oficial)
-        $protectionFieldOptions = [
-            'iucn_category' => [
-                '' => 'Seleccionar categoría IUCN...',
-                'EX' => 'EX - Extinto',
-                'EW' => 'EW - Extinto en Estado Silvestre',
-                'CR' => 'CR - En Peligro Crítico',
-                'EN' => 'EN - En Peligro',
-                'VU' => 'VU - Vulnerable',
-                'NT' => 'NT - Casi Amenazado',
-                'LC' => 'LC - Preocupación Menor',
-                'DD' => 'DD - Datos Insuficientes',
-                'NE' => 'NE - No Evaluado',
-            ],
-            'boe_status' => [
-                '' => 'Seleccionar protección BOE/LESPRE...',
-                'En peligro de extinción' => 'En peligro de extinción',
-                'Vulnerable' => 'Vulnerable',
-                'En régimen de protección especial' => 'En régimen de protección especial',
-                'No incluido' => 'No incluido en catálogo nacional',
-            ],
-            'ccaa_status' => [
-                '' => 'Seleccionar protección autonómica...',
-                'En peligro de extinción' => 'En peligro de extinción',
-                'Vulnerable' => 'Vulnerable',
-                'Sensible a la alteración de su hábitat' => 'Sensible a la alteración de su hábitat',
-                'De interés especial' => 'De interés especial',
-                'No catalogada' => 'No catalogada en CCAA',
-            ],
-            'cites_appendix' => [
-                '' => 'Seleccionar apéndice CITES...',
-                'I' => 'Apéndice I - Comercio prohibido',
-                'II' => 'Apéndice II - Comercio regulado',
-                'III' => 'Apéndice III - Listado por países',
-                'No incluido' => 'No incluido en CITES',
-            ],
-        ];
-        $protectionFieldKeys = array_keys($protectionFieldOptions);
-    @endphp
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
@@ -238,12 +198,12 @@
                                             @break
 
                                         @default
-                                            @if(in_array($field->key_name, $protectionFieldKeys))
+                                            @if(array_key_exists($field->key_name, $protectionFieldOptions))
                                                 {{-- Campo de protección: usar SELECT con opciones válidas --}}
                                                 <select 
                                                     name="fields[{{ $field->key_name }}]" 
                                                     id="field_{{ $field->key_name }}"
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-eco-500 focus:ring-eco-500"
+                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                     {{ $field->pivot->is_required ? 'required' : '' }}
                                                 >
                                                     @foreach($protectionFieldOptions[$field->key_name] as $value => $label)
@@ -279,7 +239,7 @@
 
                         {{-- Botones --}}
                         <div class="mt-6 pt-6 border-t border-gray-200 flex justify-between">
-                            <a href="{{ route('report-details.index', $report) }}" class="inline-flex items-center px-4 py-2 bg-eco-600 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-eco-700">
+                            <a href="{{ route('report-details.index', $report) }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
                                 Cancelar
                             </a>
                             <div class="flex gap-2">
@@ -304,11 +264,12 @@
     <script>
         
         // AUTOCOMPLETADO Y AUTORELLENADO DE ESPECIES
+        const PROTECTION_FIELD_KEYS = ['boe_status', 'ccaa_status', 'iucn_category', 'cites_appendix'];
+
         const speciesInput = document.getElementById('field_especie');
         const speciesDatalist = document.getElementById('species-list');
         
         let speciesCache = {};
-        let selectedSpecies = null;
 
         if (speciesInput) {
             let searchTimeout;
@@ -360,10 +321,6 @@
             speciesInput.addEventListener('change', function() {
                 handleSpeciesSelection(this.value);
             });
-
-            speciesInput.addEventListener('blur', function() {
-                setTimeout(() => handleSpeciesSelection(this.value), 100);
-            });
         }
 
         function handleSpeciesSelection(value) {
@@ -371,7 +328,6 @@
             const species = speciesCache[trimmedValue];
             
             if (species) {
-                selectedSpecies = species;
                 autofillSpeciesProtection(species);
                 showSpeciesBadge(species);
             } else if (value.trim() === '') {
@@ -465,9 +421,7 @@
         }
 
         function resetProtectionFields() {
-            const protectionFieldKeys = ['boe_status', 'ccaa_status', 'iucn_category', 'cites_appendix'];
-            
-            protectionFieldKeys.forEach(fieldKey => {
+            PROTECTION_FIELD_KEYS.forEach(fieldKey => {
                 const element = document.getElementById(`field_${fieldKey}`);
                 if (!element) return;
                 
@@ -530,7 +484,6 @@
             document.getElementById('species-protection-badge')?.classList.add('hidden');
             document.getElementById('species-not-protected-badge')?.classList.add('hidden');
             document.getElementById('editable-fields-notice')?.classList.add('hidden');
-            selectedSpecies = null;
         }
 
        
