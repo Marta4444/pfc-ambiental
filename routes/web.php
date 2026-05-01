@@ -84,6 +84,10 @@ Route::middleware('auth')->group(function () {
     Route::get('protected-areas/search', [ProtectedAreaController::class, 'search'])
         ->name('protected-areas.search');
 
+    // Mapa de Áreas Protegidas (para todos los usuarios autenticados)
+    Route::get('protected-areas/check', [ProtectedAreaController::class, 'checkTool'])
+        ->name('protected-areas.check');
+
     // Estadísticas (para todos los usuarios autenticados)
     Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
 });
@@ -144,8 +148,6 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
         ->name('protected-areas.index');
     Route::get('protected-areas/create', [ProtectedAreaController::class, 'create'])
         ->name('protected-areas.create');
-    Route::get('protected-areas/check', [ProtectedAreaController::class, 'checkTool'])
-        ->name('protected-areas.check');
     Route::post('protected-areas', [ProtectedAreaController::class, 'store'])
         ->name('protected-areas.store');
     Route::get('protected-areas/{protectedArea}', [ProtectedAreaController::class, 'show'])

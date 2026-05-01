@@ -424,6 +424,7 @@ graph TD
     UA --> UO[Perfil de Usuario]
     UA --> UP[Login/Logout]
     UA --> US[Estadísticas]
+    UA --> UT[Mapa Áreas]
 
     %% Admin
     AA["Dashboard (Admin)"] --> AB[Listado de Reports]
@@ -470,7 +471,7 @@ El Pdf se guarda en la carpeta reports, usando la carpeta public. Pero para que 
   - El comando de arranque del servidor.
   - Un healthcheck para que Railway sepa si la app está corriendo correctamente.
   - Política de reinicio automático en caso de que la app falle.
-- env.example: actualizado para Railway, para que sirva de referencia para las variables que ha que configurar en el panel de Railway. Cambios importantes respecto a Local:
+- env.example: actualizado para Railway, para que sirva de referencia para las variables que hay que configurar en el panel de Railway. Cambios importantes respecto a Local:
   - APP_ENV=production y APP_DEBUG=false (para no mostrar errores en producción).
   - DB_CONNECTION=mysql
   - SESSION_DRIVER=file y CACHE_STORE=file
@@ -481,10 +482,17 @@ El Pdf se guarda en la carpeta reports, usando la carpeta public. Pero para que 
 Pasos:
 1. Subir los archivos a GitHub con el "git add .", "git commit..." y "git push origin main".
 2. Crear una cuenta en railway.app con Github
-3. Crear un Nuevo proyecto y conectar con el repositorio de GitHub
-4. Añadir un servicio de MySQL desde el panel.
-5. Configurar las variables de entorno (del env.example)
-6. Ejecutar desde la consola de Railway los comandos:
+3. Crear un Nuevo proyecto y conectar con el repositorio de GitHub -> Esto despliega el proyecto pero falla porque no tiene variables de entorno ni la BBDD
+4. Añadir un servicio de MySQL desde el panel. -> Add Database
+5. Configurar las variables de entorno (del env.example) -> Para esto entrar en el proyecto -> Variables -> RAW editor -> ENV -> Pegar las variables de entorno, el archivo .env, pero hacer los siguientes cambios:
+   1. Se deben cambiar los datos de la BBDD, según la que se ha creado en Railway.
+   2. Ir a la BBDD -> Variables -> ir copiando estas en las variables de ENV del proyecto.
+   3. Se debe cambiar el domminio, que ya no será localhost. Depende de lo que haya creado Railway. -> Para esto ir a Settings del proyecto -> Networking -> Generate Domain -> Se copia la que se genere y se actualiza en las variables ENV, en APP_URL -> Update variables.
+      1. Para generar el dominio pregunta en que puerto escucha la app -> Poner 8080 y darle a Generate Domain.
+      2. Copiarlo en ENV, en APP_ULR, pero mantener la parte del "https://" y pegar a continuación el resto del dominio generado.
+6. En ENV, añadir una variable al final del archivo NIXPACKS_BUILD_CMD= y como valores, poner todos los comandos que se deben ejecutar para desplegar la app, separados por &&.
+   1. Ej: NIXPACKS_BUILD_CMD=composer install && npm install && migrate...
+8. Ejecutar desde la consola de Railway los comandos:
    1. php artisan migrate --seed
    2. php artisan sync:species
    3. php artisan sync:protected-areas 
