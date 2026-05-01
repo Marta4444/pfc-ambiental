@@ -490,9 +490,15 @@ Pasos:
    3. Se debe cambiar el domminio, que ya no será localhost. Depende de lo que haya creado Railway. -> Para esto ir a Settings del proyecto -> Networking -> Generate Domain -> Se copia la que se genere y se actualiza en las variables ENV, en APP_URL -> Update variables.
       1. Para generar el dominio pregunta en que puerto escucha la app -> Poner 8080 y darle a Generate Domain.
       2. Copiarlo en ENV, en APP_ULR, pero mantener la parte del "https://" y pegar a continuación el resto del dominio generado.
-6. En ENV, añadir una variable al final del archivo NIXPACKS_BUILD_CMD= y como valores, poner todos los comandos que se deben ejecutar para desplegar la app, separados por &&.
-   1. Ej: NIXPACKS_BUILD_CMD=composer install && npm install && migrate...
-8. Ejecutar desde la consola de Railway los comandos:
+6. Hacer cambios en el código de desarrollo para adaptar a producción - quitar seeders de datos falsos de reports y demás.
+7. Hacer push a github y esto lanza un nuevo deployment.
+8. Tras el 1r deployment exitoso, eliminar de railway.json el comando db:seed --force, ya que una vez se ha hecho el seeder en el primer deployment, esto volvería a hacerlo y borraría datos.
+9. Hacer push nuevamente y esto debería desplegar el proyecto con éxito.
+10. Ejecutar desde la consola de Railway los comandos:
    1. php artisan migrate --seed
    2. php artisan sync:species
    3. php artisan sync:protected-areas 
+
+Problemas
+1. Al hacer el deploy, composer no es un paquete válido en el nixpacks.toml. Se cambia por php82Package.composer y se vuelve a subir a github para que se depliegue.
+2. Hay un problema para pasar los network checks. Railway hace una petición HTTP GET a /. Si la respuesta no es 200, mata el servicio. La ruta / estaba devolviendo un 302 hacia /login, lo que es válido pero railway lo interpreta como un problema. Mediante los logs se identifica esto, y para solucionarlo, se añade la ruta /health en web.php que devuelve 200, y se apunta al healtcheckPath de railway, en el railway.json. Esto es un patrón estándard en apps desplegadas en cloud.

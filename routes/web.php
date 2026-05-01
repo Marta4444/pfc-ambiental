@@ -18,6 +18,10 @@ use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+Route::get('/health', function () {
+    return response('OK', 200);
+});
+
 Route::get('/', function () {
     if (Auth::check()) {
         return redirect()->route('dashboard');
