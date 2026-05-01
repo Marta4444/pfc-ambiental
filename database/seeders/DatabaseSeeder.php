@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,28 +16,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear usuario admin principal
-        User::factory()->admin()->create([
-            'name' => 'Administrador',
-            'email' => 'admin@seprona.es',
-            'agent_num' => now()->year . '-00001',
-        ]);
+        // Crear usuario admin principal (sin factory para evitar dependencia de Faker en producción)
+        User::firstOrCreate(
+            ['email' => 'admin@seprona.es'],
+            [
+                'name'       => 'Administrador',
+                'password'   => Hash::make('admin1234'),
+                'role'       => 'admin',
+                'agent_num'  => now()->year . '-00001',
+                'active'     => true,
+            ]
+        );
 
-        // Crear algunos usuarios de prueba
-        User::factory(10)->create();
-
-        // Llamar a otros seeders
+        // Llamar a seeders de datos reales (sin dependencia de Faker)
         $this->call([
             CategorySeeder::class,
             SubcategorySeeder::class,
-            FieldSeeder::class,       
+            FieldSeeder::class,
             SubcategoryFieldSeeder::class,
             PetitionerSeeder::class,
-            //SpeciesSeeder::class, -> Inactivado para hacer importacion de datos desde API.           
-            ProtectedAreaSeeder::class,     
-            ReportSeeder::class,
-            ReportDetailSeeder::class,   
-            ReportCostItemSeeder::class,    
+            // SpeciesSeeder::class -> importación desde API
+            ProtectedAreaSeeder::class,
+            // ReportSeeder, ReportDetailSeeder, ReportCostItemSeeder -> datos de prueba, no para producción
         ]);
     }
 }
