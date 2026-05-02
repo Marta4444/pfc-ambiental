@@ -219,6 +219,8 @@ class SpeciesAdminController extends Controller
      */
     public function importSpanish(Request $request): RedirectResponse
     {
+        set_time_limit(0);
+
         Artisan::call('species:sync', [
             '--initial' => true,
             '--no-interaction' => true,
@@ -235,9 +237,12 @@ class SpeciesAdminController extends Controller
      */
     public function enrich(Request $request): RedirectResponse
     {
+        set_time_limit(0);
+
         Artisan::call('species:sync', [
             '--enrich' => true,
             '--all'    => true,
+            '--no-interaction' => true,
         ]);
 
         return redirect()->route('admin.species.index')

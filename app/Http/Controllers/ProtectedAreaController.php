@@ -267,8 +267,11 @@ class ProtectedAreaController extends Controller
      */
     public function syncWdpa(): \Illuminate\Http\RedirectResponse
     {
+        set_time_limit(0);
+
         \Illuminate\Support\Facades\Artisan::call('protected-areas:sync', [
-            '--source' => 'wdpa',
+            '--source'         => 'wdpa',
+            '--no-interaction' => true,
         ]);
 
         return redirect()->route('protected-areas.index')
