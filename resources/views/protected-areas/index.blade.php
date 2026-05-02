@@ -18,6 +18,17 @@
                     </svg>
                     Nueva Área
                 </a>
+                @if(Auth::user()->role === 'admin')
+                <form action="{{ route('protected-areas.sync-wdpa') }}" method="POST" class="inline" onsubmit="return confirm('La sincronización WDPA puede tardar varios minutos. ¿Continuar?')">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-700">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Sincronizar WDPA
+                    </button>
+                </form>
+                @endif
                 <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-200">
                     ← Volver
                 </a>

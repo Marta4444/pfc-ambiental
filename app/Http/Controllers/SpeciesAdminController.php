@@ -215,20 +215,32 @@ class SpeciesAdminController extends Controller
     }
 
     /**
-     * Importar fauna española
+     * Importación inicial completa de fauna española
      */
     public function importSpanish(Request $request): RedirectResponse
     {
-        $limit = (int) $request->get('limit', 200);
-        
-        // Ejecutar en segundo plano si es posible
         Artisan::call('species:sync', [
-            '--spanish' => true,
-            '--limit' => $limit,
+            '--initial' => true,
+        ]);
+
+        $output = Artisan::output();
+
+        return redirect()->route('admin.species.index')
+            ->with('success', 'Importación inicial completada. Revisa los logs para ver el detalle.');
+    }
+
+    /**
+     * Enriquecer especies con datos de IUCN y CITES
+     */
+    public function enrich(Request $request): RedirectResponse
+    {
+        Artisan::call('species:sync', [
+            '--enrich' => true,
+            '--all'    => true,
         ]);
 
         return redirect()->route('admin.species.index')
-            ->with('success', "Importación de fauna española iniciada (hasta {$limit} especies).");
+            ->with('success', 'Enriquecimiento con IUCN/CITES completado.');
     }
 
     /**

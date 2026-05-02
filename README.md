@@ -494,9 +494,11 @@ Pasos:
 8. Tras el 1r deployment exitoso, eliminar de railway.json el comando db:seed --force, ya que una vez se ha hecho el seeder en el primer deployment, esto volvería a hacerlo y borraría datos.
 9. Hacer push nuevamente y esto debería desplegar el proyecto con éxito.
 10. Ejecutar desde la consola de Railway los comandos:
-   1. php artisan migrate --seed
-   2. php artisan sync:species
+   1. railway run php artisan sync:species --check -> para comprobar ele stado de las APIs
+   2. railway run php artisan sync:species --initial -> para la importacion
    3. php artisan sync:protected-areas 
+11. Para ejecutar los comandos en consola, instalar el Railway CLI -> Ejecutar en PowerShell: npm install -g @railway/cli
+12. 
 
 Problemas
 1. Al hacer el deploy, composer no es un paquete válido en el nixpacks.toml. Se cambia por php82Package.composer y se vuelve a subir a github para que se depliegue.

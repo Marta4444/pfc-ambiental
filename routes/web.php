@@ -143,6 +143,7 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
         Route::post('/sync-all', [SpeciesAdminController::class, 'syncAll'])->name('syncAll');
         Route::get('/search-api', [SpeciesAdminController::class, 'search'])->name('search');
         Route::post('/import-spanish', [SpeciesAdminController::class, 'importSpanish'])->name('importSpanish');
+        Route::post('/enrich', [SpeciesAdminController::class, 'enrich'])->name('enrich');
         Route::get('/logs', [SpeciesAdminController::class, 'logs'])->name('logs');
         Route::get('/export', [SpeciesAdminController::class, 'export'])->name('export');
     });
@@ -154,6 +155,8 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
         ->name('protected-areas.create');
     Route::post('protected-areas', [ProtectedAreaController::class, 'store'])
         ->name('protected-areas.store');
+    Route::post('protected-areas/sync-wdpa', [ProtectedAreaController::class, 'syncWdpa'])
+        ->name('protected-areas.sync-wdpa');
     Route::get('protected-areas/{protectedArea}', [ProtectedAreaController::class, 'show'])
         ->name('protected-areas.show');
     Route::get('protected-areas/{protectedArea}/edit', [ProtectedAreaController::class, 'edit'])

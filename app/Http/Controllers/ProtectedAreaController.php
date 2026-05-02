@@ -263,6 +263,19 @@ class ProtectedAreaController extends Controller
     }
 
     /**
+     * Sincronizar áreas protegidas desde WDPA
+     */
+    public function syncWdpa(): \Illuminate\Http\RedirectResponse
+    {
+        \Illuminate\Support\Facades\Artisan::call('protected-areas:sync', [
+            '--source' => 'wdpa',
+        ]);
+
+        return redirect()->route('protected-areas.index')
+            ->with('success', 'Sincronización WDPA completada.');
+    }
+
+    /**
      * Eliminar área protegida (admin)
      */
     public function destroy(Request $request, ProtectedArea $protectedArea)
