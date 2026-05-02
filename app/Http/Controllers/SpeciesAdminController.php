@@ -219,17 +219,11 @@ class SpeciesAdminController extends Controller
      */
     public function importSpanish(Request $request): RedirectResponse
     {
-        set_time_limit(0);
-
-        Artisan::call('species:sync', [
-            '--initial' => true,
-            '--no-interaction' => true,
-        ]);
-
-        $output = Artisan::output();
+        $cmd = PHP_BINARY . ' ' . base_path('artisan') . ' species:sync --initial --no-interaction > /dev/null 2>&1 &';
+        exec($cmd);
 
         return redirect()->route('admin.species.index')
-            ->with('success', 'Importación inicial completada. Revisa los logs para ver el detalle.');
+            ->with('success', 'Importación inicial lanzada en segundo plano. Puede tardar varios minutos. Recarga la página para ver el progreso.');
     }
 
     /**
@@ -237,16 +231,11 @@ class SpeciesAdminController extends Controller
      */
     public function enrich(Request $request): RedirectResponse
     {
-        set_time_limit(0);
-
-        Artisan::call('species:sync', [
-            '--enrich' => true,
-            '--all'    => true,
-            '--no-interaction' => true,
-        ]);
+        $cmd = PHP_BINARY . ' ' . base_path('artisan') . ' species:sync --enrich --all --no-interaction > /dev/null 2>&1 &';
+        exec($cmd);
 
         return redirect()->route('admin.species.index')
-            ->with('success', 'Enriquecimiento con IUCN/CITES completado.');
+            ->with('success', 'Enriquecimiento IUCN/CITES lanzado en segundo plano. Puede tardar varios minutos. Recarga la página para ver el progreso.');
     }
 
     /**

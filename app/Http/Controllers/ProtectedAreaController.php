@@ -267,15 +267,11 @@ class ProtectedAreaController extends Controller
      */
     public function syncWdpa(): \Illuminate\Http\RedirectResponse
     {
-        set_time_limit(0);
-
-        \Illuminate\Support\Facades\Artisan::call('protected-areas:sync', [
-            '--source'         => 'wdpa',
-            '--no-interaction' => true,
-        ]);
+        $cmd = PHP_BINARY . ' ' . base_path('artisan') . ' protected-areas:sync --source=wdpa --no-interaction > /dev/null 2>&1 &';
+        exec($cmd);
 
         return redirect()->route('protected-areas.index')
-            ->with('success', 'Sincronización WDPA completada.');
+            ->with('success', 'Sincronización WDPA lanzada en segundo plano. Puede tardar varios minutos.');
     }
 
     /**
