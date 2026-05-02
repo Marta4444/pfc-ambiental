@@ -221,6 +221,7 @@ class SpeciesAdminController extends Controller
     {
         Artisan::call('species:sync', [
             '--initial' => true,
+            '--no-interaction' => true,
         ]);
 
         $output = Artisan::output();
