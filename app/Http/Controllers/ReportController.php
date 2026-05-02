@@ -152,13 +152,6 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'ip' => [
-                'required',
-                'string',
-                'max:20',
-                'regex:/^\d{4}-IP\d+$/',
-                'unique:reports,ip'
-            ],
             'title' => 'required|string|max:255',
             'background' => 'required|string',
             'category_id' => 'required|exists:categories,id',
@@ -181,9 +174,6 @@ class ReportController extends Controller
             'vs_total' => 'nullable|numeric|min:0',
             'total_cost' => 'nullable|numeric|min:0',
         ], [
-            'ip.required' => 'El número IP es obligatorio.',
-            'ip.regex' => 'El formato del IP debe ser: AAAA-IPNNN (ejemplo: 2025-IP312)',
-            'ip.unique' => 'Este número IP ya está registrado en otro informe.',
             'background.required' => 'Los antecedentes son obligatorios.',
             'petitioner_id.required' => 'Debe seleccionar una unidad peticionaria.',
         ]);
@@ -225,11 +215,16 @@ class ReportController extends Controller
         // Determinar estado inicial: NUEVO si no hay asignado, EN_ESPERA si está asignado
         $initialStatus = $assigned ? Report::STATUS_EN_ESPERA : Report::STATUS_NUEVO;
 
+        // Generar IP automáticamente: AAAA-IPn (correlativo por año)
+        $year = now()->year;
+        $count = Report::whereYear('created_at', $year)->count() + 1;
+        $ip = $year . '-IP' . $count;
+
         $report = Report::create([
             'user_id' => Auth::id(),
             'category_id' => $validated['category_id'],
             'subcategory_id' => $validated['subcategory_id'],
-            'ip' => $validated['ip'],
+            'ip' => $ip,
             'title' => $validated['title'],
             'background' => $validated['background'],
             'community' => $validated['community'],

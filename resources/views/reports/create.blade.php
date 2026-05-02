@@ -13,19 +13,10 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <x-input-label for="ip" value="Número IP (Informe Pericial) *" />
-                        <x-text-input 
-                            id="ip" 
-                            name="ip" 
-                            class="mt-1 block w-full" 
-                            placeholder="2025-IP312" 
-                            value="{{ old('ip') }}"
-                            pattern="\d{4}-IP\d+"
-                            title="Formato: AAAA-IPNNN (ejemplo: 2025-IP312)"
-                            required
-                        />
-                        <p class="text-xs text-gray-500 mt-1">Formato: AAAA-IPNNN</p>
-                        @error('ip')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                        <x-input-label value="Número IP (Informe Pericial)" />
+                        <p class="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-600 italic">
+                            Se asignará automáticamente al guardar (ej: {{ now()->year }}-IP1)
+                        </p>
                     </div>
 
                     <div>

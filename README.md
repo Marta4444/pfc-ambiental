@@ -465,7 +465,6 @@ El Pdf se guarda en la carpeta reports, usando la carpeta public. Pero para que 
   - Que instale dependencias con "composer install"
   - Que optimice la cache de configuración, rutas y vistas para producción.
   - Cómo arrancar el servidor de Laravel.
-- Procfile: define cómo arrancar la app.
 - railway.json: define la configuración específica de Railway. Es el archivo de configuración princila y define:
   - que use Nixpacks como vuilder (usando nixpacks.toml).
   - El comando de arranque del servidor.
@@ -502,3 +501,4 @@ Pasos:
 Problemas
 1. Al hacer el deploy, composer no es un paquete válido en el nixpacks.toml. Se cambia por php82Package.composer y se vuelve a subir a github para que se depliegue.
 2. Hay un problema para pasar los network checks. Railway hace una petición HTTP GET a /. Si la respuesta no es 200, mata el servicio. La ruta / estaba devolviendo un 302 hacia /login, lo que es válido pero railway lo interpreta como un problema. Mediante los logs se identifica esto, y para solucionarlo, se añade la ruta /health en web.php que devuelve 200, y se apunta al healtcheckPath de railway, en el railway.json. Esto es un patrón estándard en apps desplegadas en cloud.
+3. La app se despliega sin estilos porque hay un problema con el css. Railway es un proxi inverso. aravel ignora por defecto el header X-Forwarded-Proto: https que Railway envía, generando las URLs del CSS/JS con http://. El navegador las bloquea por mixed content. Solución: Añadir $middleware->trustProxies(at: '*') en app.php
