@@ -231,6 +231,9 @@ class SpeciesAdminController extends Controller
      */
     public function enrich(Request $request): RedirectResponse
     {
+        // Reset all species to pending so the enrichment processes them regardless of prior sync status
+        Species::query()->update(['sync_status' => 'pending']);
+
         $cmd = PHP_BINARY . ' ' . base_path('artisan') . ' species:sync --enrich --all --no-interaction > /dev/null 2>&1 &';
         exec($cmd);
 

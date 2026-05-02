@@ -532,21 +532,80 @@ class SpeciesSyncService
     {
         if (!$this->iucnToken) return null;
 
-        $cacheKey = 'iucn_' . md5($scientificName);
-        
+        // v4 cache key (old 'iucn_' keys were from the now-dead v3 API)
+        $cacheKey = 'iucn_v4_' . md5($scientificName);
+
         return Cache::remember($cacheKey, 86400, function () use ($scientificName) {
             try {
-                $response = Http::timeout(10)->get(
-                    $this->iucnApiUrl . '/species/' . urlencode($scientificName),
-                    ['token' => $this->iucnToken]
-                );
+                $parts = explode(' ', trim($scientificName), 3);
+                if (count($parts) < 2) return null;
 
-                if ($response->successful()) {
-                    $data = $response->json();
-                    return $data['result'][0] ?? null;
+                [$genus, $speciesEpithet] = $parts;
+
+                // Step 1: find assessments by name (IUCN API v4)
+                $taxaResponse = Http::timeout(15)
+                    ->withHeaders(['Authorization' => $this->iucnToken])
+                    ->get($this->iucnApiUrl . '/taxa/scientific_name', [
+                        'genus_name'   => $genus,
+                        'species_name' => $speciesEpithet,
+                    ]);
+
+                if (!$taxaResponse->successful()) {
+                    Log::warning("IUCN v4 taxa lookup failed for {$scientificName}", [
+                        'status' => $taxaResponse->status(),
+                    ]);
+                    return null;
                 }
+
+                $assessments = $taxaResponse->json('assessments') ?? [];
+                if (empty($assessments)) return null;
+
+                // Prefer latest global assessment (scope code "1")
+                $target = null;
+                foreach ($assessments as $a) {
+                    if (!($a['latest'] ?? false)) continue;
+                    $codes = array_column($a['scopes'] ?? [], 'code');
+                    if (in_array('1', $codes)) {
+                        $target = $a;
+                        break;
+                    }
+                }
+                // Fallback: any latest assessment
+                if (!$target) {
+                    foreach ($assessments as $a) {
+                        if ($a['latest'] ?? false) {
+                            $target = $a;
+                            break;
+                        }
+                    }
+                }
+                if (!$target) return null;
+
+                // Step 2: get full assessment data to obtain category
+                $assessmentResponse = Http::timeout(15)
+                    ->withHeaders(['Authorization' => $this->iucnToken])
+                    ->get($this->iucnApiUrl . '/assessment/' . $target['assessment_id']);
+
+                if (!$assessmentResponse->successful()) {
+                    Log::warning("IUCN v4 assessment fetch failed for {$scientificName}", [
+                        'status'        => $assessmentResponse->status(),
+                        'assessment_id' => $target['assessment_id'],
+                    ]);
+                    return null;
+                }
+
+                $aData = $assessmentResponse->json();
+
+                // Normalize to the format expected by updateFromIucn
+                return [
+                    'taxonid'         => $aData['sis_taxon_id'] ?? $target['sis_taxon_id'] ?? null,
+                    'category'        => $aData['red_list_category']['code'] ?? null,
+                    'assessment_date' => $aData['assessment_date']
+                        ?? (($aData['year_published'] ?? '') . '-01-01'),
+                ];
+
             } catch (\Exception $e) {
-                Log::warning("IUCN API error for {$scientificName}", ['error' => $e->getMessage()]);
+                Log::warning("IUCN API v4 error for {$scientificName}", ['error' => $e->getMessage()]);
             }
             return null;
         });

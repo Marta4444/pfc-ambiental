@@ -48,7 +48,7 @@ return [
     ],
 
     'iucn' => [
-        'base_url' => env('IUCN_API_URL', 'https://apiv3.iucnredlist.org/api/v3'),
+        'base_url' => env('IUCN_API_URL', 'https://api.iucnredlist.org/api/v4'),
         'token' => env('IUCN_API_TOKEN'),
         'timeout' => env('IUCN_API_TIMEOUT', 30),
     ],
