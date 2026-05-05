@@ -33,8 +33,8 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             SubcategorySeeder::class,
             FieldSeeder::class,
-            SubcategoryFieldSeeder::class,
-            PetitionerSeeder::class,
+            SubcategoryFieldSeeder::class,            ExtraccionAguasFieldSeeder::class,
+            VertidoAguasFieldSeeder::class,            PetitionerSeeder::class,
             // SpeciesSeeder::class -> importación desde API
             ProtectedAreaSeeder::class,
             // ReportSeeder, ReportDetailSeeder, ReportCostItemSeeder -> datos de prueba, no para producción
