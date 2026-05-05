@@ -59,6 +59,9 @@ Route::middleware('auth')->group(function () {
     // Ruta para descargar el PDF adjunto
     Route::get('reports/{report}/download-attachment', [ReportController::class, 'downloadAttachment'])->name('reports.downloadAttachment');
 
+    // Ruta para eliminar el PDF adjunto
+    Route::delete('reports/{report}/pdf-attachment', [ReportController::class, 'deletePdfAttachment'])->name('reports.deletePdfAttachment');
+
     Route::resource('reports', ReportController::class);
 
     // Report Details

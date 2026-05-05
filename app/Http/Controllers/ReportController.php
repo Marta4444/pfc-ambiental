@@ -457,6 +457,30 @@ class ReportController extends Controller
 }
 
     /**
+     * Eliminar el PDF adjunto de un caso.
+     */
+    public function deletePdfAttachment(Report $report): \Illuminate\Http\RedirectResponse
+    {
+        $user = Auth::user();
+
+        $canDelete = $user->role === 'admin'
+            || $report->created_by === $user->id
+            || $report->assigned_to === $user->id;
+
+        if (!$canDelete) {
+            abort(403, 'No tienes permiso para eliminar el PDF de este caso.');
+        }
+
+        if ($report->pdf_report) {
+            Storage::disk('public')->delete($report->pdf_report);
+            $report->update(['pdf_report' => null]);
+        }
+
+        return redirect()->route('reports.edit', $report)
+            ->with('success', 'PDF eliminado correctamente.');
+    }
+
+    /**
      * Eliminar un caso.
      */
     public function destroy(Report $report)

@@ -193,8 +193,13 @@
                 <div class="mb-4">
                     <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
                     @if($report->pdf_report)
-                        <div class="mb-2">
+                        <div class="mb-2 flex items-center gap-3">
                             <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-eco-700 hover:underline text-sm">Ver archivo actual</a>
+                            <form method="POST" action="{{ route('reports.deletePdfAttachment', $report) }}" onsubmit="return confirm('¿Eliminar el PDF adjunto?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm underline">Eliminar PDF</button>
+                            </form>
                         </div>
                     @endif
                     <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" />
@@ -341,8 +346,13 @@
                 <div class="mb-4">
                     <x-input-label for="pdf_report" value="Adjuntar PDF (reemplaza el existente)" />
                     @if($report->pdf_report)
-                        <div class="mb-2">
+                        <div class="mb-2 flex items-center gap-3">
                             <a href="{{ asset('storage/' . $report->pdf_report) }}" target="_blank" class="text-eco-700 hover:underline text-sm">Ver archivo actual</a>
+                            <form method="POST" action="{{ route('reports.deletePdfAttachment', $report) }}" onsubmit="return confirm('¿Eliminar el PDF adjunto?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm underline">Eliminar PDF</button>
+                            </form>
                         </div>
                     @endif
                     <input type="file" id="pdf_report" name="pdf_report" class="mt-1 block w-full" accept=".pdf" />
