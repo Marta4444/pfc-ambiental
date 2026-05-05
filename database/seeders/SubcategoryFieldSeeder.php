@@ -166,18 +166,21 @@ class SubcategoryFieldSeeder extends Seeder
         $extraccionAguas = Subcategory::where('name', 'Extracciones de aguas')->first();
         if ($extraccionAguas) {
             $extraccionAguasFields = [
-                'caudal' => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
-                'origen_agua' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
-                'volumen' => ['is_required' => false, 'order_index' => 3, 'default_value' => null],
-                            ];
+                'volumen'         => ['is_required' => true,  'order_index' => 1, 'default_value' => null],
+                'origen_agua'     => ['is_required' => true,  'order_index' => 2, 'default_value' => null],
+                'caudal'          => ['is_required' => false, 'order_index' => 3, 'default_value' => null],
+                'precio_unitario' => ['is_required' => true,  'order_index' => 4, 'default_value' => null],
+                'vr_manual'       => ['is_required' => true,  'order_index' => 5, 'default_value' => '0'],
+                'vs_manual'       => ['is_required' => true,  'order_index' => 6, 'default_value' => '0'],
+            ];
 
+            $syncData = [];
             foreach ($extraccionAguasFields as $keyName => $pivotData) {
                 if (isset($fields[$keyName])) {
-                    $extraccionAguas->fields()->syncWithoutDetaching([
-                        $fields[$keyName] => $pivotData
-                    ]);
+                    $syncData[$fields[$keyName]] = $pivotData;
                 }
             }
+            $extraccionAguas->fields()->sync($syncData);
         }
 
         // INFRAESTRUCTURAS - Parques eólicos
@@ -221,22 +224,23 @@ class SubcategoryFieldSeeder extends Seeder
         }
 
         // VERTIDOS - Vertido de aguas
-    
+
         $vertidoAguas = Subcategory::where('name', 'Vertido de aguas')->first();
         if ($vertidoAguas) {
             $vertidoAguasFields = [
-                'volumen' => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
-                'caudal' => ['is_required' => false, 'order_index' => 2, 'default_value' => null],
-                'coordenadas_afectacion' => ['is_required' => false, 'order_index' => 3, 'default_value' => null],
+                'volumen'             => ['is_required' => true, 'order_index' => 1, 'default_value' => null],
+                'coste_limpieza_agua' => ['is_required' => true, 'order_index' => 2, 'default_value' => null],
+                'vr_manual'           => ['is_required' => true, 'order_index' => 3, 'default_value' => '0'],
+                'vs_manual'           => ['is_required' => true, 'order_index' => 4, 'default_value' => '0'],
             ];
 
+            $syncData = [];
             foreach ($vertidoAguasFields as $keyName => $pivotData) {
                 if (isset($fields[$keyName])) {
-                    $vertidoAguas->fields()->syncWithoutDetaching([
-                        $fields[$keyName] => $pivotData
-                    ]);
+                    $syncData[$fields[$keyName]] = $pivotData;
                 }
             }
+            $vertidoAguas->fields()->sync($syncData);
         }
 
         // VERTIDOS - Emisiones atmosféricas
